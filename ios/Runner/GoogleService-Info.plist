@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>763302285301-3m7fpd9ppo2546fg8t3t50orc1lhc6kt.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.763302285301-3m7fpd9ppo2546fg8t3t50orc1lhc6kt</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBVpWwLndP3jUW0NFXDzxMldy-S188Cgos</string>
+	<key>GCM_SENDER_ID</key>
+	<string>763302285301</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>tech.harmonysoft.oss.chronoSheet</string>
+	<key>PROJECT_ID</key>
+	<string>chrono-sheet</string>
+	<key>STORAGE_BUCKET</key>
+	<string>chrono-sheet.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:763302285301:ios:70d8690884f8de9d5b5abc</string>
+</dict>
+</plist>
