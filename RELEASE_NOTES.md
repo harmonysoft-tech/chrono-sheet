@@ -1,3 +1,5 @@
+## v1.12.0+13 released on 24 Dec 2024 UTC
+  * 39736b1daa3b2f654f1534d9b6f2a2f97e658e9f setting up CI
 ## v1.11.0+12 released on 24 Dec 2024 UTC
   * f8927348539f1da8841a7c1f97a85e130ca3da18 setting up CI
 ## v1.10.0+11 released on 24 Dec 2024 UTC
