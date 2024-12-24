@@ -1,3 +1,5 @@
+## v1.4.0+5 released on 24 Dec 2024 UTC
+  * 7e1d360661c5818f84f33239af3e4addd0c541b1 setting up CI
 ## v1.3.0+4 released on 24 Dec 2024 UTC
   * 20450ebfb2d95cfdd22ba5872974cba6821858d1 added terms of service
 ## v1.2.0+3 released on 24 Dec 2024 UTC
