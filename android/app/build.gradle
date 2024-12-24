@@ -17,6 +17,8 @@ if (keystorePropertiesFile.exists()) {
     if (!keystoreFile.isFile()) {
         throw new GradleException("android keystore file is not found at ${keystoreFile.canonicalPath}")
     }
+    println "xxx keyPassword=${keystoreProperties['keyPassword']}"
+    println "xxx storePassword=${keystoreProperties['storePassword']}"
 } else {
     throw new GradleException("a file with release keystore properties is not available ($keyPropertiesFileName)")
 }
