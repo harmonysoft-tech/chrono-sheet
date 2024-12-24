@@ -31,6 +31,10 @@ jobs:
         run: flutter test
 
       - name: prepare gradle cache key
+        # we explicitly use the same cache key for restoring and saving the cache because
+        # it seems that the flutter build modifies gradle files and if we generate the key
+        # from hash after the build (on cache save), we get a hash value whcih is different
+        # from the value we get initially (on cache restore)
         run: echo "GRADLE_CACHE_KEY=gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}" >> $GITHUB_ENV
 
       - name: restore gradle cache
