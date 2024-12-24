@@ -55,8 +55,8 @@ jobs:
           echo "storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyPassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
-          which keytool
-          keytool -list -v -keystore ./android/app/chrono-sheet.jks -storepass ${{ secrets.RELEASE_KEYSTORE_PASSWORD }} -storetype JKS -alias chrono-sheet-release
+          keytool --version
+          ls -al ./android/app
 
       - name: build apk
         run: flutter build apk --release
