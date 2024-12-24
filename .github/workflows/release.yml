@@ -21,7 +21,14 @@ jobs:
 #          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
 #          pub-cache-key: "flutter-pub:os:-:channel:-:version:-:arch:-:hash:" get dependencies
 #          pub-cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
-      - run: flutter --version
-      - run: flutter pub get
-      - run: flutter test
+      - name: print flutter version
+        run: flutter --version
+      - name: get dependencies
+        run: flutter pub get
+      - name: test
+        run: flutter test
+      - name: setup firebase
+        run: |
+          echo {{ secrets.FIREBASE_OPTIONS_DART }} > ./lib/firebase_options.dart
+          echo {{ secrets.GOOGLE_SERVICE_JSON }} > ./android/app/google-services.json
       - run: flutter build apk
