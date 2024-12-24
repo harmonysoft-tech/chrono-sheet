@@ -29,7 +29,9 @@ jobs:
         run: flutter test
 
       - name: release paperwork
-        run: ./gradlew release-paperwork
+        run: |
+          ./gradlew release-paperwork
+          git push
 
       - name: setup firebase
         run: |
