@@ -32,6 +32,12 @@ jobs:
           echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > ./lib/firebase_options.dart
           echo "${{ secrets.GOOGLE_SERVICE_JSON }}" > ./android/app/google-services.json
           
+          echo "./lib contents:"
+          ls -al ./lib
+          
+          cp ./lib/firebase_options.dart ./tmp.txt
+          echo "tmp.txt:"
+          cat ./tmp.txt
           
           echo "firebase_options.dart:"
           cat ./lib/firebase_options.dart
