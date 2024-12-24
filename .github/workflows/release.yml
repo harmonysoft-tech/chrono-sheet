@@ -31,4 +31,8 @@ jobs:
         run: |
           echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > ./lib/firebase_options.dart
           echo "${{ secrets.GOOGLE_SERVICE_JSON }}" > ./android/app/google-services.json
+          
+          
+          echo "firebase_options.dart:"
+          cat ./lib/firebase_options.dart
       - run: flutter build apk
