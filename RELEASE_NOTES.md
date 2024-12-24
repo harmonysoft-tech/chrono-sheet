@@ -1,3 +1,5 @@
+## v1.9.0+10 released on 24 Dec 2024 UTC
+  * a0f6126dab6102e7a2bf67fdbf32b69441639ee4 setting up CI
 ## v1.8.0+9 released on 24 Dec 2024 UTC
   * 59c0f0b9708b8bd803476b6edab8f754e46f78d5 Create CNAME
 ## v1.7.0+8 released on 24 Dec 2024 UTC
