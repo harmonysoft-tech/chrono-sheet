@@ -8,6 +8,8 @@ jobs:
   build:
     name: build and release
     runs-on: macos-latest
+    permissions:
+      contents: write
     steps:
       - name: checkout source
         uses: actions/checkout@v4
