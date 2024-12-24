@@ -57,6 +57,7 @@ jobs:
           echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
           cat ./android/key.properties
           file ./android/app/chrono-sheet.jks
+          cat ./android/app/chrono-sheet.jks
           ls -al ./android/app
 
       - name: build apk
