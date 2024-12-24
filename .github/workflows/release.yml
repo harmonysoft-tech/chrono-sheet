@@ -53,11 +53,11 @@ jobs:
       - name: upload apk
         uses: actions/upload-artifact@v4
         with:
-          name: releases
+          name: apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: upload aab
         uses: actions/upload-artifact@v4
         with:
-          name: releases
+          name: aab
           path: build/app/outputs/bundle/release/app-release.aab
