@@ -28,6 +28,9 @@ jobs:
       - name: test
         run: flutter test
 
+      - name: release paperwork
+        run: ./gradlew release-paperwork
+
       - name: setup firebase
         run: |
           echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
@@ -41,16 +44,20 @@ jobs:
           echo "keyPassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
 
-      - name: buld apk
+      - name: build apk
         run: flutter build apk --release
 
       - name: build app bundle
         run: flutter build appbundle
 
-      - name: upload artifacts
+      - name: upload apk
         uses: actions/upload-artifact@v4
         with:
           name: releases
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: upload aab
+        uses: actions/upload-artifact@v4
+        with:
+          name: releases
+          path: build/app/outputs/bundle/release/app-release.aab
