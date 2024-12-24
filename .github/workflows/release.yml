@@ -30,14 +30,5 @@ jobs:
       - name: setup firebase
         run: |
           echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
-          
-          echo "./lib contents:"
-          ls -al ./lib
-          
-          cp ./lib/firebase_options.dart ./tmp.txt
-          echo "tmp.txt:"
-          cat ./tmp.txt
-          
-          echo "firebase_options.dart:"
-          cat ./lib/firebase_options.dart
+          echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 -d >> ./android/app/google-services.json
       - run: flutter build apk
