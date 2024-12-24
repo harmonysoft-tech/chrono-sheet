@@ -8,6 +8,19 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def keystoreProperties = new java.util.Properties()
+def keyPropertiesFileName = 'key.properties'
+def keystorePropertiesFile = rootProject.file(keyPropertiesFileName)
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new java.io.FileInputStream(keystorePropertiesFile))
+    def keystoreFile = file(keystoreProperties["storeFile"])
+    if (!keystoreFile.isFile()) {
+        throw new GradleException("android keystore file is not found at ${keystoreFile.canonicalPath}")
+    }
+} else {
+    throw new GradleException("a file with release keystore properties is not available ($keyPropertiesFileName)")
+}
+
 android {
     namespace = "tech.harmonysoft.oss.chrono_sheet"
     compileSdk = 35
@@ -32,11 +45,18 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }

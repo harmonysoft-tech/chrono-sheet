@@ -31,4 +31,11 @@ jobs:
         run: |
           echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
           echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 -d >> ./android/app/google-services.json
-      - run: flutter build apk
+      - name: prepare release signing
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 -d >> ./android/app/chrono-sheet.jks
+          echo "storeFile=chrono-sheet.jks" >> ./android/key.properties
+          echo "storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
+          echo "keyPassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
+          echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
+      - run: flutter build apk --release
