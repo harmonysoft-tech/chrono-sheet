@@ -29,8 +29,9 @@ jobs:
         run: flutter test
       - name: setup firebase
         run: |
-          echo "${{ secrets.FIREBASE_OPTIONS_DART }}" > ./lib/firebase_options.dart
-          echo "${{ secrets.GOOGLE_SERVICE_JSON }}" > ./android/app/google-services.json
+          echo "1" >> ./lib/firebase_options.dart
+          echo "${{ secrets.FIREBASE_OPTIONS_DART }}" >> ./lib/firebase_options.dart
+#          echo "${{ secrets.GOOGLE_SERVICE_JSON }}" > ./android/app/google-services.json
           
           echo "./lib contents:"
           ls -al ./lib
