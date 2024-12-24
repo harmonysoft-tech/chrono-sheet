@@ -1,4 +1,5 @@
-## v  released on 24 Dec 2024 UTC
+## v1.0.0 released on 24 Dec 2024 UTC
+  * f6c104aaee998429041b8c9b507e7e07a6c2b714 release-
   * 3ac0c436ba6091309f67ed59768133fc40c9eb90 setting up CI
   * 020a60e3e241d0fc31eb36ef84d2b73daf56f770 setting up CI
   * 1daf742cd181275ffd4fab6b05f339a731b28dc7 setting up CI
@@ -18,5 +19,4 @@
   * 796357f2289de9588f05a54014def09c888c6167 setting up CI
   * b3155a81432fa35880c56aacf55417656265ff49 setting up CI
   * 4b9f93fdf1b80a83418fc0896e76f063a3a00aa5 setting up CI
-  * df3effa819d8f23b9ea8cce7d1cb1020f8177866 basic stopwatch UI
   * ...
