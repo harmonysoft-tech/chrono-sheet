@@ -30,7 +30,7 @@ jobs:
       - name: setup firebase
         run: |
           echo "1" >> ./lib/firebase_options.dart
-          echo "${{ secrets.FIREBASE_OPTIONS_DART }}" >> ./lib/firebase_options.dart
+          echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | sed 's/\\n/\n/g' >> ./lib/firebase_options.dart
           
           echo "./lib contents:"
           ls -al ./lib
