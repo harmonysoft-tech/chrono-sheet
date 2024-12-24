@@ -30,6 +30,14 @@ jobs:
       - name: test
         run: flutter test
 
+      - name: restore gradle cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
       - name: release paperwork
         run: |
           ./gradlew release-paperwork
@@ -53,6 +61,14 @@ jobs:
 
       - name: build app bundle
         run: flutter build appbundle
+
+      - name: save gradle cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
       - name: upload apk
         uses: actions/upload-artifact@v4
