@@ -30,13 +30,16 @@ jobs:
       - name: test
         run: flutter test
 
+      - name: prepare gradle cache key
+        run: echo "GRADLE_CACHE_KEY=gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}" >> $GITHUB_ENV
+
       - name: restore gradle cache
         uses: actions/cache/restore@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ env.GRADLE_CACHE_KEY }}
 
       - name: release paperwork
         run: |
@@ -69,7 +72,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ env.GRADLE_CACHE_KEY }}
 
       - name: upload apk
         uses: actions/upload-artifact@v4
