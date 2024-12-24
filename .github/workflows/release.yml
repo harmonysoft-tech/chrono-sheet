@@ -11,26 +11,28 @@ jobs:
     steps:
       - name: checkout source
         uses: actions/checkout@v4
+
       - name: set up flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           flutter-version-file: pubspec.yaml
-#          cache: true
-#          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
-#          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
-#          pub-cache-key: "flutter-pub:os:-:channel:-:version:-:arch:-:hash:" get dependencies
-#          pub-cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+          cache: true
+
       - name: print flutter version
         run: flutter --version
+
       - name: get dependencies
         run: flutter pub get
+
       - name: test
         run: flutter test
+
       - name: setup firebase
         run: |
           echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
           echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 -d >> ./android/app/google-services.json
+
       - name: prepare release signing
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 -d >> ./android/app/chrono-sheet.jks
@@ -38,7 +40,17 @@ jobs:
           echo "storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyPassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
+
       - name: buld apk
         run: flutter build apk --release
+
       - name: build app bundle
         run: flutter build appbundle
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: releases
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
