@@ -1,3 +1,5 @@
+## v1.3.0+4 released on 24 Dec 2024 UTC
+  * 20450ebfb2d95cfdd22ba5872974cba6821858d1 added terms of service
 ## v1.2.0+3 released on 24 Dec 2024 UTC
   * 30733d22c48abbcf7c6b3d43d5af6559cf91c6f4 added privacy policy
 ## v1.1.0+2 released on 24 Dec 2024 UTC
