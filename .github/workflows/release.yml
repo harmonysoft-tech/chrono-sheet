@@ -38,4 +38,7 @@ jobs:
           echo "storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyPassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
-      - run: flutter build apk --release
+      - name: buld apk
+        run: flutter build apk --release
+      - name: build app bundle
+        run: flutter build appbundle
