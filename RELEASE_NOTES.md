@@ -1,3 +1,5 @@
+## v1.19.0+20 released on 25 Dec 2024 UTC
+  * 070c6572bdb77b2464598c4e9789c8d04e454af7 riverpod skeleton
 ## v1.18.0+19 released on 24 Dec 2024 UTC
   * eaf9bc71607838024003c59fa045de8faddbfaa4 setting up CI
 ## v1.17.0+18 released on 24 Dec 2024 UTC
