@@ -1,16 +1,17 @@
-import 'package:googleapis/drive/v3.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../model/google_file.dart';
 
 part 'selected_file.g.dart';
 
 @riverpod
 class SelectedFile extends _$SelectedFile {
   @override
-  File? build() {
+  GoogleFile? build() {
     return null;
   }
 
-  void select(File file) {
+  void select(GoogleFile file) {
     state = file;
   }
 }
