@@ -27,6 +27,7 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(paginatedFilesProvider);
     final notifier = ref.read(paginatedFilesProvider.notifier);
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Choose Google Sheet File'), // TODO implement i18n
@@ -48,7 +49,13 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
                 child: ListView.builder(
                   itemCount: state.files.length,
                   itemBuilder: (context, index) => ListTile(
-                    title: Text(state.files[index].name),
+                    leading: CircleAvatar(
+                      child: Icon(Icons.table_chart)
+                    ),
+                    title: Text(
+                      state.files[index].name,
+                      style: theme.textTheme.headlineSmall,
+                    ),
                     onTap: () {
                       ref.read(selectedFileProvider.notifier).select(
                           state.files[index]
