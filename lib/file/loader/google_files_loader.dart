@@ -1,10 +1,14 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
+import 'package:chrono_sheet/logging/logging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:googleapis/drive/v3.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:googleapis/drive/v3.dart';
 import 'package:googleapis/sheets/v4.dart' as sheets;
+
 import '../../http/AuthenticatedHttpClient.dart';
+
+final _logger = getNamedLogger();
 
 Future<FileList> fetchSheets(String? pageToken) async {
   final signIn = GoogleSignIn(scopes: [
@@ -75,25 +79,41 @@ class PaginatedFilesNotifier extends StateNotifier<PaginatedFilesState> {
     state = state.copyWith(loading: true);
     final errors = <String>[];
     final files = <GoogleFile>[];
+    _logger.info(
+        "fetching gsheet documents, next page token: ${state.nextPageToken}"
+    );
     try {
       final fileList = await fetchSheets(initialLoad ? null : state.nextPageToken);
+      _logger.info(
+          "got google response for ${fileList.files?.length ?? 0} gsheet files"
+      );
       fileList.files?.forEach((file) {
         final id = file.id;
         if (id == null) {
-          errors.add("can not get id of google file ${file.toJson()}");
+          final error = "can not get id of google file ${file.toJson()}";
+          _logger.severe(error);
+          errors.add(error);
           return;
         }
         final name = file.name;
         if (name == null) {
-          errors.add("can not get name of google file ${file.toJson()}");
+          final error = "can not get name of google file ${file.toJson()}";
+          _logger.severe(error);
+          errors.add(error);
           return;
         }
         files.add(GoogleFile(id, name));
       });
     } catch (e, stackTrace) {
+      _logger.warning(
+          "got an exception on attempt to fetch gsheets", e, stackTrace
+      );
       errors.add("$e\n$stackTrace");
     }
 
+    _logger.info(
+        "got ${files.length} gsheet file(s) and ${errors.length} error(s)"
+    );
     state = state.copyWith(
       files: files,
       loading: false,
