@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -77,34 +78,16 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              onPressed: () => {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: Text(
-                "Start",
-                style: TextStyle(fontSize: 20),
-              ),
+            ElevatedButton.icon(
+              onPressed: measurement != Duration.zero ? _reset : null,
+              icon: Icon(Icons.refresh),
+              label: Text(AppLocalizations.of(context).textReset),
             ),
             SizedBox(width: 20),
-            ElevatedButton(
-              onPressed: () => {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: Text(
-                "Reset",
-                style: TextStyle(fontSize: 20),
-              ),
+            ElevatedButton.icon(
+              onPressed: () {},
+              icon: Icon(Icons.save),
+              label: Text(AppLocalizations.of(context).textSave)
             ),
           ],
         )

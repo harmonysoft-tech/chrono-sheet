@@ -3,5 +3,8 @@
 
   "titleSelectFile": "Select Google Sheet File",
 
+  "textReset": "Reset",
+  "textSave": "Save",
+
   "hintSelectFile": "tap to select a file"
 }
