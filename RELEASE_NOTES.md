@@ -1,3 +1,5 @@
+## v1.23.0+24 released on 26 Dec 2024 UTC
+  * df3a0cd720a6b0dfa16a59719f8cddd32297905a added logging
 ## v1.22.0+23 released on 26 Dec 2024 UTC
   * 42c493856928dd53db2bebe0022845635b82d893 implemented pull to refresh for google sheet files list
 ## v1.21.0+22 released on 26 Dec 2024 UTC
