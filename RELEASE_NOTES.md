@@ -1,3 +1,5 @@
+## v1.25.0+26 released on 26 Dec 2024 UTC
+  * 7537bd97bbb449d737b5751fdea172d67fa4ae46 added crashlytics
 ## v1.24.0+25 released on 26 Dec 2024 UTC
   * 2a130a983d74d26812de440dea6caa2e9a22c6db logging unhandled exceptions
 ## v1.23.0+24 released on 26 Dec 2024 UTC
