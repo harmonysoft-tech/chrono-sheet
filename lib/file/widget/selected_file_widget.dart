@@ -15,7 +15,7 @@ class SelectedFileWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final files = ref.watch(filesInfoHolderProvider);
+    final asyncFiles = ref.watch(filesInfoHolderProvider);
     return GestureDetector(
       onTap: () => _selectFile(context),
       child: Container(
@@ -26,17 +26,23 @@ class SelectedFileWidget extends ConsumerWidget {
           child: Padding(
               padding: EdgeInsets.all(16.0),
               child: Center(
-                child: Text(
-                  files.selected?.name ?? AppLocalizations.of(context).hintSelectFile,
-                  style: TextStyle(
-                    // TODO implement use theme
-                    color: files.selected == null
-                        ? Colors.grey
-                        : Colors.black
-                  ),
+                child: asyncFiles.when(
+                    data: (data) => _fileWidget(data.selected?.name, context),
+                    error: (_, __) => _fileWidget(null, context),
+                    loading: () => _fileWidget(null, context)
                 ),
               )
           )
+      ),
+    );
+  }
+
+  Widget _fileWidget(String? text, BuildContext context) {
+    return Text(
+      text ?? AppLocalizations.of(context).hintSelectFile,
+      style: TextStyle(
+        // TODO implement use theme
+          color:text == null ? Colors.grey : Colors.black
       ),
     );
   }

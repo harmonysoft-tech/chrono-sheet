@@ -6,7 +6,7 @@ part of 'measurement_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$measurementStateHash() => r'6e0e75c35f6709ec276d3fe4414781b7d50b1af8';
+String _$measurementStateHash() => r'93c4accd49e47fa46cfee58816e9ed275e5b7d85';
 
 /// See also [MeasurementState].
 @ProviderFor(MeasurementState)
