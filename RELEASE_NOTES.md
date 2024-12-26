@@ -1,3 +1,5 @@
+## v1.30.0+31 released on 26 Dec 2024 UTC
+  * 035b24b1be5b8c25684f532f932cba8405e9f7fe * constraining recent files as 5 * supported selection from recent files
 ## v1.29.0+30 released on 26 Dec 2024 UTC
   * e1e2d1533024c20501b161c1dc64421d4246a18c file info is persistent now
 ## v1.28.0+29 released on 26 Dec 2024 UTC
