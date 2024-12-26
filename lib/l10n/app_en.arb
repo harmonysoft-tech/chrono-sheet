@@ -1,0 +1,7 @@
+{
+  "appName": "Chrono Sheet",
+
+  "titleSelectFile": "Select Google Sheet File",
+
+  "hintSelectFile": "tap to select a file"
+}

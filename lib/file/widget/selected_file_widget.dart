@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../generated/app_localizations.dart';
 import '../state/files_state.dart';
 
 class SelectedFileWidget extends ConsumerWidget {
@@ -26,7 +27,7 @@ class SelectedFileWidget extends ConsumerWidget {
               padding: EdgeInsets.all(16.0),
               child: Center(
                 child: Text(
-                  files.selected?.name ?? 'tap to select a file', // TODO implement i18n
+                  files.selected?.name ?? AppLocalizations.of(context).hintSelectFile,
                   style: TextStyle(
                     // TODO implement use theme
                     color: files.selected == null

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../file/loader/google_files_loader.dart';
+import '../generated/app_localizations.dart';
 
 class ChooseSheetScreen extends ConsumerStatefulWidget {
 
@@ -30,7 +31,7 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Choose Google Sheet File'), // TODO implement i18n
+        title: Text(AppLocalizations.of(context).titleSelectFile),
       ),
       body: RefreshIndicator(
         onRefresh: () => notifier.loadFiles(initialLoad: true),

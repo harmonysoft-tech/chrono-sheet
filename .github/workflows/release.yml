@@ -27,6 +27,9 @@ jobs:
       - name: get dependencies
         run: flutter pub get
 
+      - name: generate l10n
+        run: flutter gen-l10n
+
       - name: test
         run: flutter test
 
