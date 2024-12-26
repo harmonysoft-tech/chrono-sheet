@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/router/router.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,12 +8,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   setupLogging();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const ProviderScope(child: MyApp()));
+  final logger = getNamedLogger();
+
+  runZonedGuarded(() async {
+    FlutterError.onError = (FlutterErrorDetails details) {
+      var error = "flutter error - ${details.exception}";
+      if (details.stack != null) {
+        error += "\n";
+        error += details.stack.toString();
+      }
+      logger.severe(error);
+    };
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    runApp(const ProviderScope(child: MyApp()));
+  }, (error, stackTrace) {
+    logger.severe("unexpected exception - $error\n$stackTrace");
+  });
 }
 
 class MyApp extends StatelessWidget {
