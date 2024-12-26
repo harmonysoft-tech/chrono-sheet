@@ -87,6 +87,7 @@ class PaginatedFilesNotifier extends StateNotifier<PaginatedFilesState> {
       _logger.info(
           "got google response for ${fileList.files?.length ?? 0} gsheet files"
       );
+
       fileList.files?.forEach((file) {
         final id = file.id;
         if (id == null) {

@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
@@ -37,6 +38,18 @@ void setupLogging() {
     }
     // ignore: avoid_print
     print('${record.time} [${record.level}] ${record.loggerName}: $message');
+
+    if (record.level.compareTo(Level.INFO) > 0) {
+      if (record.error == null) {
+        FirebaseCrashlytics.instance.recordError(message, record.stackTrace);
+      } else {
+        FirebaseCrashlytics.instance.recordError(
+          record.error,
+          record.stackTrace,
+          reason: "[${record.level}] ${record.message}"
+        );
+      }
+    }
   });
   _logger.info("configured level $level for logging");
 }
