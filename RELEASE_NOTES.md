@@ -1,3 +1,5 @@
+## v1.22.0+23 released on 26 Dec 2024 UTC
+  * 42c493856928dd53db2bebe0022845635b82d893 implemented pull to refresh for google sheet files list
 ## v1.21.0+22 released on 26 Dec 2024 UTC
   * 27066e377b6ed12363acd8d7b24e2ef2831f0792 styling google sheets
 ## v1.20.0+21 released on 26 Dec 2024 UTC
