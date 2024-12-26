@@ -1,4 +1,4 @@
-import 'package:chrono_sheet/file/selected/model/selected_file.dart';
+import 'package:chrono_sheet/file/state/files_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +10,7 @@ class ChooseSheetScreen extends ConsumerStatefulWidget {
   const ChooseSheetScreen({super.key});
 
   @override
-  ConsumerState createState() => ChooseSheetState();
+  ChooseSheetState createState() => ChooseSheetState();
 }
 
 class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
@@ -59,7 +59,7 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
                         style: theme.textTheme.headlineSmall,
                       ),
                       onTap: () {
-                        ref.read(selectedFileProvider.notifier).select(
+                        ref.read(filesInfoHolderProvider.notifier).select(
                             state.files[index]
                         );
                         context.pop();

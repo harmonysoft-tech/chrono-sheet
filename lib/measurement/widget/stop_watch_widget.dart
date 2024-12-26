@@ -1,9 +1,51 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StopWatch extends ConsumerWidget {
+import '../model/measurement_state.dart';
 
-  const StopWatch({super.key});
+class StopWatchWidget extends ConsumerStatefulWidget {
+
+  const StopWatchWidget({super.key});
+
+  @override
+  StopWatchState createState() => StopWatchState();
+}
+
+class StopWatchState extends ConsumerState<StopWatchWidget> {
+
+  late Timer _timer;
+  DateTime _lastMeasurementTime = DateTime.now();
+  bool _running = false;
+
+  void _toggle() {
+    if (_running) {
+      _timer.cancel();
+    } else {
+      _lastMeasurementTime = DateTime.now();
+      _timer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+        setState(() {
+          final now = DateTime.now();
+          ref.read(measurementStateProvider.notifier).increment(
+              now.difference(_lastMeasurementTime)
+          );
+          _lastMeasurementTime = now;
+        });
+      });
+    }
+    setState(() {
+      _running = !_running;
+    });
+  }
+
+  void _reset() {
+    setState(() {
+      _timer.cancel();
+      _running = false;
+      ref.read(measurementStateProvider.notifier).reset();
+    });
+  }
 
   String _formatTime(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -14,17 +56,21 @@ class StopWatch extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final measurement = ref.watch(measurementStateProvider);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Center(
-          child: Text(
-            _formatTime(Duration.zero),
-            style: TextStyle(
-              fontSize: 64,
-              fontWeight: FontWeight.bold,
+          child: GestureDetector(
+            onTap: _toggle,
+            child: Text(
+              _formatTime(measurement),
+              style: TextStyle(
+                fontSize: 64,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),

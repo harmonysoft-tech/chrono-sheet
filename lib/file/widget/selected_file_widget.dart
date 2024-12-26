@@ -1,8 +1,9 @@
 import 'package:chrono_sheet/router/router.dart';
-import 'package:chrono_sheet/file/selected/model/selected_file.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../state/files_state.dart';
 
 class SelectedFileWidget extends ConsumerWidget {
   const SelectedFileWidget({super.key});
@@ -13,7 +14,7 @@ class SelectedFileWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedFile = ref.watch(selectedFileProvider);
+    final files = ref.watch(filesInfoHolderProvider);
     return GestureDetector(
       onTap: () => _selectFile(context),
       child: Container(
@@ -25,11 +26,13 @@ class SelectedFileWidget extends ConsumerWidget {
               padding: EdgeInsets.all(16.0),
               child: Center(
                 child: Text(
-                  selectedFile?.name ?? 'tap to select a file', // TODO implement i18n
+                  files.selected?.name ?? 'tap to select a file', // TODO implement i18n
                   style: TextStyle(
-                      color: selectedFile?.name == null
-                          ? Colors.grey
-                          : Colors.black),
+                    // TODO implement use theme
+                    color: files.selected == null
+                        ? Colors.grey
+                        : Colors.black
+                  ),
                 ),
               )
           )

@@ -1,5 +1,5 @@
+import 'package:chrono_sheet/file/widget/selected_file_widget.dart';
 import 'package:chrono_sheet/measurement/widget/stop_watch_widget.dart';
-import 'package:chrono_sheet/file/selected/widget/selected_file_widget.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatelessWidget {
@@ -18,7 +18,7 @@ class MainScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              StopWatch(),
+              StopWatchWidget(),
               SizedBox(height: 24),
               SelectedFileWidget(),
             ],

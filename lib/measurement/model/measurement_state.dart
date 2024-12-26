@@ -5,10 +5,14 @@ part 'measurement_state.g.dart';
 @riverpod
 class MeasurementState extends _$MeasurementState {
 
-  final Duration duration = Duration.zero;
-
   @override
-  MeasurementState build() {
-    return this;
+  Duration build() {
+    return Duration.zero;
   }
+
+  void increment(Duration diff) {
+    state = state + diff;
+  }
+
+  void reset() => state = Duration.zero;
 }
