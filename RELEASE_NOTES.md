@@ -1,3 +1,5 @@
+## v1.29.0+30 released on 26 Dec 2024 UTC
+  * e1e2d1533024c20501b161c1dc64421d4246a18c file info is persistent now
 ## v1.28.0+29 released on 26 Dec 2024 UTC
   * d572dcd683754de9f6258e5bae93762599e1bada added ability to reset the stopwatch
 ## v1.27.0+28 released on 26 Dec 2024 UTC
