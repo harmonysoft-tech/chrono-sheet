@@ -1,3 +1,5 @@
+## v1.26.0+27 released on 26 Dec 2024 UTC
+  * ae46dadf469e8408fff1e4c76691cd19a9f31ce7 timer toggle on tap
 ## v1.25.0+26 released on 26 Dec 2024 UTC
   * 7537bd97bbb449d737b5751fdea172d67fa4ae46 added crashlytics
 ## v1.24.0+25 released on 26 Dec 2024 UTC
