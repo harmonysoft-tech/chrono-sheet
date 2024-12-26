@@ -25,6 +25,7 @@ class FilesInfo {
 class FilesInfoHolder extends _$FilesInfoHolder {
 
   static const _separator = "___";
+  static const _maxRecentItems = 5;
 
   final _prefs = SharedPreferencesAsync();
 
@@ -58,8 +59,16 @@ class FilesInfoHolder extends _$FilesInfoHolder {
 
   void select(GoogleFile file) async {
     _logger.info("file '${file.name}' is now active");
-    List<GoogleFile> recent = List.from((await future).recent);
+    final previousState = await future;
+    List<GoogleFile> recent = List.from(previousState.recent);
+    final previousSelected = previousState.selected;
+    if (previousSelected != null) {
+      recent.insert(0, previousSelected);
+    }
     recent.removeWhere((recentFile) => recentFile.id == file.id);
+    if (recent.length > _maxRecentItems) {
+      recent.removeRange(_maxRecentItems, recent.length);
+    }
     state = AsyncValue.data(FilesInfo(file, recent));
     await _prefs.setString(_Key.selected, _serialize(file));
     await _prefs.setInt(_Key.recentCount, recent.length);
