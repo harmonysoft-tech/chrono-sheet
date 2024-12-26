@@ -1,3 +1,5 @@
+## v1.24.0+25 released on 26 Dec 2024 UTC
+  * 2a130a983d74d26812de440dea6caa2e9a22c6db logging unhandled exceptions
 ## v1.23.0+24 released on 26 Dec 2024 UTC
   * df3a0cd720a6b0dfa16a59719f8cddd32297905a added logging
 ## v1.22.0+23 released on 26 Dec 2024 UTC
