@@ -1,3 +1,5 @@
+## v1.21.0+22 released on 26 Dec 2024 UTC
+  * 27066e377b6ed12363acd8d7b24e2ef2831f0792 styling google sheets
 ## v1.20.0+21 released on 26 Dec 2024 UTC
   * 298ee54589f996e22e72c5eaaa09a1190c32575b google sheet selection is implemented
 ## v1.19.0+20 released on 25 Dec 2024 UTC
