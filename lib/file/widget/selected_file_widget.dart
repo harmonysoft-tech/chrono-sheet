@@ -1,6 +1,5 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/router/router.dart';
-import 'package:chrono_sheet/ui/dimension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,86 +9,81 @@ import '../state/files_state.dart';
 
 class SelectedFileWidget extends ConsumerWidget {
 
-  final GlobalKey _historyButtonKey = GlobalKey();
-
-  SelectedFileWidget({super.key});
+  const SelectedFileWidget({super.key});
 
   void _selectFile(BuildContext context) async {
     context.push(AppRoute.chooseSheet);
   }
 
+  void _onFileSelected(GoogleFile file, WidgetRef ref) {
+    ref.read(filesInfoHolderProvider.notifier).select(file);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncFiles = ref.watch(filesInfoHolderProvider);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(width: Dimension.historyIconButtonSize),
-        Expanded(
-          child: GestureDetector(
-            onTap: () => _selectFile(context),
-            child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8.0),
+    final asyncData = ref.watch(filesInfoHolderProvider);
+    final localization = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+            bottom: BorderSide()
+        ),
+      ),
+      child: Row(
+        // mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _selectFile(context),
+              // we use Container here in order for it to fill all the
+              // available space occupied by Expanded. Otherwise
+              // GestureDetector reacts only on taps on the nested Text.
+              child: Container(
+                color: Colors.transparent,
+                child: Center(
+                  child: asyncData.when(
+                    data: (data) => Text(
+                      data.selected?.name ?? localization.hintSelectFile,
+                      style: data.selected == null
+                          ? TextStyle(color: theme.disabledColor)
+                          : null,
+                    ),
+                    error: (_, __) => Text(
+                      localization.hintSelectFile,
+                      style: TextStyle(color: theme.disabledColor),
+                    ),
+                    loading: () => Text(
+                      localization.hintSelectFile,
+                      style: TextStyle(color: theme.disabledColor),
+                    ),
+                  ),
                 ),
-                child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Center(
-                      child: asyncFiles.when(
-                          data: (data) =>
-                              _fileWidget(data.selected?.name, context),
-                          error: (_, __) => _fileWidget(null, context),
-                          loading: () => _fileWidget(null, context)),
-                    )
-                )
+              ),
             ),
           ),
-        ),
-        IconButton(
-          key: _historyButtonKey,
-          onPressed: asyncFiles.when(
-            data: (data) => data.recent.isNotEmpty
-                ? () => _showRecent(data.recent, ref)
-                : null,
-            error: (_, __) => null,
-            loading: () => null,
+          asyncData.when(
+            data: (data) => PopupMenuButton<GoogleFile>(
+              icon: Icon(Icons.arrow_drop_down),
+              onSelected: (file) => _onFileSelected(file, ref),
+              itemBuilder: (context) => data.recent.map((file) {
+                return PopupMenuItem(
+                  value: file,
+                  child: Text(file.name),
+                );
+              }).toList(),
+            ),
+              error: (_, __) => PopupMenuButton(
+                icon: Icon(Icons.arrow_drop_down),
+                itemBuilder: (context) => [],
+              ),
+              loading: () =>  PopupMenuButton(
+                icon: Icon(Icons.arrow_drop_down),
+                itemBuilder: (context) => [],
+              ),
           ),
-          icon: Icon(Icons.history),
-          iconSize: Dimension.historyIconButtonSize,
-        )
-      ],
-    );
-  }
-
-  void _showRecent(List<GoogleFile> recent, WidgetRef ref) async {
-    final BuildContext context = _historyButtonKey.currentContext!;
-    final RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final Offset position = renderBox.localToGlobal(Offset.zero);
-    final Size size = renderBox.size;
-    final x = position.dx + size.width;
-    final y = position.dy + size.height;
-
-    final selected = await showMenu(
-        context: context,
-        position: RelativeRect.fromLTRB(x, y, x, y),
-        items: recent.map((file) => PopupMenuItem(
-          value: file,
-          child: Text(file.name),
-        )).toList(),
-    );
-    if (selected != null) {
-      ref.read(filesInfoHolderProvider.notifier).select(selected);
-    }
-  }
-
-  Widget _fileWidget(String? text, BuildContext context) {
-    return Text(
-      text ?? AppLocalizations.of(context).hintSelectFile,
-      style: TextStyle(
-        // TODO implement use theme
-          color:text == null ? Colors.grey : Colors.black
-      ),
+        ],
+      )
     );
   }
 }
