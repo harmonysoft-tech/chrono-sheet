@@ -24,7 +24,7 @@ class MainScreen extends StatelessWidget {
               SizedBox(height: 24),
               SelectedFileWidget(),
               SizedBox(height: 24),
-              CategorySelector(),
+              CategoryWidget(),
             ],
           )
       ),

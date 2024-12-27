@@ -7,18 +7,18 @@ part 'files_state.g.dart';
 
 final _logger = getNamedLogger();
 
-class _Key {
-  static const selected = "file.selected";
-  static const recentCount = "file.recent.count";
-  static const recentN = "file.recent";
-}
-
 class FilesInfo {
 
   final GoogleFile? selected;
   final List<GoogleFile> recent;
 
   const FilesInfo(this.selected, [this.recent = const []]);
+}
+
+class _Key {
+  static const selected = "file.selected";
+  static const recentCount = "file.recent.count";
+  static const recentN = "file.recent";
 }
 
 @riverpod

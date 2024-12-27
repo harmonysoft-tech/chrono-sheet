@@ -1,5 +1,6 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/router/router.dart';
+import 'package:chrono_sheet/ui/dimension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +24,7 @@ class SelectedFileWidget extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        SizedBox(width: Dimension.historyIconButtonSize),
         Expanded(
           child: GestureDetector(
             onTap: () => _selectFile(context),
@@ -54,7 +56,7 @@ class SelectedFileWidget extends ConsumerWidget {
             loading: () => null,
           ),
           icon: Icon(Icons.history),
-          iconSize: 40.0,
+          iconSize: Dimension.historyIconButtonSize,
         )
       ],
     );

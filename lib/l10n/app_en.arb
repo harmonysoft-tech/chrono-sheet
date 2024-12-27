@@ -6,5 +6,10 @@
   "textReset": "Reset",
   "textSave": "Save",
 
-  "hintSelectFile": "tap to select a file"
+  "hintTapToCreateCategory": "tap to create a category",
+  "hintSelectFile": "tap to select a file",
+
+  "errorCanNotParseCategories": "can not parse categories",
+
+  "progressParsingCategories": "parsing categories from file..."
 }
