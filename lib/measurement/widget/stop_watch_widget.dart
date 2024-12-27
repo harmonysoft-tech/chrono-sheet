@@ -1,9 +1,7 @@
 import 'dart:async';
-
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../model/measurement_state.dart';
 
 class StopWatchWidget extends ConsumerStatefulWidget {
@@ -48,17 +46,25 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
     });
   }
 
-  String _formatTime(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$hours:$minutes:$seconds";
+  String _format(Duration duration) {
+    String t(int n) => n.toString().padLeft(2, '0');
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    final milliseconds = duration.inMilliseconds.remainder(1000) ~/ 10;
+    if (hours > 0) {
+      return "${t(hours)}:${t(minutes)}:${t(seconds)}.${t(milliseconds)}";
+    } else if (minutes > 0) {
+      return "${t(minutes)}:${t(seconds)}.${t(milliseconds)}";
+    } else {
+      return "${t(seconds)}.${t(milliseconds)}";
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final measurement = ref.watch(measurementStateProvider);
+    final theme = Theme.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -67,9 +73,9 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
           child: GestureDetector(
             onTap: _toggle,
             child: Text(
-              _formatTime(measurement),
+              _format(measurement),
               style: TextStyle(
-                fontSize: 64,
+                fontSize: theme.textTheme.displayLarge?.fontSize,
                 fontWeight: FontWeight.bold,
               ),
             ),
