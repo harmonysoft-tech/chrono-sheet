@@ -30,7 +30,14 @@ class CategoryState extends ConsumerState<CategoryWidget> {
     if (!_editing) {
       setState(() {
         _editing = true;
-        FocusScope.of(context).requestFocus(_focusNode);
+        // we need to request focus later because at the moment
+        // _editing = false, hence, the TextField was never shown
+        // in the elements tree yet. So, we need to wait for the
+        // next redrawing, when TextField will be shown, and request
+        // focus only after that
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).requestFocus(_focusNode);
+        });
       });
     }
   }
