@@ -6,7 +6,7 @@ part of 'files_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$filesInfoHolderHash() => r'3a17028456ae6b95aca337fedbf38cea70c3cdff';
+String _$filesInfoHolderHash() => r'f4c2c123dac232d4d45f479b101bbbd5124de775';
 
 /// See also [FilesInfoHolder].
 @ProviderFor(FilesInfoHolder)

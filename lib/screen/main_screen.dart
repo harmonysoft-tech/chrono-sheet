@@ -3,6 +3,8 @@ import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/measurement/widget/stop_watch_widget.dart';
 import 'package:flutter/material.dart';
 
+import '../category/widget/category_widget.dart';
+
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
@@ -21,6 +23,8 @@ class MainScreen extends StatelessWidget {
               StopWatchWidget(),
               SizedBox(height: 24),
               SelectedFileWidget(),
+              SizedBox(height: 24),
+              CategorySelector(),
             ],
           )
       ),

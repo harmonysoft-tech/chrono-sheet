@@ -1,26 +1,14 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/logging/logging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis/drive/v3.dart';
-import 'package:googleapis/sheets/v4.dart' as sheets;
-
-import '../../http/AuthenticatedHttpClient.dart';
+import '../../google/google_helper.dart';
 
 final _logger = getNamedLogger();
 
 Future<FileList> fetchSheets(String? pageToken) async {
-  final signIn = GoogleSignIn(scopes: [
-    sheets.SheetsApi.spreadsheetsScope,
-    sheets.SheetsApi.driveReadonlyScope
-  ]);
-  var googleAccount = await signIn.signIn();
-  if (googleAccount == null) {
-    throw StateError("can not login into google");
-  }
-  final headers = await googleAccount.authHeaders;
-  final client = AuthenticatedHttpClient(headers);
+  final client = await getAuthenticatedGoogleApiHttpClient();
   final driveApi = drive.DriveApi(client);
   return driveApi.files.list(
       q: "mimeType='application/vnd.google-apps.spreadsheet'",

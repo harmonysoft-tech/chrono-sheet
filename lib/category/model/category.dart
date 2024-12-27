@@ -10,4 +10,9 @@ class Category implements Comparable<Category> {
   int compareTo(Category other) {
     return name.compareTo(other.name);
   }
+
+  @override
+  String toString() {
+    return name;
+  }
 }
