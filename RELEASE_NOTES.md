@@ -1,3 +1,5 @@
+## v1.34.0+35 released on 27 Dec 2024 UTC
+  * 646eb689fb344da206b8a1cedcaf18be677750dd changed appearance of the category and file selection widgets
 ## v1.33.0+34 released on 27 Dec 2024 UTC
   * d2460e77b4562645f0565e85f3fa52f07e4be2cc category selection widget
 ## v1.32.0+33 released on 27 Dec 2024 UTC
