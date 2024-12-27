@@ -39,15 +39,17 @@ void setupLogging() {
     // ignore: avoid_print
     print('${record.time} [${record.level}] ${record.loggerName}: $message');
 
-    if (record.level.compareTo(Level.INFO) > 0) {
-      if (record.error == null) {
-        FirebaseCrashlytics.instance.recordError(message, record.stackTrace);
-      } else {
-        FirebaseCrashlytics.instance.recordError(
-          record.error,
-          record.stackTrace,
-          reason: "[${record.level}] ${record.message}"
-        );
+    if (!kDebugMode) {
+      if (record.level.compareTo(Level.INFO) > 0) {
+        if (record.error == null) {
+          FirebaseCrashlytics.instance.recordError(message, record.stackTrace);
+        } else {
+          FirebaseCrashlytics.instance.recordError(
+              record.error,
+              record.stackTrace,
+              reason: "[${record.level}] ${record.message}"
+          );
+        }
       }
     }
   });
