@@ -1,3 +1,5 @@
+## v1.35.0+36 released on 27 Dec 2024 UTC
+  * 50cc97da74b7bfc1e967989ceb7bf40476e02a4a make sure that category editing starts after the first tap
 ## v1.34.0+35 released on 27 Dec 2024 UTC
   * 646eb689fb344da206b8a1cedcaf18be677750dd changed appearance of the category and file selection widgets
 ## v1.33.0+34 released on 27 Dec 2024 UTC
