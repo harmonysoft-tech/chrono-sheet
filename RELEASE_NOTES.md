@@ -1,3 +1,5 @@
+## v1.33.0+34 released on 27 Dec 2024 UTC
+  * d2460e77b4562645f0565e85f3fa52f07e4be2cc category selection widget
 ## v1.32.0+33 released on 27 Dec 2024 UTC
   * 8b038925a90c3f304b89b69302050cf658be4fc3 * keeping stopwatch measurements on a widget level * stopwatch now blinks when it's paused
 ## v1.31.0+32 released on 27 Dec 2024 UTC
