@@ -1,3 +1,5 @@
+## v1.32.0+33 released on 27 Dec 2024 UTC
+  * 8b038925a90c3f304b89b69302050cf658be4fc3 * keeping stopwatch measurements on a widget level * stopwatch now blinks when it's paused
 ## v1.31.0+32 released on 27 Dec 2024 UTC
   * ef23c6ab0b4095a5aa10ee2efa8f4395457eac6d don't send crashlytics reports for debug versions
 ## v1.30.0+31 released on 26 Dec 2024 UTC
