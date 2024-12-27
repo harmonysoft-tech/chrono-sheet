@@ -1,10 +1,9 @@
 import 'dart:async';
+
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../model/measurement_state.dart';
 
-class StopWatchWidget extends ConsumerStatefulWidget {
+class StopWatchWidget extends StatefulWidget {
 
   const StopWatchWidget({super.key});
 
@@ -12,37 +11,57 @@ class StopWatchWidget extends ConsumerStatefulWidget {
   StopWatchState createState() => StopWatchState();
 }
 
-class StopWatchState extends ConsumerState<StopWatchWidget> {
+class StopWatchState extends State<StopWatchWidget> {
 
-  late Timer _timer;
+  Timer? _timer;
   DateTime _lastMeasurementTime = DateTime.now();
+  Duration _measuredDuration = Duration.zero;
   bool _running = false;
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _tick(Timer _) {
+    setState(() {
+      if (_running) {
+        final now = DateTime.now();
+        _measuredDuration += now.difference(_lastMeasurementTime);
+        _lastMeasurementTime = now;
+      }
+    });
+  }
+
   void _toggle() {
-    if (_running) {
-      _timer.cancel();
-    } else {
-      _lastMeasurementTime = DateTime.now();
-      _timer = Timer.periodic(Duration(milliseconds: 100), (timer) {
-        setState(() {
-          final now = DateTime.now();
-          ref.read(measurementStateProvider.notifier).increment(
-              now.difference(_lastMeasurementTime)
-          );
-          _lastMeasurementTime = now;
-        });
-      });
-    }
     setState(() {
       _running = !_running;
+      if (_running) {
+        _lastMeasurementTime = DateTime.now();
+      }
+      if (_running || _hasMeasurement()) {
+        _timer ??= Timer.periodic(Duration(milliseconds: 100), _tick);
+      } else {
+        // we need to show UI changes only if the stopwatch is running
+        // or if it's stopped and some duration is already measured
+        // (the duration blinks in this case)
+        _timer?.cancel();
+        _timer = null;
+      }
     });
+  }
+
+  bool _hasMeasurement() {
+    return _measuredDuration > Duration.zero;
   }
 
   void _reset() {
     setState(() {
-      _timer.cancel();
       _running = false;
-      ref.read(measurementStateProvider.notifier).reset();
+      _measuredDuration = Duration.zero;
+      _timer?.cancel();
+      _timer = null;
     });
   }
 
@@ -63,7 +82,6 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final measurement = ref.watch(measurementStateProvider);
     final theme = Theme.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -72,11 +90,18 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
         Center(
           child: GestureDetector(
             onTap: _toggle,
-            child: Text(
-              _format(measurement),
-              style: TextStyle(
-                fontSize: theme.textTheme.displayLarge?.fontSize,
-                fontWeight: FontWeight.bold,
+            child: AnimatedOpacity(
+              opacity:
+              (!_running && _measuredDuration > Duration.zero)
+                  ? (DateTime.now().millisecond % 1000 < 500) ? 0.0 : 1.0
+                  : 1.0,
+              duration: Duration(milliseconds: 200),
+              child: Text(
+                _format(_measuredDuration),
+                style: TextStyle(
+                  fontSize: theme.textTheme.displayLarge?.fontSize,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -85,7 +110,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton.icon(
-              onPressed: measurement != Duration.zero ? _reset : null,
+              onPressed: _measuredDuration != Duration.zero ? _reset : null,
               icon: Icon(Icons.refresh),
               label: Text(AppLocalizations.of(context).textReset),
             ),
