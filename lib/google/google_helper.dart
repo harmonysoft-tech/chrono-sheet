@@ -8,7 +8,7 @@ Future<AuthenticatedHttpClient> getAuthenticatedGoogleApiHttpClient() async {
     sheets.SheetsApi.spreadsheetsScope,
     sheets.SheetsApi.driveReadonlyScope
   ]);
-  var googleAccount = await signIn.signIn();
+  var googleAccount = await signIn.signInSilently();
   if (googleAccount == null) {
     throw StateError("can not login into google");
   }
