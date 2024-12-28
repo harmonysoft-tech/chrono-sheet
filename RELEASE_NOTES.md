@@ -1,3 +1,5 @@
+## v1.36.0+37 released on 28 Dec 2024 UTC
+  * b384af5342ff68b333a242ad1117cae62dca7d30 storing measurements in empty sheets
 ## v1.35.0+36 released on 27 Dec 2024 UTC
   * 50cc97da74b7bfc1e967989ceb7bf40476e02a4a make sure that category editing starts after the first tap
 ## v1.34.0+35 released on 27 Dec 2024 UTC
