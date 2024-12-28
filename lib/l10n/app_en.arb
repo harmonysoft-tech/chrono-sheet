@@ -10,6 +10,8 @@
   "hintSelectFile": "tap to select a file",
 
   "errorCanNotParseCategories": "can not parse categories",
+  "errorNoFileIsSelected": "no file is selected",
+  "errorNoCategoryIsSelected": "no category is selected",
 
   "progressParsingCategories": "parsing categories from file..."
 }

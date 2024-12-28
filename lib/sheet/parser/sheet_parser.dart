@@ -1,13 +1,12 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/google/google_helper.dart';
 import 'package:chrono_sheet/logging/logging.dart';
-import 'package:chrono_sheet/sheet/model/sheet_info.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:intl/intl.dart';
+import '../model/sheet_model.dart';
+import '../util/date_util.dart';
+import '../util/sheet_util.dart';
 
-import '../model/sheet_column.dart';
-
-final List<DateFormat> _dateFormats = [DateFormat("yyyy-MM-dd")];
 final _logger = getNamedLogger();
 
 Future<GoogleSheetInfo> parseSheetDocument(GoogleFile file) async {
@@ -15,18 +14,20 @@ Future<GoogleSheetInfo> parseSheetDocument(GoogleFile file) async {
   final api = SheetsApi(http);
   final document = await api.spreadsheets.get(file.id);
   final sheets = document.sheets;
-  if (sheets == null) {
+  if (sheets == null || sheets.isEmpty) {
     return GoogleSheetInfo.empty;
   }
-  final List<DateFormat> dateFormats = _getDateFormats(document.properties?.locale);
+  final locale = document.properties?.locale;
+  final List<DateFormat> dateFormats = getDateFormats(locale);
   GoogleSheetInfo result = GoogleSheetInfo.empty;
-  int resultScore = _score(result);
+  int resultScore = -1;
   for (final sheet in sheets) {
     final candidate = await _parseSheet(
-        sheet: sheet,
-        dateFormats: dateFormats,
-        file: file,
-        api: api,
+      sheet: sheet,
+      dateFormats: dateFormats,
+      file: file,
+      api: api,
+      locale: locale,
     );
     final candidateScore = _score(candidate);
     if (candidateScore > resultScore) {
@@ -37,51 +38,162 @@ Future<GoogleSheetInfo> parseSheetDocument(GoogleFile file) async {
   return result;
 }
 
-List<DateFormat> _getDateFormats(String? locale) {
-  final result = List.of(_dateFormats);
-  if (locale != null) {
-    result.add(DateFormat.yMMMd(locale));
-    result.add(DateFormat.yMMMMd(locale));
-    result.add(DateFormat.yMd(locale));
-    result.add(DateFormat.yMEd(locale));
-    result.add(DateFormat.yMMMEd(locale));
-    result.add(DateFormat.yMMMMEEEEd(locale));
-  }
-  return result;
-}
-
 Future<GoogleSheetInfo> _parseSheet({
   required Sheet sheet,
   required List<DateFormat> dateFormats,
   required GoogleFile file,
-  required SheetsApi api
+  required SheetsApi api,
+  String? locale,
 }) async {
-  final title = sheet.properties?.title;
-  if (title == null) {
+  final sheetId = sheet.properties?.sheetId;
+  if (sheetId == null) {
+    return GoogleSheetInfo.empty;
+  }
+  final sheetTitle = sheet.properties?.title;
+  if (sheetTitle == null) {
     return GoogleSheetInfo.empty;
   }
 
-  final valueRange = await api.spreadsheets.values.get(file.id, title);
+  final valueRange = await api.spreadsheets.values.get(
+    file.id,
+    sheetTitle,
+    majorDimension: "ROWS"
+  );
+  final size = _parseSize(valueRange, file);
   final values = valueRange.values;
+  DateFormat dateFormat = defaultDateFormat;
+  if (locale != null) {
+    dateFormat = DateFormat.yMMMd(locale);
+  }
   if (values == null || values.isEmpty) {
-    return GoogleSheetInfo(title: title);
+    return GoogleSheetInfo(
+      id: sheetId,
+      title: sheetTitle,
+      dateFormat: dateFormat,
+      rowsNumber: size.rows,
+      columnsNumber: size.columns
+    );
   }
 
-  for (int row = 0; row < values.length; ++row) {
-    for (int column = 0; column < values[row].length; ++column) {
-      if (_canBeDateCell(row, column, values, dateFormats)) {
-        final columns = _parseColumns(row, column, values);
-        final todayRow = _parseTodayRow(row, column, values, dateFormats);
-        return GoogleSheetInfo(
-          title: title,
-          columns: columns,
-          todayRow: todayRow
-        );
-      }
-    }
+  final basedOnExistingData = _tryParseExistingData(
+      values: values, dateFormats: dateFormats, size: size, sheetId: sheetId, sheetTitle: sheetTitle, locale: locale);
+  if (basedOnExistingData == null) {
+    return GoogleSheetInfo(
+      id: sheetId,
+      title: sheetTitle,
+      rowsNumber: size.rows,
+      columnsNumber: size.columns,
+      dateFormat: dateFormat,
+    );
+  } else {
+    return basedOnExistingData;
+  }
+}
+
+_Size _parseSize(ValueRange range, GoogleFile file) {
+  final rangeString = _getRangeString(range, file);
+  if (rangeString == null) {
+    return _Size.empty;
   }
 
-  return GoogleSheetInfo.empty;
+  // assuming that the range is defined as <sheet-name>!<top-left-cell>:<bottom-right-cell>
+  final sheetStartCellSeparatorIndex = _getSheetStartCellSeparatorIndex(rangeString, file);
+  if (sheetStartCellSeparatorIndex == null) {
+    return _Size.empty;
+  }
+
+  final rowColumnSeparatorIndex = _getRowColumnSeparatorIndex(rangeString, file);
+  if (rowColumnSeparatorIndex == null) {
+    return _Size.empty;
+  }
+
+  if (rangeString.indexOf(":", rowColumnSeparatorIndex + 1) >= 0) {
+    _logger.warning(
+      "unexpected range format is detected for google sheet file '${file.name}' range value '$rangeString' "
+      "- it has more than two ':' symbols"
+    );
+    return _Size.empty;
+  }
+  final topLeftAddress = _getTopLeftAddress(sheetStartCellSeparatorIndex, rowColumnSeparatorIndex, rangeString, file);
+  if (topLeftAddress == null) {
+    return _Size.empty;
+  }
+
+  final bottomRightAddress = _getBottomRightAddress(rowColumnSeparatorIndex, rangeString, file);
+  if (bottomRightAddress == null) {
+    return _Size.empty;
+  }
+
+  return _Size(bottomRightAddress.row - topLeftAddress.row + 1, bottomRightAddress.column - topLeftAddress.column + 1);
+}
+
+String? _getRangeString(ValueRange range, GoogleFile file) {
+  final result = range.range;
+  if (result == null) {
+    _logger.warning(
+        "no range info is provided for google sheet file '${file.name}'"
+    );
+  }
+  return result;
+}
+
+int? _getSheetStartCellSeparatorIndex(String range, GoogleFile file) {
+  final result = range.indexOf("!");
+  if (result <= 0) {
+    _logger.warning(
+      "unexpected range format is detected for google sheet file '${file.name}' range value '$range' "
+      "- it doesn't have '!'"
+    );
+    return null;
+  } else {
+    return result;
+  }
+}
+
+int? _getRowColumnSeparatorIndex(String range, GoogleFile file) {
+  final result = range.indexOf(":");
+  if (result <= 0) {
+    _logger.warning(
+      "unexpected range format is detected for google sheet file '${file.name}' range value '$range' "
+      "- it doesn't have the second ':'"
+    );
+    return null;
+  } else {
+    return result;
+  }
+}
+
+CellAddress? _getTopLeftAddress(
+  int sheetStartCellSeparatorIndex,
+  int rowColumnSeparatorIndex,
+  String range,
+  GoogleFile file,
+) {
+  final addressString = range.substring(sheetStartCellSeparatorIndex + 1, rowColumnSeparatorIndex);
+  final result = parseCellAddress(addressString);
+  if (result == null) {
+    _logger.warning(
+      "can not parse address of the top-left cell of google sheet file '${file.name}', range value '$range', "
+      "cell address '$addressString'"
+    );
+  }
+  return result;
+}
+
+CellAddress? _getBottomRightAddress(
+    int rowColumnSeparatorIndex,
+    String range,
+    GoogleFile file,
+    ) {
+  final addressString = range.substring(rowColumnSeparatorIndex + 1);
+  final result = parseCellAddress(addressString);
+  if (result == null) {
+    _logger.warning(
+      "can not parse address of the bottom-right cell of google sheet file '${file.name}', range value '$range', "
+      "cell address '$addressString'"
+    );
+  }
+  return result;
 }
 
 int _score(GoogleSheetInfo info) {
@@ -149,30 +261,19 @@ Map<String, String> _parseColumns(
     List<List<Object?>> values,
 ) {
   final Map<String, String> result = {
-    Column.date: _getCellAddress(dateCellRow, dateCellColumn)
+    Column.date: getCellAddress(dateCellRow, dateCellColumn)
   };
   for (int i = dateCellColumn + 1; i < values[dateCellRow].length; ++i) {
     final cellValue = values[dateCellRow][i]?.toString();
     if (cellValue == null || cellValue.isEmpty) {
       break;
     } else if (cellValue.toLowerCase() == Column.total.toLowerCase()) {
-      result[Column.total] = _getCellAddress(dateCellRow, i);
+      result[Column.total] = getCellAddress(dateCellRow, i);
     } else {
-      result[cellValue] = _getCellAddress(dateCellRow, i);
+      result[cellValue] = getCellAddress(dateCellRow, i);
     }
   }
   return result;
-}
-
-String _getCellAddress(int row, int col) {
-  String columnLetter = '';
-  int tempCol = col + 1;
-  while (tempCol > 0) {
-    tempCol--;
-    columnLetter = String.fromCharCode(tempCol % 26 + 65) + columnLetter;
-    tempCol ~/= 26;
-  }
-  return '$columnLetter${row + 1}';
 }
 
 String? _parseTodayRow(
@@ -203,10 +304,82 @@ String? _parseTodayRow(
         && date.month == today.month
         && date.day == today.day
       ) {
-        return _getCellAddress(dateCellRow + 1, dateCellColumn);
+        return getCellAddress(dateCellRow + 1, dateCellColumn);
       }
     } catch (_) {
     }
   }
   return null;
+}
+
+DateFormat _parseDateFormatToUse({
+  required int dateCellRow,
+  required int dateCellColumn,
+  required List<List<Object?>> values,
+  String? locale
+}) {
+  if (values.length > dateCellRow + 1 && values[dateCellRow + 1].length > dateCellColumn) {
+    final dateCellValue = values[dateCellRow][dateCellColumn]?.toString();
+    if (dateCellValue != null && dateCellValue.isNotEmpty) {
+      final formats = getDateFormats(locale);
+      for (final format in formats) {
+        try {
+          format.parse(dateCellValue);
+          return format;
+        } catch (_) {
+        }
+      }
+    }
+  }
+
+  // use fallback format
+  if (locale == null) {
+    return defaultDateFormat;
+  } else {
+    return DateFormat.yMMMd(locale);
+  }
+}
+
+GoogleSheetInfo? _tryParseExistingData({
+  required List<List<Object?>> values,
+  required List<DateFormat> dateFormats,
+  required _Size size,
+  required int sheetId,
+  required String sheetTitle,
+  String? locale,
+}) {
+  for (int row = 0; row < values.length; ++row) {
+    for (int column = 0; column < values[row].length; ++column) {
+      if (_canBeDateCell(row, column, values, dateFormats)) {
+        final columns = _parseColumns(row, column, values);
+        final todayRow = _parseTodayRow(row, column, values, dateFormats);
+        final dateFormat = _parseDateFormatToUse(
+            dateCellRow: row,
+            dateCellColumn: column,
+            values: values,
+            locale: locale
+        );
+        return GoogleSheetInfo(
+          rowsNumber: size.rows,
+          columnsNumber: size.columns,
+          id: sheetId,
+          title: sheetTitle,
+          columns: columns,
+          todayRow: todayRow,
+          dateFormat: dateFormat,
+        );
+      }
+    }
+  }
+  return null;
+}
+
+class _Size {
+
+  static const _Size empty = _Size(0, 0);
+
+  final int rows;
+  final int columns;
+
+  const _Size(this.rows, this.columns);
 }

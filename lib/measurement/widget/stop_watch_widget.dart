@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:chrono_sheet/generated/app_localizations.dart';
+import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StopWatchWidget extends StatefulWidget {
+class StopWatchWidget extends ConsumerStatefulWidget {
 
   const StopWatchWidget({super.key});
 
@@ -11,7 +13,7 @@ class StopWatchWidget extends StatefulWidget {
   StopWatchState createState() => StopWatchState();
 }
 
-class StopWatchState extends State<StopWatchWidget> {
+class StopWatchState extends ConsumerState<StopWatchWidget> {
 
   Timer? _timer;
   DateTime _lastMeasurementTime = DateTime.now();
@@ -65,6 +67,17 @@ class StopWatchState extends State<StopWatchWidget> {
     });
   }
 
+  void _saveMeasurement() {
+    setState(() {
+      _running = false;
+      final durationToStore = _measuredDuration;
+      _measuredDuration = Duration.zero;
+      _timer?.cancel();
+      _timer = null;
+      ref.read(sheetUpdaterProvider.notifier).store(durationToStore, AppLocalizations.of(context));
+    });
+  }
+
   String _format(Duration duration) {
     String t(int n) => n.toString().padLeft(2, '0');
     final hours = duration.inHours;
@@ -110,13 +123,13 @@ class StopWatchState extends State<StopWatchWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton.icon(
-              onPressed: _measuredDuration != Duration.zero ? _reset : null,
+              onPressed: _hasMeasurement() ? _reset : null,
               icon: Icon(Icons.refresh),
               label: Text(AppLocalizations.of(context).textReset),
             ),
             SizedBox(width: 20),
             ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: _hasMeasurement() ? _saveMeasurement : null,
               icon: Icon(Icons.save),
               label: Text(AppLocalizations.of(context).textSave)
             ),

@@ -1,26 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'categories_state.dart';
+part of 'update_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$fileCategoriesHash() => r'4da7140c95999f61376494fc958d2261319bae15';
+String _$updateServiceHash() => r'25b91583fc8aaf3f378f3cc564ea1b3fedd03c6f';
 
-/// See also [FileCategories].
-@ProviderFor(FileCategories)
-final fileCategoriesProvider =
-    AutoDisposeAsyncNotifierProvider<FileCategories, CategoriesInfo>.internal(
-  FileCategories.new,
-  name: r'fileCategoriesProvider',
+/// See also [updateService].
+@ProviderFor(updateService)
+final updateServiceProvider = AutoDisposeProvider<SheetUpdateService>.internal(
+  updateService,
+  name: r'updateServiceProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$fileCategoriesHash,
+      : _$updateServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$FileCategories = AutoDisposeAsyncNotifier<CategoriesInfo>;
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef UpdateServiceRef = AutoDisposeProviderRef<SheetUpdateService>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
