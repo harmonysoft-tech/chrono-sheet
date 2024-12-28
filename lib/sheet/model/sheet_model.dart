@@ -33,12 +33,13 @@ class GoogleSheetInfo {
 
   final int rowsNumber;
   final int columnsNumber;
-  final Map<String, String> columns; // TODO implement switch values to CellAddress
+  final Map<String, CellAddress> columns;
+  final Map<CellAddress, String> values;
   final DateFormat dateFormat;
   final int? id;
   final String? title;
   final String? locale;
-  final String? todayRow; // TODO switch to int
+  final int? todayRow;
 
   GoogleSheetInfo({
     required this.dateFormat,
@@ -47,29 +48,54 @@ class GoogleSheetInfo {
     this.id,
     this.title,
     this.locale,
-    this.columns = const <String, String>{},
+    this.columns = const {},
+    this.values = const {},
     this.todayRow,
   });
 
   GoogleSheetInfo copyWith({
     int? rowsNumber,
     int? columnsNumber,
-    Map<String, String>? columns,
+    Map<String, CellAddress>? columns,
+    Map<CellAddress, String>? values,
     DateFormat? dateFormat,
     int? id,
     String? title,
     String? locale,
-    String? todayRow
+    int? todayRow
   }) {
     return GoogleSheetInfo(
       rowsNumber: rowsNumber ?? this.rowsNumber,
       columnsNumber: columnsNumber ?? this.columnsNumber,
       columns: columns ?? this.columns,
+      values: values ?? this.values,
       dateFormat: dateFormat ?? this.dateFormat,
       id: id ?? this.id,
       title: title ?? this.title,
       locale: locale ?? this.locale,
       todayRow: todayRow ?? this.todayRow,
     );
+  }
+
+  void onRowsInserted(int rowToInsertAfter, int rowsCount) {
+    final newColumns = columns.map((column, address) {
+      if (address.row > rowToInsertAfter) {
+        return MapEntry(column, CellAddress(address.row + rowsCount, address.column));
+      } else {
+        return MapEntry(column, address);
+      }
+    });
+    columns.clear();
+    columns.addAll(newColumns);
+
+    final newValues = values.map((address, value) {
+      if (address.row > rowToInsertAfter) {
+        return MapEntry(CellAddress(address.row + rowsCount, address.column), value);
+      } else {
+        return MapEntry(address, value);
+      }
+    });
+    values.clear();
+    values.addAll(newValues);
   }
 }

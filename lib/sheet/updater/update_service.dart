@@ -31,7 +31,7 @@ class SheetUpdateService {
     GoogleSheetInfo sheetInfo = await parseSheetDocument(file);
     sheetInfo = await _createSheetIfNecessary(sheetInfo, file, api);
     final context = _Context(
-      durationToStore: duration,
+      durationToStore: duration.inSeconds, // TODO switch to minutes
       file: file,
       category: category,
       api: api,
@@ -40,15 +40,11 @@ class SheetUpdateService {
     if (sheetInfo.columns.isEmpty) {
       await _createColumnsAndStore(context);
     } else {
-      // TODO implement
+      await _storeInExistingTable(context);
     }
   }
 
-  Future<GoogleSheetInfo> _createSheetIfNecessary(
-      GoogleSheetInfo info,
-      GoogleFile file,
-      SheetsApi api
-      ) async {
+  Future<GoogleSheetInfo> _createSheetIfNecessary(GoogleSheetInfo info, GoogleFile file, SheetsApi api) async {
     final sheetName = info.title;
     if (sheetName != null) {
       return info;
@@ -85,7 +81,7 @@ class SheetUpdateService {
   }
 
   Future<void> _createColumnsAndStore(_Context context) async {
-    int rowsToCreate = await _calculateNumberOfRowsToCreateForSheetWithoutPreviousData(context);
+    int rowsToCreate = _calculateNumberOfRowsToCreateForSheetWithoutPreviousData(context);
     if (rowsToCreate > 0) {
       await _insertRows(0, rowsToCreate, context);
     }
@@ -94,20 +90,20 @@ class SheetUpdateService {
       CellAddress(0, 1): Column.total,
       CellAddress(0, 2): context.category.name,
       CellAddress(1, 0): context.sheetInfo.dateFormat.format(DateTime.now()),
-      CellAddress(1, 1): context.durationToStore.inMinutes.toString(),
-      CellAddress(1, 2): context.durationToStore.inMinutes.toString(),
+      CellAddress(1, 1): context.durationToStore.toString(),
+      CellAddress(1, 2): context.durationToStore .toString(),
     });
   }
 
-  Future<int> _calculateNumberOfRowsToCreateForSheetWithoutPreviousData(_Context context) async {
+  int _calculateNumberOfRowsToCreateForSheetWithoutPreviousData(_Context context) {
     if (context.sheetInfo.rowsNumber <= 0) {
       // the sheet has no rows, we just need to create two empty rows then
       return 2;
     }
 
-    final firstRowCells = { CellAddress(0, 0), CellAddress(0, 1), CellAddress(0, 2) };
+    final firstRowCells = {CellAddress(0, 0), CellAddress(0, 1), CellAddress(0, 2)};
     if (context.sheetInfo.rowsNumber == 1) {
-      final firstRowValues = await _getValues(firstRowCells, context);
+      final firstRowValues = _getValues(firstRowCells, context);
       final hasDataInFirstRow = firstRowValues.entries.any((entry) => entry.value.isNotEmpty);
       if (hasDataInFirstRow) {
         // one row is to hold the headers, another row to hold today's data and one empty buffer row between
@@ -120,8 +116,8 @@ class SheetUpdateService {
     }
 
     // the google sheet document has at least two rows
-    final secondRowCells = { CellAddress(1, 0), CellAddress(1, 1), CellAddress(1, 2) };
-    final values = await _getValues(firstRowCells.union(secondRowCells), context);
+    final secondRowCells = {CellAddress(1, 0), CellAddress(1, 1), CellAddress(1, 2)};
+    final values = _getValues(firstRowCells.union(secondRowCells), context);
     final hasDataInFirstRow = firstRowCells.any((address) {
       final cellValue = values[address];
       return cellValue != null && cellValue.isNotEmpty;
@@ -143,15 +139,15 @@ class SheetUpdateService {
     }
   }
 
-  Future<void> _insertRows(int startRow, int rowsCount, _Context context) async {
+  Future<void> _insertRows(int rowToInsertAfter, int rowsCount, _Context context) async {
     final batchUpdateRequest = BatchUpdateSpreadsheetRequest(requests: [
       Request(
         insertDimension: InsertDimensionRequest(
           range: DimensionRange(
             sheetId: context.sheetInfo.id!,
             dimension: "ROWS",
-            startIndex: startRow,
-            endIndex: startRow + rowsCount,
+            startIndex: rowToInsertAfter + 1, // we use zero-based indexing ang google sheet uses 1-based
+            endIndex: rowToInsertAfter + 1 + rowsCount,
           ),
           inheritFromBefore: false,
         ),
@@ -160,76 +156,90 @@ class SheetUpdateService {
 
     try {
       await context.api.spreadsheets.batchUpdate(batchUpdateRequest, context.file.id);
-      // await api.spreadsheets.values.append(ValueRange(values: values), file.id, range);
+      context.sheetInfo.onRowsInserted(rowToInsertAfter, rowsCount);
     } catch (e, stack) {
       _logger.warning(
-          "can not insert $rowsCount row(s) at index $startRow into google sheet document '${context.file.name}'",
-          e, stack
-      );
+          "can not insert $rowsCount row(s) at index $rowToInsertAfter into google sheet document '${context.file.name}'",
+          e,
+          stack);
       rethrow;
     }
   }
 
-  Future<Map<CellAddress, String>> _getValues(Set<CellAddress> addresses, _Context context) async {
-    final ranges = addresses.map((address) {
-      return "${context.sheetInfo.title}!${getCellAddress(address.row, address.column)}";
-    }).toList();
-    final response = await context.api.spreadsheets.values.batchGet(context.file.id, ranges: ranges);
+  String? _getValue(CellAddress address, _Context context) {
+    final values = _getValues({address}, context);
+    if (values.isNotEmpty) {
+      return values.values.first;
+    } else {
+      return null;
+    }
+  }
 
+  Map<CellAddress, String> _getValues(Set<CellAddress> addresses, _Context context) {
     final result = <CellAddress, String>{};
-    response.valueRanges?.forEach((range) {
-      final responseRange = range.range;
-      if (responseRange == null) {
-        _logger.severe(
-            "can not parse response to the 'get value' request made to the google sheet '${context.sheetInfo.title}' "
-                "- expected 'range' response property to be not empty. Full response: ${response.toJson()}"
-        );
-        return;
+    for (final address in addresses) {
+      final value = context.sheetInfo.values[address];
+      if (value != null) {
+        result[address] = value;
       }
-
-      final i = responseRange.indexOf("!");
-      String addressString = responseRange;
-      if (i > 0) {
-        addressString = responseRange.substring(i + 1);
-      }
-      final address = parseCellAddress(addressString);
-      if (address == null) {
-        _logger.severe(
-            "can not parse response to the 'get value' request made to the google sheet '${context.sheetInfo.title}' "
-                "- failed to parse cell address from '$addressString'. Full response: ${response.toJson()}"
-        );
-        return;
-      }
-      final values = range.values;
-      String? value;
-      if (values != null) {
-        if (values.length > 1) {
-          _logger.warning(
-              "expected that a google sheet data is [[<data>]] but got '$values'"
-          );
-        }
-        if (values.isNotEmpty) {
-          final subValues = values.first;
-          if (subValues.length > 1) {
-            _logger.warning(
-                "expected that a google sheet data is [[<data>]] but got '$values'"
-            );
-          }
-          if (subValues.isNotEmpty) {
-            value = subValues.first?.toString();
-          }
-        }
-      }
-      result[address] = value ?? "";
-    });
+    }
     return result;
+
+    // final ranges = addresses.map((address) {
+    //   return "${context.sheetInfo.title}!${getCellAddress(address.row, address.column)}";
+    // }).toList();
+    // final response = await context.api.spreadsheets.values.batchGet(context.file.id, ranges: ranges);
+    //
+    // final result = <CellAddress, String>{};
+    // response.valueRanges?.forEach((range) {
+    //   final responseRange = range.range;
+    //   if (responseRange == null) {
+    //     _logger.severe(
+    //         "can not parse response to the 'get value' request made to the google sheet '${context.sheetInfo.title}' "
+    //         "- expected 'range' response property to be not empty. Full response: ${response.toJson()}");
+    //     return;
+    //   }
+    //
+    //   final i = responseRange.indexOf("!");
+    //   String addressString = responseRange;
+    //   if (i > 0) {
+    //     addressString = responseRange.substring(i + 1);
+    //   }
+    //   final address = parseCellAddress(addressString);
+    //   if (address == null) {
+    //     _logger.severe(
+    //         "can not parse response to the 'get value' request made to the google sheet '${context.sheetInfo.title}' "
+    //         "- failed to parse cell address from '$addressString'. Full response: ${response.toJson()}");
+    //     return;
+    //   }
+    //   final values = range.values;
+    //   String? value;
+    //   if (values != null) {
+    //     if (values.length > 1) {
+    //       _logger.warning("expected that a google sheet data is [[<data>]] but got '$values'");
+    //     }
+    //     if (values.isNotEmpty) {
+    //       final subValues = values.first;
+    //       if (subValues.length > 1) {
+    //         _logger.warning("expected that a google sheet data is [[<data>]] but got '$values'");
+    //       }
+    //       if (subValues.isNotEmpty) {
+    //         value = subValues.first?.toString();
+    //       }
+    //     }
+    //   }
+    //   result[address] = value ?? "";
+    // });
+    // return result;
   }
 
   Future<void> _setValues(_Context context, Map<CellAddress, String> values) async {
     final valueRanges = values.entries.map((entry) {
       return ValueRange(
         range: "${context.sheetInfo.title}!${getCellAddress(entry.key.row, entry.key.column)}",
-        values: [[entry.value]],
+        values: [
+          [entry.value]
+        ],
       );
     }).toList();
     final request = BatchUpdateValuesRequest(
@@ -239,16 +249,80 @@ class SheetUpdateService {
     try {
       await context.api.spreadsheets.values.batchUpdate(request, context.file.id);
     } catch (e, stack) {
-      _logger.warning(
-          "failed to set values $values in google sheet document '${context.file.name}'", e, stack
-      );
+      _logger.warning("failed to set values $values in google sheet document '${context.file.name}'", e, stack);
       rethrow;
     }
+  }
+
+  Future<void> _storeInExistingTable(_Context context) async {
+    final updates = <CellAddress, String>{};
+    int? todayRow = context.sheetInfo.todayRow;
+    final dateHeaderCell = context.sheetInfo.columns[Column.date]!;
+    if (todayRow == null) {
+      await _insertRows(dateHeaderCell.row, 1, context);
+      todayRow = dateHeaderCell.row + 1;
+      updates[CellAddress(todayRow, dateHeaderCell.column)] = context.sheetInfo.dateFormat.format(DateTime.now());
+    }
+
+    int currentTotalTime = _calculateTotalDuration(todayRow, context);
+    int? totalColumn = context.sheetInfo.columns[Column.total]?.column;
+    int? categoryColumn = context.sheetInfo.columns[context.category.name]?.column;
+
+    int newColumnShift = 0;
+
+    if (totalColumn == null) {
+      totalColumn = _calculateNewColumn(context) + newColumnShift++;
+      updates[CellAddress(dateHeaderCell.row, totalColumn)] = Column.total;
+    }
+    updates[CellAddress(todayRow, totalColumn)] = (currentTotalTime + context.durationToStore).toString();
+
+    if (categoryColumn == null) {
+      categoryColumn = _calculateNewColumn(context) + newColumnShift++;
+      updates[CellAddress(dateHeaderCell.row, categoryColumn)] = context.category.name;
+    }
+    final categoryValueCellAddress = CellAddress(todayRow, categoryColumn);
+    final currentCategoryStringValue = _getValue(categoryValueCellAddress, context);
+    int currentCategoryValue = 0;
+    if (currentCategoryStringValue != null) {
+      final v = int.tryParse(currentCategoryStringValue);
+      if (v != null) {
+        currentCategoryValue = v;
+      }
+    }
+    updates[CellAddress(todayRow, categoryColumn)] = (currentCategoryValue + context.durationToStore).toString();
+
+    await _setValues(context, updates);
+  }
+
+  int _calculateTotalDuration(int row, _Context context) {
+    int result = 0;
+    context.sheetInfo.columns.forEach((column, address) {
+      if (column != Column.date && column != Column.total) {
+        final stringValue = _getValue(CellAddress(row, address.column), context);
+        if (stringValue != null) {
+          final duration = int.tryParse(stringValue);
+          if (duration != null) {
+            result += duration;
+          }
+        }
+      }
+    });
+    return result;
+  }
+
+  int _calculateNewColumn(_Context context) {
+    int currentMax = -1;
+    for (final address in context.sheetInfo.columns.values) {
+      if (address.column > currentMax) {
+        currentMax = address.column;
+      }
+    }
+    return currentMax + 1;
   }
 }
 
 class _Context {
-  final Duration durationToStore;
+  final int durationToStore;
   final GoogleFile file;
   final Category category;
   final SheetsApi api;

@@ -83,6 +83,7 @@ Future<GoogleSheetInfo> _parseSheet({
       title: sheetTitle,
       rowsNumber: size.rows,
       columnsNumber: size.columns,
+      values: _parseValues(values),
       dateFormat: dateFormat,
     );
   } else {
@@ -255,28 +256,28 @@ bool _canBeDateCell(
   return false;
 }
 
-Map<String, String> _parseColumns(
+Map<String, CellAddress> _parseColumns(
     int dateCellRow,
     int dateCellColumn,
     List<List<Object?>> values,
 ) {
-  final Map<String, String> result = {
-    Column.date: getCellAddress(dateCellRow, dateCellColumn)
+  final Map<String, CellAddress> result = {
+    Column.date: CellAddress(dateCellRow, dateCellColumn)
   };
   for (int i = dateCellColumn + 1; i < values[dateCellRow].length; ++i) {
     final cellValue = values[dateCellRow][i]?.toString();
     if (cellValue == null || cellValue.isEmpty) {
       break;
     } else if (cellValue.toLowerCase() == Column.total.toLowerCase()) {
-      result[Column.total] = getCellAddress(dateCellRow, i);
+      result[Column.total] = CellAddress(dateCellRow, i);
     } else {
-      result[cellValue] = getCellAddress(dateCellRow, i);
+      result[cellValue] = CellAddress(dateCellRow, i);
     }
   }
   return result;
 }
 
-String? _parseTodayRow(
+int? _parseTodayRow(
   int dateCellRow,
   int dateCellColumn,
   List<List<Object?>> values,
@@ -286,7 +287,7 @@ String? _parseTodayRow(
     // header row is the last row in the document
     return null;
   }
-  if (dateCellColumn >= values[dateCellRow].length) {
+  if (dateCellColumn >= values[dateCellRow + 1].length) {
     // there is no value at the next cell of the 'date' column
     return null;
   }
@@ -304,7 +305,7 @@ String? _parseTodayRow(
         && date.month == today.month
         && date.day == today.day
       ) {
-        return getCellAddress(dateCellRow + 1, dateCellColumn);
+        return dateCellRow + 1;
       }
     } catch (_) {
     }
@@ -365,6 +366,7 @@ GoogleSheetInfo? _tryParseExistingData({
           id: sheetId,
           title: sheetTitle,
           columns: columns,
+          values: _parseValues(values),
           todayRow: todayRow,
           dateFormat: dateFormat,
         );
@@ -372,6 +374,19 @@ GoogleSheetInfo? _tryParseExistingData({
     }
   }
   return null;
+}
+
+Map<CellAddress, String> _parseValues(List<List<Object?>> values) {
+  final result = <CellAddress, String>{};
+  for (int row = 0; row < values.length; ++row) {
+    for (int column = 0; column < values[row].length; ++column) {
+      final value = values[row][column]?.toString();
+      if (value != null) {
+        result[CellAddress(row, column)] = value;
+      }
+    }
+  }
+  return result;
 }
 
 class _Size {
