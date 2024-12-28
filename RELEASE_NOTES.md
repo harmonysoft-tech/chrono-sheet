@@ -1,3 +1,5 @@
+## v1.38.0+39 released on 28 Dec 2024 UTC
+  * e0b443761862e3e71d991b64fbc596a882f0f249 #13 avoid ugly blink on storing the measurement
 ## v1.37.0+38 released on 28 Dec 2024 UTC
   * 34106dfdb08a8f3d3a9086ef1c1766cad3837a75 finished storing logic
 ## v1.36.0+37 released on 28 Dec 2024 UTC
