@@ -1,3 +1,5 @@
+## v1.37.0+38 released on 28 Dec 2024 UTC
+  * 34106dfdb08a8f3d3a9086ef1c1766cad3837a75 finished storing logic
 ## v1.36.0+37 released on 28 Dec 2024 UTC
   * b384af5342ff68b333a242ad1117cae62dca7d30 storing measurements in empty sheets
 ## v1.35.0+36 released on 27 Dec 2024 UTC
