@@ -320,7 +320,7 @@ DateFormat _parseDateFormatToUse({
   String? locale
 }) {
   if (values.length > dateCellRow + 1 && values[dateCellRow + 1].length > dateCellColumn) {
-    final dateCellValue = values[dateCellRow][dateCellColumn]?.toString();
+    final dateCellValue = values[dateCellRow + 1][dateCellColumn]?.toString();
     if (dateCellValue != null && dateCellValue.isNotEmpty) {
       final formats = getDateFormats(locale);
       for (final format in formats) {
