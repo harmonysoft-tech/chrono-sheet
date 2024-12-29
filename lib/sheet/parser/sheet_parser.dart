@@ -4,7 +4,7 @@ import 'package:chrono_sheet/logging/logging.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:intl/intl.dart';
 import '../model/sheet_model.dart';
-import '../util/date_util.dart';
+import '../../util/date_util.dart';
 import '../util/sheet_util.dart';
 
 final _logger = getNamedLogger();
@@ -61,7 +61,7 @@ Future<GoogleSheetInfo> _parseSheet({
   );
   final size = _parseSize(valueRange, file);
   final values = valueRange.values;
-  DateFormat dateFormat = defaultDateFormat;
+  DateFormat dateFormat = fallbackDateFormat;
   if (locale != null) {
     dateFormat = DateFormat.yMMMd(locale);
   }
@@ -83,7 +83,7 @@ Future<GoogleSheetInfo> _parseSheet({
       title: sheetTitle,
       rowsNumber: size.rows,
       columnsNumber: size.columns,
-      values: _parseValues(values),
+      values: parseSheetValues(values),
       dateFormat: dateFormat,
     );
   } else {
@@ -299,7 +299,7 @@ int? _parseTodayRow(
   for (final format in dateFormats) {
     try {
       final date = format.parse(value);
-      final today = DateTime.now();
+      final today = clockProvider.now();
       if (
         date.year == today.year
         && date.month == today.month
@@ -335,7 +335,7 @@ DateFormat _parseDateFormatToUse({
 
   // use fallback format
   if (locale == null) {
-    return defaultDateFormat;
+    return fallbackDateFormat;
   } else {
     return DateFormat.yMMMd(locale);
   }
@@ -366,7 +366,7 @@ GoogleSheetInfo? _tryParseExistingData({
           id: sheetId,
           title: sheetTitle,
           columns: columns,
-          values: _parseValues(values),
+          values: parseSheetValues(values),
           todayRow: todayRow,
           dateFormat: dateFormat,
         );
@@ -376,7 +376,7 @@ GoogleSheetInfo? _tryParseExistingData({
   return null;
 }
 
-Map<CellAddress, String> _parseValues(List<List<Object?>> values) {
+Map<CellAddress, String> parseSheetValues(List<List<Object?>> values) {
   final result = <CellAddress, String>{};
   for (int row = 0; row < values.length; ++row) {
     for (int column = 0; column < values[row].length; ++column) {

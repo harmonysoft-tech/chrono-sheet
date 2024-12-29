@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-import '../util/date_util.dart';
+import '../../util/date_util.dart';
 
 class Column {
   static const date = "Date";
@@ -29,7 +29,7 @@ class CellAddress {
 
 class GoogleSheetInfo {
 
-  static GoogleSheetInfo empty = GoogleSheetInfo(dateFormat: defaultDateFormat);
+  static GoogleSheetInfo empty = GoogleSheetInfo(dateFormat: fallbackDateFormat);
 
   final int rowsNumber;
   final int columnsNumber;

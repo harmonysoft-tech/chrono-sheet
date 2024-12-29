@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
+import 'package:chrono_sheet/util/date_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +17,7 @@ class StopWatchWidget extends ConsumerStatefulWidget {
 class StopWatchState extends ConsumerState<StopWatchWidget> {
 
   Timer? _timer;
-  DateTime _lastMeasurementTime = DateTime.now();
+  DateTime _lastMeasurementTime = clockProvider.now();
   Duration _measuredDuration = Duration.zero;
   bool _running = false;
 
@@ -29,7 +30,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
   void _tick(Timer _) {
     setState(() {
       if (_running) {
-        final now = DateTime.now();
+        final now = clockProvider.now();
         _measuredDuration += now.difference(_lastMeasurementTime);
         _lastMeasurementTime = now;
       }
@@ -40,7 +41,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
     setState(() {
       _running = !_running;
       if (_running) {
-        _lastMeasurementTime = DateTime.now();
+        _lastMeasurementTime = clockProvider.now();
       }
       if (_running || _hasMeasurement()) {
         _timer ??= Timer.periodic(Duration(milliseconds: 100), _tick);
@@ -106,7 +107,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
             child: AnimatedOpacity(
               opacity:
               (!_running && _measuredDuration > Duration.zero)
-                  ? (DateTime.now().millisecond % 1000 < 500) ? 0.0 : 1.0
+                  ? (clockProvider.now().millisecond % 1000 < 500) ? 0.0 : 1.0
                   : 1.0,
               duration: Duration(milliseconds: 200),
               child: Text(

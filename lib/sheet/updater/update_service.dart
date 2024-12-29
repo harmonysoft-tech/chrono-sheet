@@ -1,4 +1,5 @@
 import 'package:chrono_sheet/logging/logging.dart';
+import 'package:chrono_sheet/util/date_util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -22,7 +23,7 @@ SheetUpdateService updateService(Ref ref) {
 
 class SheetUpdateService {
   Future<void> saveMeasurement(
-    Duration duration,
+    int duration,
     Category category,
     GoogleFile file,
   ) async {
@@ -31,7 +32,7 @@ class SheetUpdateService {
     GoogleSheetInfo sheetInfo = await parseSheetDocument(file);
     sheetInfo = await _createSheetIfNecessary(sheetInfo, file, api);
     final context = _Context(
-      durationToStore: duration.inSeconds, // TODO switch to minutes
+      durationToStore: duration,
       file: file,
       category: category,
       api: api,
@@ -89,7 +90,7 @@ class SheetUpdateService {
       CellAddress(0, 0): Column.date,
       CellAddress(0, 1): Column.total,
       CellAddress(0, 2): context.category.name,
-      CellAddress(1, 0): context.sheetInfo.dateFormat.format(DateTime.now()),
+      CellAddress(1, 0): context.sheetInfo.dateFormat.format(clockProvider.now()),
       CellAddress(1, 1): context.durationToStore.toString(),
       CellAddress(1, 2): context.durationToStore .toString(),
     });
@@ -234,24 +235,13 @@ class SheetUpdateService {
   }
 
   Future<void> _setValues(_Context context, Map<CellAddress, String> values) async {
-    final valueRanges = values.entries.map((entry) {
-      return ValueRange(
-        range: "${context.sheetInfo.title}!${getCellAddress(entry.key.row, entry.key.column)}",
-        values: [
-          [entry.value]
-        ],
-      );
-    }).toList();
-    final request = BatchUpdateValuesRequest(
-      valueInputOption: "RAW",
-      data: valueRanges,
+    await setSheetCellValues(
+      values: values,
+      sheetTitle: context.sheetInfo.title!,
+      sheetDocumentId: context.file.id,
+      sheetFileName: context.file.name,
+      api: context.api,
     );
-    try {
-      await context.api.spreadsheets.values.batchUpdate(request, context.file.id);
-    } catch (e, stack) {
-      _logger.warning("failed to set values $values in google sheet document '${context.file.name}'", e, stack);
-      rethrow;
-    }
   }
 
   Future<void> _storeInExistingTable(_Context context) async {
@@ -261,7 +251,7 @@ class SheetUpdateService {
     if (todayRow == null) {
       await _insertRows(dateHeaderCell.row, 1, context);
       todayRow = dateHeaderCell.row + 1;
-      updates[CellAddress(todayRow, dateHeaderCell.column)] = context.sheetInfo.dateFormat.format(DateTime.now());
+      updates[CellAddress(todayRow, dateHeaderCell.column)] = context.sheetInfo.dateFormat.format(clockProvider.now());
     }
 
     int currentTotalTime = _calculateTotalDuration(todayRow, context);
@@ -318,6 +308,33 @@ class SheetUpdateService {
       }
     }
     return currentMax + 1;
+  }
+}
+
+Future<void> setSheetCellValues({
+  required Map<CellAddress, String> values,
+  required String sheetTitle,
+  required String sheetDocumentId,
+  required String sheetFileName,
+  required SheetsApi api,
+}) async {
+  final valueRanges = values.entries.map((entry) {
+    return ValueRange(
+      range: "$sheetTitle!${getCellAddress(entry.key.row, entry.key.column)}",
+      values: [
+        [entry.value]
+      ],
+    );
+  }).toList();
+  final request = BatchUpdateValuesRequest(
+    valueInputOption: "RAW",
+    data: valueRanges,
+  );
+  try {
+    await api.spreadsheets.values.batchUpdate(request, sheetDocumentId);
+  } catch (e, stack) {
+    _logger.warning("failed to set values $values in google sheet document '$sheetFileName'", e, stack);
+    rethrow;
   }
 }
 
