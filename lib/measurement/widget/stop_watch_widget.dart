@@ -89,6 +89,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
       if (_running) {
         _lastMeasurementTime = clockProvider.now();
         _lastStoreTime = _lastMeasurementTime;
+        _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:y");
       } else {
         _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:n");
       }
