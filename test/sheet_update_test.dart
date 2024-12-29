@@ -30,6 +30,8 @@ final _sheetTitle = "Sheet1";
 final SheetUpdateService _service = SheetUpdateService();
 DateTime _today = date.fallbackDateFormat.parse("2024-12-29");
 String _todayUs = _Format.us.format(_today);
+DateTime _yesterday = _today.subtract(Duration(days: 1));
+String _yesterdayUs = _Format.us.format(_yesterday);
 
 Future<AutoRefreshingAuthClient> _getClient() async {
   final file = File("test/auto-test-service-account.json");
@@ -61,11 +63,22 @@ Future<void> _setSheetState(String raw) async {
 }
 
 Future<void> _verifyDocumentState(String rawExpected) async {
-  final expected = _parse(rawExpected);
+  final expectedValues = _parse(rawExpected);
 
   final valueRange = await _api.spreadsheets.values.get(_file.id, _sheetTitle, majorDimension: "ROWS");
-  final actual = parseSheetValues(valueRange.values!);
-  expect(actual, equals(expected));
+  final actualValues = parseSheetValues(valueRange.values!);
+
+  // google sheet api doesn't return values for empty rows, that's why we need to do custom comparison here
+  expectedValues.forEach((address, expected) {
+    final actual = actualValues[address];
+    if (actual == null && expected.isEmpty) {
+      return;
+    }
+    if (actual != expected) {
+      throw AssertionError(
+          "detected expectation mismatch at address $address - expected: '$expected', actual: $actual");
+    }
+  });
 }
 
 Map<CellAddress, String> _parse(String raw) {
@@ -170,6 +183,8 @@ void main() async {
 void _runTests() {
   _emptySheet();
   _updateToday();
+  _existingTableNoToday();
+  _noTableNonEmptySheet();
 }
 
 void _emptySheet() {
@@ -186,7 +201,7 @@ void _emptySheet() {
 }
 
 void _updateToday() {
-  group("update sheet", () {
+  group("existing 'today' row", () {
     test("new category", () async {
       _setSheetState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
@@ -208,6 +223,149 @@ void _updateToday() {
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 3               | 3                          
+      """);
+    });
+
+    test("non-standard  table location", () async {
+      _setSheetState("""
+        |   |  |                |                 |
+        |   |  | ${Column.date} | ${Column.total} | ${_Categories.one}
+        |   |  | $_todayUs      | 1               | 1
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        |   |  |                |                 |
+        |   |  | ${Column.date} | ${Column.total} | ${_Categories.one}
+        |   |  | $_todayUs      | 3               | 3                          
+      """);
+    });
+
+    test("historical records", () async {
+      _setSheetState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
+        $_todayUs      | 3               | 1                  | 2          
+        $_yesterdayUs  | 5               |                    | 5
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
+        $_todayUs      | 5               | 3                  | 2          
+        $_yesterdayUs  | 5               |                    | 5                          
+      """);
+    });
+  });
+}
+
+void _existingTableNoToday() {
+  group("existing table, no 'today' row", () {
+    test("new category", () async {
+      _setSheetState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one}
+        $_yesterdayUs  | 5               | 5                 
+      """);
+      await _service.saveMeasurement(2, _Categories.two, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
+        $_todayUs      | 2               |                    | 2          
+        $_yesterdayUs  | 5               | 5                  |                           
+      """);
+    });
+
+    test("existing category", () async {
+      _setSheetState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one}
+        $_yesterdayUs  | 5               | 5                 
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one}
+        $_todayUs      | 2               | 2
+        $_yesterdayUs  | 5               | 5
+      """);
+    });
+  });
+}
+
+void _noTableNonEmptySheet() {
+  group("no table, non-empty sheet", () {
+    test("data in the first row and first column", () async {
+      _setSheetState("""
+        abc                 
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one}
+        $_todayUs      | 2               | 2
+        
+        abc                            
+      """);
+    });
+
+    test("data in the first row second column", () async {
+      _setSheetState("""
+        | abc                 
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one}
+        $_todayUs      | 2               | 2
+                       |                 |
+                       | abc             |                            
+      """);
+    });
+
+    test("data in the first row and fourth column", () async {
+      _setSheetState("""
+        |   |  | abc                 
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one} |
+        $_todayUs      | 2               | 2                  |
+                       |                 |                    |                            
+                       |                 |                    | abc                            
+      """);
+    });
+
+    test("data in the first row and fifth column", () async {
+      _setSheetState("""
+        |   |   |   |  abc                 
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one} |   |
+        $_todayUs      | 2               | 2                  |   |
+                       |                 |                    |   |                            
+                       |                 |                    |   | abc                            
+      """);
+    });
+
+    test("data in the second row second column", () async {
+      _setSheetState("""
+        |
+        | abc                 
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one}
+        $_todayUs      | 2               | 2
+                       |                 |
+                       | abc             |                            
+      """);
+    });
+
+    test("data in the third row third column", () async {
+      _setSheetState("""
+        |   |
+        |   |
+        |   | abc                 
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one}
+        $_todayUs      | 2               | 2
+                       |                 |
+                       |                 | abc                            
       """);
     });
   });

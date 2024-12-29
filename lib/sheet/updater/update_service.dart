@@ -37,8 +37,10 @@ class SheetUpdateService {
       category: category,
       api: api,
       sheetInfo: sheetInfo,
+      columns: Map.of(sheetInfo.columns),
+      values: Map.of(sheetInfo.values),
     );
-    if (sheetInfo.columns.isEmpty) {
+    if (context.columns.isEmpty) {
       await _createColumnsAndStore(context);
     } else {
       await _storeInExistingTable(context);
@@ -84,7 +86,7 @@ class SheetUpdateService {
   Future<void> _createColumnsAndStore(_Context context) async {
     int rowsToCreate = _calculateNumberOfRowsToCreateForSheetWithoutPreviousData(context);
     if (rowsToCreate > 0) {
-      await _insertRows(0, rowsToCreate, context);
+      await _insertRows(-1, rowsToCreate, context);
     }
     await _setValues(context, {
       CellAddress(0, 0): Column.date,
@@ -102,42 +104,49 @@ class SheetUpdateService {
       return 2;
     }
 
-    final firstRowCells = {CellAddress(0, 0), CellAddress(0, 1), CellAddress(0, 2)};
-    if (context.sheetInfo.rowsNumber == 1) {
-      final firstRowValues = _getValues(firstRowCells, context);
-      final hasDataInFirstRow = firstRowValues.entries.any((entry) => entry.value.isNotEmpty);
-      if (hasDataInFirstRow) {
-        // one row is to hold the headers, another row to hold today's data and one empty buffer row between
-        // the application data and existing data
-        return 3;
-      } else {
-        // the google sheet has only one empty row, so, we need to create one more
-        return 1;
-      }
-    }
-
-    // the google sheet document has at least two rows
-    final secondRowCells = {CellAddress(1, 0), CellAddress(1, 1), CellAddress(1, 2)};
-    final values = _getValues(firstRowCells.union(secondRowCells), context);
-    final hasDataInFirstRow = firstRowCells.any((address) {
-      final cellValue = values[address];
-      return cellValue != null && cellValue.isNotEmpty;
+    final hasDataInFirstRow = context.values.entries.any((e) {
+      return e.key.row == 0 && e.value.isNotEmpty;
     });
     if (hasDataInFirstRow) {
-      // the top sheet row already has some unrelated data, we need to create one row for our headers,
-      // another row for data and one row as a buffer between our data and unrelated data
+      // we can't keep any data at the headers row because more categories might be added in future and
+      // this old data might be treated as a column
       return 3;
     }
 
-    final hasDataInSecondRow = secondRowCells.any((address) {
-      final cellValue = values[address];
+    if (context.sheetInfo.rowsNumber == 1) {
+      // the google sheet has only one empty row, so, we need to create one more
+      return 1;
+    }
+
+    // the google sheet document has at least two rows
+    final secondRowValues = _getValues(_Addresses.secondRow, context);
+    final hasDataInSecondRow = _Addresses.secondRow.any((address) {
+      final cellValue = secondRowValues[address];
       return cellValue != null && cellValue.isNotEmpty;
     });
     if (hasDataInSecondRow) {
+      // the first row is empty but there some unrelated data at the second rows, we need to create one row
+      // for our headers, another row for data. Existing empty first row will be a buffer between our data
+      // and with the row which hold the unrelated data
       return 2;
-    } else {
+    }
+
+    if (context.sheetInfo.rowsNumber == 2) {
+      // the sheet has two rows and they don't have data in important cells
       return 0;
     }
+
+    final thirdRowValues = _getValues(_Addresses.thirdRow, context);
+    final hasDataInThirdRow = _Addresses.thirdRow.any((address) {
+      final cellValue = thirdRowValues[address];
+      return cellValue != null && cellValue.isNotEmpty;
+    });
+    if (hasDataInThirdRow) {
+      // first and second rows are empty, so, we just create one more empty row as a buffer
+      return 1;
+    }
+
+    return 0;
   }
 
   Future<void> _insertRows(int rowToInsertAfter, int rowsCount, _Context context) async {
@@ -157,7 +166,7 @@ class SheetUpdateService {
 
     try {
       await context.api.spreadsheets.batchUpdate(batchUpdateRequest, context.file.id);
-      context.sheetInfo.onRowsInserted(rowToInsertAfter, rowsCount);
+      _onRowsInserted(rowToInsertAfter, rowsCount, context);
     } catch (e, stack) {
       _logger.warning(
           "can not insert $rowsCount row(s) at index $rowToInsertAfter into google sheet document '${context.file.name}'",
@@ -165,6 +174,26 @@ class SheetUpdateService {
           stack);
       rethrow;
     }
+  }
+
+  void _onRowsInserted(int rowToInsertAfter, int rowsCount, _Context context) {
+    final newColumns = context.columns.map((column, address) {
+      if (address.row > rowToInsertAfter) {
+        return MapEntry(column, CellAddress(address.row + rowsCount, address.column));
+      } else {
+        return MapEntry(column, address);
+      }
+    });
+    context.columns = newColumns;
+
+    final newValues = context.values.map((address, value) {
+      if (address.row > rowToInsertAfter) {
+        return MapEntry(CellAddress(address.row + rowsCount, address.column), value);
+      } else {
+        return MapEntry(address, value);
+      }
+    });
+    context.values = newValues;
   }
 
   String? _getValue(CellAddress address, _Context context) {
@@ -179,7 +208,7 @@ class SheetUpdateService {
   Map<CellAddress, String> _getValues(Set<CellAddress> addresses, _Context context) {
     final result = <CellAddress, String>{};
     for (final address in addresses) {
-      final value = context.sheetInfo.values[address];
+      final value = context.values[address];
       if (value != null) {
         result[address] = value;
       }
@@ -247,7 +276,7 @@ class SheetUpdateService {
   Future<void> _storeInExistingTable(_Context context) async {
     final updates = <CellAddress, String>{};
     int? todayRow = context.sheetInfo.todayRow;
-    final dateHeaderCell = context.sheetInfo.columns[Column.date]!;
+    final dateHeaderCell = context.columns[Column.date]!;
     if (todayRow == null) {
       await _insertRows(dateHeaderCell.row, 1, context);
       todayRow = dateHeaderCell.row + 1;
@@ -255,8 +284,8 @@ class SheetUpdateService {
     }
 
     int currentTotalTime = _calculateTotalDuration(todayRow, context);
-    int? totalColumn = context.sheetInfo.columns[Column.total]?.column;
-    int? categoryColumn = context.sheetInfo.columns[context.category.name]?.column;
+    int? totalColumn = context.columns[Column.total]?.column;
+    int? categoryColumn = context.columns[context.category.name]?.column;
 
     int newColumnShift = 0;
 
@@ -286,7 +315,7 @@ class SheetUpdateService {
 
   int _calculateTotalDuration(int row, _Context context) {
     int result = 0;
-    context.sheetInfo.columns.forEach((column, address) {
+    context.columns.forEach((column, address) {
       if (column != Column.date && column != Column.total) {
         final stringValue = _getValue(CellAddress(row, address.column), context);
         if (stringValue != null) {
@@ -302,7 +331,7 @@ class SheetUpdateService {
 
   int _calculateNewColumn(_Context context) {
     int currentMax = -1;
-    for (final address in context.sheetInfo.columns.values) {
+    for (final address in context.columns.values) {
       if (address.column > currentMax) {
         currentMax = address.column;
       }
@@ -338,6 +367,20 @@ Future<void> setSheetCellValues({
   }
 }
 
+class _Addresses {
+  static final Set<CellAddress> secondRow = {
+    CellAddress(1, 0),
+    CellAddress(1, 1),
+    CellAddress(1, 2),
+    CellAddress(1, 3)
+  };
+  static final Set<CellAddress> thirdRow = {
+    CellAddress(2, 0),
+    CellAddress(2, 1),
+    CellAddress(2, 2),
+  };
+}
+
 class _Context {
   final int durationToStore;
   final GoogleFile file;
@@ -345,10 +388,19 @@ class _Context {
   final SheetsApi api;
   final GoogleSheetInfo sheetInfo;
 
-  _Context(
-      {required this.durationToStore,
-      required this.file,
-      required this.category,
-      required this.api,
-      required this.sheetInfo});
+  // we use custom copied of columns and values because when new row is inserted, we need to update coordinates
+  // the all cells located below the inserted row. We can't update them directly in the GoogleSheetInfo object,
+  // that's why we keep our own copied here
+  Map<String, CellAddress> columns;
+  Map<CellAddress, String> values;
+
+  _Context({
+    required this.durationToStore,
+    required this.file,
+    required this.category,
+    required this.api,
+    required this.sheetInfo,
+    required this.columns,
+    required this.values,
+  });
 }

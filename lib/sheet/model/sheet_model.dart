@@ -76,26 +76,4 @@ class GoogleSheetInfo {
       todayRow: todayRow ?? this.todayRow,
     );
   }
-
-  void onRowsInserted(int rowToInsertAfter, int rowsCount) {
-    final newColumns = columns.map((column, address) {
-      if (address.row > rowToInsertAfter) {
-        return MapEntry(column, CellAddress(address.row + rowsCount, address.column));
-      } else {
-        return MapEntry(column, address);
-      }
-    });
-    columns.clear();
-    columns.addAll(newColumns);
-
-    final newValues = values.map((address, value) {
-      if (address.row > rowToInsertAfter) {
-        return MapEntry(CellAddress(address.row + rowsCount, address.column), value);
-      } else {
-        return MapEntry(address, value);
-      }
-    });
-    values.clear();
-    values.addAll(newValues);
-  }
 }
