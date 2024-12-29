@@ -1,3 +1,5 @@
+## v1.42.0+43 released on 29 Dec 2024 UTC
+  * 58c8da3f5b454bdcd2a8533920c5fc6adab92a2b #14 Try to make sure that the application is not killed by OS if the stopwatch is running
 ## v1.41.0+42 released on 29 Dec 2024 UTC
   * 373d95b1f18645da648065398d55cb389db4b469 #10 Create auto tests
 ## v1.40.0+41 released on 29 Dec 2024 UTC
