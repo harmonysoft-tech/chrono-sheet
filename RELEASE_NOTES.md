@@ -1,3 +1,5 @@
+## v1.40.0+41 released on 29 Dec 2024 UTC
+  * 0b681898c74485c479eef5795f0331d2d24ef082 #10 Create auto tests
 ## v1.39.0+40 released on 29 Dec 2024 UTC
   * 769666a216139619851b266c98a3e2a3537c4adf #10 Create auto tests
 ## v1.38.0+39 released on 28 Dec 2024 UTC
