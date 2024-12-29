@@ -1,3 +1,5 @@
+## v1.39.0+40 released on 29 Dec 2024 UTC
+  * 769666a216139619851b266c98a3e2a3537c4adf #10 Create auto tests
 ## v1.38.0+39 released on 28 Dec 2024 UTC
   * e0b443761862e3e71d991b64fbc596a882f0f249 #13 avoid ugly blink on storing the measurement
 ## v1.37.0+38 released on 28 Dec 2024 UTC
