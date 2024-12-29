@@ -1,10 +1,14 @@
 import 'dart:async';
 
 import 'package:chrono_sheet/generated/app_localizations.dart';
+import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
 import 'package:chrono_sheet/util/date_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+final _logger = getNamedLogger();
 
 class StopWatchWidget extends ConsumerStatefulWidget {
 
@@ -16,14 +20,50 @@ class StopWatchWidget extends ConsumerStatefulWidget {
 
 class StopWatchState extends ConsumerState<StopWatchWidget> {
 
+  static const _preferencesKey = "measurement.duration.ongoing";
+  static final _storeFrequency = Duration(seconds: 15);
+
+  final _prefs = SharedPreferencesAsync();
   Timer? _timer;
   DateTime _lastMeasurementTime = clockProvider.now();
+  DateTime _lastStoreTime = clockProvider.now();
   Duration _measuredDuration = Duration.zero;
   bool _running = false;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _prefs.getString(_preferencesKey).then((storedValue) {
+      if (storedValue == null || storedValue.isEmpty) {
+        return;
+      }
+      final i = storedValue.indexOf(":");
+      if (i <= 0 || i >= storedValue.length - 1) {
+        return;
+      }
+      final storedDurationMillis = int.tryParse(storedValue.substring(0, i));
+      if (storedDurationMillis == null) {
+        return;
+      }
+      final storedDuration = Duration(milliseconds: storedDurationMillis);
+      final running = "y" == storedValue.substring(i + 1);
+      _logger.fine("found stored duration $storedDuration, running: $running");
+      setState(() {
+        _lastMeasurementTime = clockProvider.now();
+        _measuredDuration = storedDuration;
+        _running = running;
+        _startTimerIfNecessary();
+      });
+    });
+  }
 
   @override
   void dispose() {
     _timer?.cancel();
+    if (_running && _hasMeasurement()) {
+      _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:y");
+    }
     super.dispose();
   }
 
@@ -33,6 +73,12 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
         final now = clockProvider.now();
         _measuredDuration += now.difference(_lastMeasurementTime);
         _lastMeasurementTime = now;
+        if (now.difference(_lastStoreTime) > _storeFrequency) {
+          _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:y").then((_) {
+            _logger.fine("stored last stop watch measurement  $_measuredDuration");
+            _lastStoreTime = now;
+          });
+        }
       }
     });
   }
@@ -42,9 +88,12 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
       _running = !_running;
       if (_running) {
         _lastMeasurementTime = clockProvider.now();
+        _lastStoreTime = _lastMeasurementTime;
+      } else {
+        _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:n");
       }
       if (_running || _hasMeasurement()) {
-        _timer ??= Timer.periodic(Duration(milliseconds: 100), _tick);
+        _startTimerIfNecessary();
       } else {
         // we need to show UI changes only if the stopwatch is running
         // or if it's stopped and some duration is already measured
@@ -53,6 +102,10 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
         _timer = null;
       }
     });
+  }
+
+  void _startTimerIfNecessary() {
+    _timer ??= Timer.periodic(Duration(milliseconds: 100), _tick);
   }
 
   bool _hasMeasurement() {
@@ -65,6 +118,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
       _measuredDuration = Duration.zero;
       _timer?.cancel();
       _timer = null;
+      _prefs.setString(_preferencesKey, "");
     });
   }
 
@@ -75,6 +129,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
       _measuredDuration = Duration.zero;
       _timer?.cancel();
       _timer = null;
+      _prefs.setString(_preferencesKey, "");
       ref.read(sheetUpdaterProvider.notifier).store(durationToStore, AppLocalizations.of(context));
     });
   }
