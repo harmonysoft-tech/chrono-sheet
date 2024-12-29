@@ -185,6 +185,7 @@ void _runTests() {
   _updateToday();
   _existingTableNoToday();
   _noTableNonEmptySheet();
+  _customFormat();
 }
 
 void _emptySheet() {
@@ -366,6 +367,25 @@ void _noTableNonEmptySheet() {
         $_todayUs      | 2               | 2
                        |                 |
                        |                 | abc                            
+      """);
+    });
+  });
+}
+
+void _customFormat() {
+  group("custom format", () {
+    test("custom format is preserved", () async {
+      final yesterday = date.fallbackDateFormat.format(_yesterday);
+      final today = date.fallbackDateFormat.format(_today);
+      _setSheetState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one}
+        $yesterday     | 1               | 1
+      """);
+      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one}
+        $today         | 2               | 2         
+        $yesterday     | 1               | 1         
       """);
     });
   });
