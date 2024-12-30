@@ -11,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 final _logger = getNamedLogger();
 
 class StopWatchWidget extends ConsumerStatefulWidget {
-
   const StopWatchWidget({super.key});
 
   @override
@@ -19,7 +18,6 @@ class StopWatchWidget extends ConsumerStatefulWidget {
 }
 
 class StopWatchState extends ConsumerState<StopWatchWidget> {
-
   static const _preferencesKey = "measurement.duration.ongoing";
   static final _storeFrequency = Duration(seconds: 15);
 
@@ -29,7 +27,6 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
   DateTime _lastStoreTime = clockProvider.now();
   Duration _measuredDuration = Duration.zero;
   bool _running = false;
-
 
   @override
   void initState() {
@@ -46,13 +43,25 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
       if (storedDurationMillis == null) {
         return;
       }
-      final storedDuration = Duration(milliseconds: storedDurationMillis);
-      final running = "y" == storedValue.substring(i + 1);
-      _logger.fine("found stored duration $storedDuration, running: $running");
+      Duration storedDuration = Duration(milliseconds: storedDurationMillis);
+
+      final storedLastMeasurementTimeMillis = int.tryParse(storedValue.substring(i + 1));
+      DateTime? storedLastMeasurementTime;
+      if (storedLastMeasurementTimeMillis != null) {
+        storedLastMeasurementTime = DateTime.fromMillisecondsSinceEpoch(storedLastMeasurementTimeMillis);
+      }
+      _logger.fine("found stored duration $storedDuration, last measurement time: $storedLastMeasurementTime");
       setState(() {
-        _lastMeasurementTime = clockProvider.now();
-        _measuredDuration = storedDuration;
-        _running = running;
+        final now = clockProvider.now();
+
+        Duration runInBackgroundDuration = Duration();
+        if (storedLastMeasurementTime != null) {
+          runInBackgroundDuration = now.difference(storedLastMeasurementTime);
+        }
+
+        _lastMeasurementTime = now;
+        _measuredDuration = storedDuration + runInBackgroundDuration;
+        _running = storedLastMeasurementTime != null;
         _startTimerIfNecessary();
       });
     });
@@ -62,7 +71,10 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
   void dispose() {
     _timer?.cancel();
     if (_running && _hasMeasurement()) {
-      _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:y");
+      _prefs.setString(
+        _preferencesKey,
+        "${_measuredDuration.inMilliseconds}:${clockProvider.now().millisecondsSinceEpoch}",
+      );
     }
     super.dispose();
   }
@@ -74,8 +86,9 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
         _measuredDuration += now.difference(_lastMeasurementTime);
         _lastMeasurementTime = now;
         if (now.difference(_lastStoreTime) > _storeFrequency) {
-          _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:y").then((_) {
-            _logger.fine("stored last stop watch measurement  $_measuredDuration");
+          final valueToStore = "${_measuredDuration.inMilliseconds}:${now.millisecondsSinceEpoch}";
+          _prefs.setString(_preferencesKey, valueToStore).then((_) {
+            _logger.fine("stored last stop watch measurement:  $valueToStore");
             _lastStoreTime = now;
           });
         }
@@ -87,11 +100,12 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
     setState(() {
       _running = !_running;
       if (_running) {
-        _lastMeasurementTime = clockProvider.now();
+        final now = clockProvider.now();
+        _lastMeasurementTime = now;
         _lastStoreTime = _lastMeasurementTime;
-        _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:y");
+        _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:${now.millisecondsSinceEpoch}");
       } else {
-        _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:n");
+        _prefs.setString(_preferencesKey, "${_measuredDuration.inMilliseconds}:");
       }
       if (_running || _hasMeasurement()) {
         _startTimerIfNecessary();
@@ -161,9 +175,10 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
           child: GestureDetector(
             onTap: _toggle,
             child: AnimatedOpacity(
-              opacity:
-              (!_running && _measuredDuration > Duration.zero)
-                  ? (clockProvider.now().millisecond % 1000 < 500) ? 0.0 : 1.0
+              opacity: (!_running && _measuredDuration > Duration.zero)
+                  ? (clockProvider.now().millisecond % 1000 < 500)
+                      ? 0.0
+                      : 1.0
                   : 1.0,
               duration: Duration(milliseconds: 200),
               child: Text(
@@ -186,10 +201,9 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
             ),
             SizedBox(width: 20),
             ElevatedButton.icon(
-              onPressed: _hasMeasurement() ? _saveMeasurement : null,
-              icon: Icon(Icons.save),
-              label: Text(AppLocalizations.of(context).textSave)
-            ),
+                onPressed: _hasMeasurement() ? _saveMeasurement : null,
+                icon: Icon(Icons.save),
+                label: Text(AppLocalizations.of(context).textSave)),
           ],
         )
       ],
