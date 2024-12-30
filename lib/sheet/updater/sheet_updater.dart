@@ -82,8 +82,7 @@ class SheetUpdater extends _$SheetUpdater {
 
     final service = ref.read(updateServiceProvider);
     try {
-      // TODO change duration to minutes
-      await service.saveMeasurement(measurement.inSeconds, category, file);
+      await service.saveMeasurement(measurement.inMinutes, category, file);
       state = SaveMeasurementState.success;
     } catch (e, stack) {
       _logger.warning("can not save measurement $measurement for category '$category' in file ${file.name}", e, stack);

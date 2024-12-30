@@ -6,7 +6,7 @@ part of 'categories_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$fileCategoriesHash() => r'4da7140c95999f61376494fc958d2261319bae15';
+String _$fileCategoriesHash() => r'200925f7c1906869a4f0adfa1b2c44869e662a03';
 
 /// See also [FileCategories].
 @ProviderFor(FileCategories)

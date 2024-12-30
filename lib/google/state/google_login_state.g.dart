@@ -1,25 +1,25 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'sheet_updater.dart';
+part of 'google_login_state.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sheetUpdaterHash() => r'7cd886e9df553f9c337cc2795a9d7fa9fffc4273';
+String _$loginStateHash() => r'090cf7dfe08a8e89b7d03d85ef37755b2541e7e4';
 
-/// See also [SheetUpdater].
-@ProviderFor(SheetUpdater)
-final sheetUpdaterProvider =
-    AutoDisposeNotifierProvider<SheetUpdater, SaveMeasurementState>.internal(
-  SheetUpdater.new,
-  name: r'sheetUpdaterProvider',
+/// See also [LoginState].
+@ProviderFor(LoginState)
+final loginStateProvider =
+    AutoDisposeAsyncNotifierProvider<LoginState, bool>.internal(
+  LoginState.new,
+  name: r'loginStateProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$sheetUpdaterHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$loginStateHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SheetUpdater = AutoDisposeNotifier<SaveMeasurementState>;
+typedef _$LoginState = AutoDisposeAsyncNotifier<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
