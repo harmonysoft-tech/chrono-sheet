@@ -60,13 +60,15 @@ jobs:
           echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
           echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 -d >> ./android/app/google-services.json
 
-      - name: prepare release signing
+      - name: prepare sensitive data
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 -d >> ./android/app/chrono-sheet.jks
           echo "storeFile=chrono-sheet.jks" >> ./android/key.properties
           echo "storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyPassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
+          echo "${{ secrets.INFO_PLIST }}" | base64 -d >> ./ios/Runner/Info.plist
+          echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d >> ./ios/Runner/GoogleService-Info.plist
 
       - name: build apk
         run: flutter build apk --release
@@ -93,3 +95,6 @@ jobs:
         with:
           name: aab
           path: build/app/outputs/bundle/release/app-release.aab
+
+      - name: build ios
+        run: flutter build ios --no-codesign
