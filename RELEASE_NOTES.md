@@ -1,3 +1,5 @@
+## v1.48.0+49 released on 31 Dec 2024 UTC
+  * 5b22a80caf9955620f4e696dc1eea7a71d639f93 #8 Allow to create a new google sheet document
 ## v1.47.0+48 released on 31 Dec 2024 UTC
   * a31ca520cb847b843c2f15c2dca231409a9753bf make sure that paused stop watch state is correctly preserved between application runs
 ## v1.46.0+47 released on 31 Dec 2024 UTC
