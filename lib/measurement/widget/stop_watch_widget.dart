@@ -32,11 +32,12 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
   void initState() {
     super.initState();
     _prefs.getString(_preferencesKey).then((storedValue) {
+      _logger.fine("found the following for preferences key '$_preferencesKey': $storedValue");
       if (storedValue == null || storedValue.isEmpty) {
         return;
       }
       final i = storedValue.indexOf(":");
-      if (i <= 0 || i >= storedValue.length - 1) {
+      if (i <= 0 || i >= storedValue.length) {
         return;
       }
       final storedDurationMillis = int.tryParse(storedValue.substring(0, i));
