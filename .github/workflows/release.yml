@@ -96,5 +96,5 @@ jobs:
           name: aab
           path: build/app/outputs/bundle/release/app-release.aab
 
-      - name: build ios
-        run: flutter build ios --no-codesign
+#      - name: build ios
+#        run: flutter build ios --no-codesign
