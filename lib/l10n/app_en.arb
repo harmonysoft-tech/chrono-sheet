@@ -3,6 +3,7 @@
 
   "titleSelectFile": "Select Google Sheet File",
   "titleAddNewCategory": "Add New Category",
+  "titleAddNewFile": "Add New File",
 
   "textReset": "Reset",
   "textSave": "Save",
@@ -13,6 +14,7 @@
   "hintSelectFile": "tap to select a file",
 
   "labelCategoryName": "category name",
+  "labelFileName": "file name",
 
   "errorCanNotParseCategories": "can not parse categories",
   "errorNoFileIsSelected": "no file is selected",

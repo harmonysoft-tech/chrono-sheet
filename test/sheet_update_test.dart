@@ -150,7 +150,7 @@ void main() async {
   final documentTitle = "${format.format(DateTime.now())}-${Uuid().v4()}";
   final fileMetaData = drive.File()
     ..title = documentTitle
-    ..mimeType = "application/vnd.google-apps.spreadsheet"
+    ..mimeType = sheetMimeType
     ..parents = [drive.ParentReference(id: "1e7oHNJN7GHozelAlnHHtggFIFb8xTv4Q")];
   final driveApi = drive.DriveApi(client);
   final gFile = await driveApi.files.insert(fileMetaData);

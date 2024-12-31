@@ -2,6 +2,8 @@ import 'package:intl/intl.dart';
 
 import '../../util/date_util.dart';
 
+const sheetMimeType = "application/vnd.google-apps.spreadsheet";
+
 class Column {
   static const date = "Date";
   static const total = "Total Duration (minutes)";

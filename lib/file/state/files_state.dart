@@ -7,12 +7,30 @@ part 'files_state.g.dart';
 
 final _logger = getNamedLogger();
 
-class FilesInfo {
+enum FileOperation { none, creation }
 
+class FilesInfo {
   final GoogleFile? selected;
   final List<GoogleFile> recent;
+  final FileOperation operationInProgress;
 
-  const FilesInfo(this.selected, [this.recent = const []]);
+  const FilesInfo({
+    this.selected,
+    this.recent = const [],
+    this.operationInProgress = FileOperation.none,
+  });
+
+  FilesInfo copyWith({
+    GoogleFile? selected,
+    List<GoogleFile>? recent,
+    FileOperation? operationInProgress,
+  }) {
+    return FilesInfo(
+      selected: selected ?? this.selected,
+      recent: recent ?? this.recent,
+      operationInProgress: operationInProgress ?? this.operationInProgress,
+    );
+  }
 }
 
 class _Key {
@@ -23,7 +41,6 @@ class _Key {
 
 @riverpod
 class FilesInfoHolder extends _$FilesInfoHolder {
-
   static const _separator = "___";
   static const _maxRecentItems = 5;
 
@@ -31,33 +48,29 @@ class FilesInfoHolder extends _$FilesInfoHolder {
 
   @override
   Future<FilesInfo> build() async {
-    var selected = _deserialize(
-        await _prefs.getString(_Key.selected)
-    );
+    var selected = _deserialize(await _prefs.getString(_Key.selected));
     if (selected == null) {
-      return FilesInfo(null);
+      return FilesInfo();
     }
 
     var recentCount = await _prefs.getInt(_Key.recentCount);
     if (recentCount == null || recentCount <= 0) {
-      return FilesInfo(selected);
+      return FilesInfo(selected: selected);
     }
 
     List<GoogleFile> recent = [];
     for (int i = 0; i < recentCount; i++) {
-      final file = _deserialize(
-          await _prefs.getString("${_Key.recentN}[$i]")
-      );
+      final file = _deserialize(await _prefs.getString("${_Key.recentN}[$i]"));
       if (file == null) {
         break;
       } else {
         recent.add(file);
       }
     }
-    return FilesInfo(selected, recent);
+    return FilesInfo(selected: selected, recent: recent);
   }
 
-  void select(GoogleFile file) async {
+  Future<void> select(GoogleFile file) async {
     _logger.info("file '${file.name}' is now active");
     final previousState = await future;
     List<GoogleFile> recent = List.from(previousState.recent);
@@ -69,12 +82,27 @@ class FilesInfoHolder extends _$FilesInfoHolder {
     if (recent.length > _maxRecentItems) {
       recent.removeRange(_maxRecentItems, recent.length);
     }
-    state = AsyncValue.data(FilesInfo(file, recent));
+    state = AsyncValue.data(FilesInfo(selected: file, recent: recent));
     await _prefs.setString(_Key.selected, _serialize(file));
     await _prefs.setInt(_Key.recentCount, recent.length);
     for (int i = 0; i < recent.length; i++) {
       final file = recent[i];
       await _prefs.setString("${_Key.recentN}[$i]", _serialize(file));
+    }
+  }
+
+  Future<T> execute<T>(FileOperation operation, Future<T> Function() action) async {
+    _logger.info("start executing '$operation' file operation");
+    final stateBeforeOperation = await future;
+    state = AsyncValue.data(stateBeforeOperation.copyWith(operationInProgress: operation));
+    try {
+      final result = await action();
+      _logger.fine("file operation '$operation' is finished with result $result");
+      return result;
+    } finally {
+      final stateAfterOperation = await future;
+      _logger.info("finished '$operation' file operation");
+      state = AsyncValue.data(stateAfterOperation.copyWith(operationInProgress: FileOperation.none));
     }
   }
 
