@@ -12,25 +12,20 @@ Future<FileList> fetchSheets(String? pageToken) async {
   final client = await getAuthenticatedGoogleApiHttpClient();
   final driveApi = drive.DriveApi(client);
   return driveApi.files.list(
-      q: "mimeType='$sheetMimeType'",
-      spaces: 'drive',
-      $fields: 'files(id, name)',
-      pageToken: pageToken);
+    q: "mimeType='$sheetMimeType' and trashed=false",
+    spaces: 'drive',
+    $fields: 'files(id, name)',
+    pageToken: pageToken,
+  );
 }
 
 class PaginatedFilesState {
-
   final List<GoogleFile> files;
   final bool loading;
   final String? nextPageToken;
   final String? error;
 
-  PaginatedFilesState({
-    required this.files,
-    required this.loading,
-    this.nextPageToken,
-    this.error
-  });
+  PaginatedFilesState({required this.files, required this.loading, this.nextPageToken, this.error});
 
   PaginatedFilesState copyWith({
     List<GoogleFile>? files,
@@ -39,11 +34,10 @@ class PaginatedFilesState {
     String? error,
   }) {
     return PaginatedFilesState(
-      files: files ?? this.files,
-      loading: loading ?? this.loading,
-      nextPageToken: nextPageToken ?? this.nextPageToken,
-      error: error ?? this.error
-    );
+        files: files ?? this.files,
+        loading: loading ?? this.loading,
+        nextPageToken: nextPageToken ?? this.nextPageToken,
+        error: error ?? this.error);
   }
 }
 
@@ -52,11 +46,7 @@ final paginatedFilesProvider = StateNotifierProvider<PaginatedFilesNotifier, Pag
 });
 
 class PaginatedFilesNotifier extends StateNotifier<PaginatedFilesState> {
-
-  PaginatedFilesNotifier() : super(PaginatedFilesState(
-      files: [],
-      loading: false
-  ));
+  PaginatedFilesNotifier() : super(PaginatedFilesState(files: [], loading: false));
 
   Future<void> loadFiles({initialLoad = false}) async {
     if (state.loading) {
@@ -68,14 +58,10 @@ class PaginatedFilesNotifier extends StateNotifier<PaginatedFilesState> {
     state = state.copyWith(loading: true);
     final errors = <String>[];
     final files = <GoogleFile>[];
-    _logger.info(
-        "fetching gsheet documents, next page token: ${state.nextPageToken}"
-    );
+    _logger.info("fetching gsheet documents, next page token: ${state.nextPageToken}");
     try {
       final fileList = await fetchSheets(initialLoad ? null : state.nextPageToken);
-      _logger.info(
-          "got google response for ${fileList.files?.length ?? 0} gsheet files"
-      );
+      _logger.info("got google response for ${fileList.files?.length ?? 0} gsheet files");
 
       fileList.files?.forEach((file) {
         final id = file.id;
@@ -95,20 +81,12 @@ class PaginatedFilesNotifier extends StateNotifier<PaginatedFilesState> {
         files.add(GoogleFile(id, name));
       });
     } catch (e, stackTrace) {
-      _logger.warning(
-          "got an exception on attempt to fetch gsheets", e, stackTrace
-      );
+      _logger.warning("got an exception on attempt to fetch gsheets", e, stackTrace);
       errors.add("$e\n$stackTrace");
     }
 
-    _logger.info(
-        "got ${files.length} gsheet file(s) and ${errors.length} error(s)"
-    );
+    _logger.info("got ${files.length} gsheet file(s) and ${errors.length} error(s)");
     state = state.copyWith(
-      files: files,
-      loading: false,
-      nextPageToken: null,
-      error: errors.isEmpty ? null : errors.join(",\n")
-    );
+        files: files, loading: false, nextPageToken: null, error: errors.isEmpty ? null : errors.join(",\n"));
   }
 }
