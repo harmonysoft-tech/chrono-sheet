@@ -1,6 +1,5 @@
 import 'package:chrono_sheet/category/model/category.dart';
 import 'package:chrono_sheet/file/state/files_state.dart';
-import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:chrono_sheet/sheet/parser/sheet_parser.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -10,7 +9,6 @@ import '../../file/model/google_file.dart';
 
 part 'categories_state.g.dart';
 
-final _logger = getNamedLogger();
 final _categoriesToHideInUi = {Category(Column.date), Category(Column.total)};
 
 class CategoriesInfo {
@@ -19,15 +17,11 @@ class CategoriesInfo {
 
   final Category? selected;
   final List<Category> categories;
-  final String? inCreation;
 
   CategoriesInfo({
     this.selected,
     this.categories = const [],
-    this.inCreation,
   });
-
-  bool get isEditingInProgress => inCreation != null;
 }
 
 class _Key {
@@ -80,17 +74,18 @@ class FileCategories extends _$FileCategories {
     return "${_Key.selected}.${file.id}";
   }
 
-  Future<CategoriesInfo> selectExistingCategory(Category category) async {
+  Future<CategoriesInfo> select(Category category) async {
     final current = await future;
     if (current.selected == category) {
       return current;
     }
+    List<Category> categoriesToUse = current.categories;
     if (!current.categories.contains(category)) {
-      _logger.warning("got a request to select category '$category' but it's not among the available "
-          "categories (${current.categories})");
-      return current;
+      final newCategories = [...current.categories, category];
+      newCategories.sort();
+      categoriesToUse = newCategories;
     }
-    CategoriesInfo newState = CategoriesInfo(selected: category, categories: current.categories);
+    CategoriesInfo newState = CategoriesInfo(selected: category, categories: categoriesToUse);
     state = AsyncValue.data(newState);
     final fileInfo = await ref.read(filesInfoHolderProvider.future);
     final file = fileInfo.selected;
@@ -98,49 +93,5 @@ class FileCategories extends _$FileCategories {
       await _prefs.setString(_getPreferencesKey(file), category.name);
     }
     return newState;
-  }
-
-  void updateCategoryInCreation(String name) async {
-    final current = await future;
-    state =
-        AsyncValue.data(CategoriesInfo(selected: current.selected, categories: current.categories, inCreation: name));
-  }
-
-  Future<CategoriesInfo> finaliseEditingIfNecessaryAndGet() async {
-    final current = await future;
-    final inCreation = current.inCreation;
-    if (inCreation == null || inCreation.isEmpty) {
-      return current;
-    }
-    Category category = Category(inCreation);
-    bool exists = current.categories.any((c) => category == c);
-    if (exists) {
-      state = AsyncValue.data(CategoriesInfo(selected: current.selected, categories: current.categories));
-    } else {
-      final newCategories = [...current.categories, category];
-      newCategories.sort();
-      state = AsyncValue.data(CategoriesInfo(selected: current.selected, categories: newCategories, inCreation: null));
-    }
-    return selectExistingCategory(category);
-  }
-
-  Future<bool> startEditing() async {
-    final current = await future;
-    if (current.inCreation != null) {
-      return false;
-    }
-    state = AsyncValue.data(CategoriesInfo(selected: current.selected, categories: current.categories, inCreation: ""));
-    return true;
-  }
-
-  Future<bool> stopEditing() async {
-    final current = await future;
-    if (current.isEditingInProgress) {
-      state =
-          AsyncValue.data(CategoriesInfo(selected: current.selected, categories: current.categories, inCreation: null));
-      return true;
-    } else {
-      return false;
-    }
   }
 }

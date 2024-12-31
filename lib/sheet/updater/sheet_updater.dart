@@ -68,7 +68,7 @@ class SheetUpdater extends _$SheetUpdater {
       return;
     }
 
-    final categoryInfo = await ref.read(fileCategoriesProvider.notifier).finaliseEditingIfNecessaryAndGet();
+    final categoryInfo = await ref.read(fileCategoriesProvider.future);
     final category = categoryInfo.selected;
     if (category == null) {
       _logger.fine("skipped a request to store measurement $measurement in file "

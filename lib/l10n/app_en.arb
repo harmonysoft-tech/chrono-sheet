@@ -2,12 +2,17 @@
   "appName": "Chrono Sheet",
 
   "titleSelectFile": "Select Google Sheet File",
+  "titleAddNewCategory": "Add New Category",
 
   "textReset": "Reset",
   "textSave": "Save",
+  "textCancel": "Cancel",
+  "textAdd": "Add",
 
   "hintTapToCreateCategory": "tap to create a category",
   "hintSelectFile": "tap to select a file",
+
+  "labelCategoryName": "category name",
 
   "errorCanNotParseCategories": "can not parse categories",
   "errorNoFileIsSelected": "no file is selected",
