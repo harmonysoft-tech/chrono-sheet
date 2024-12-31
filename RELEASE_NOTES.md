@@ -1,3 +1,5 @@
+## v1.45.0+46 released on 31 Dec 2024 UTC
+  * af5ba34178ae74a559ab184b40199fe177acc311 #9 Prepare iphone native version
 ## v1.44.0+45 released on 30 Dec 2024 UTC
   * 25f546670d96fb45348690dfe5101b14d474803f #14 making sure that if a stopwatch was running and the application is stopped, all elapsed time is respected on the next app start
 ## v1.43.0+44 released on 29 Dec 2024 UTC
