@@ -1,3 +1,5 @@
+## v1.47.0+48 released on 31 Dec 2024 UTC
+  * a31ca520cb847b843c2f15c2dca231409a9753bf make sure that paused stop watch state is correctly preserved between application runs
 ## v1.46.0+47 released on 31 Dec 2024 UTC
   * b36cc78279450c4a33055c1d297f608a75297c72 #2 Add app bar button to allow login
 ## v1.45.0+46 released on 31 Dec 2024 UTC
