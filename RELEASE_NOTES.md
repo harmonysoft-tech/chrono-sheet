@@ -1,3 +1,5 @@
+## v1.46.0+47 released on 31 Dec 2024 UTC
+  * b36cc78279450c4a33055c1d297f608a75297c72 #2 Add app bar button to allow login
 ## v1.45.0+46 released on 31 Dec 2024 UTC
   * af5ba34178ae74a559ab184b40199fe177acc311 #9 Prepare iphone native version
 ## v1.44.0+45 released on 30 Dec 2024 UTC
