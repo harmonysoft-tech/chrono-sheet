@@ -20,8 +20,8 @@ class LoginState extends _$LoginState {
   Future<void> login() async {
     _logger.fine("got a request to login");
     state = AsyncValue.loading();
-    await signIn.signIn();
-    state = AsyncValue.data(true);
+    final account = await signIn.signIn();
+    state = AsyncValue.data(account != null);
   }
 
   Future<void> logout() async {

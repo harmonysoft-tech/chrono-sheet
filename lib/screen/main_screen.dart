@@ -54,7 +54,7 @@ class LoginWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
       onPressed: () => ref.read(loginStateProvider.notifier).login(),
-      icon: Icon(Icons.logout),
+      icon: Icon(Icons.login),
     );
   }
 }
