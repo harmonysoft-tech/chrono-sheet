@@ -10,7 +10,7 @@ RichText buildRichText(String text, TextTheme theme) {
   while (offset < text.length) {
     int markerStart = text.indexOf(_Marker.bold, offset);
     if (markerStart >= 0) {
-      int markerEnd = text.indexOf(_Marker.bold, markerStart + 1);
+      int markerEnd = text.indexOf(_Marker.bold, markerStart + _Marker.bold.length);
       if (markerEnd > markerStart) {
         if (offset < markerStart) {
           spans.add(TextSpan(

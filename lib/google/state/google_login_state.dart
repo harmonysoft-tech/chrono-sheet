@@ -31,7 +31,7 @@ class LoginState extends _$LoginState {
   Future<void> logout() async {
     _logger.fine("got a request to logout");
     state = AsyncValue.loading();
-    await signIn.signOut();
+    await signIn.disconnect();
     state = AsyncValue.data(false);
   }
 }
