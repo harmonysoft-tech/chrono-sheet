@@ -27,6 +27,18 @@ jobs:
       - name: get dependencies
         run: flutter pub get
 
+      - name: prepare sensitive data
+        run: |
+          echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
+          echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 -d >> ./android/app/google-services.json
+          echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 -d >> ./android/app/chrono-sheet.jks
+          echo "storeFile=chrono-sheet.jks" >> ./android/key.properties
+          echo "storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
+          echo "keyPassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
+          echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
+          echo "${{ secrets.INFO_PLIST }}" | base64 -d >> ./ios/Runner/Info.plist
+          echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d >> ./ios/Runner/GoogleService-Info.plist
+
       - name: generate l10n
         run: flutter gen-l10n
 
@@ -54,21 +66,6 @@ jobs:
         run: |
           ./gradlew release-paperwork
           git push
-
-      - name: setup firebase
-        run: |
-          echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
-          echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 -d >> ./android/app/google-services.json
-
-      - name: prepare sensitive data
-        run: |
-          echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 -d >> ./android/app/chrono-sheet.jks
-          echo "storeFile=chrono-sheet.jks" >> ./android/key.properties
-          echo "storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
-          echo "keyPassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
-          echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
-          echo "${{ secrets.INFO_PLIST }}" | base64 -d >> ./ios/Runner/Info.plist
-          echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d >> ./ios/Runner/GoogleService-Info.plist
 
       - name: build apk
         run: flutter build apk --release
