@@ -20,8 +20,12 @@ class LoginState extends _$LoginState {
   Future<void> login() async {
     _logger.fine("got a request to login");
     state = AsyncValue.loading();
-    final account = await signIn.signIn();
-    state = AsyncValue.data(account != null);
+    try {
+      await getAuthenticatedGoogleApiHttpClient();
+      state = AsyncValue.data(true);
+    } catch (e) {
+      state = AsyncValue.data(false);
+    }
   }
 
   Future<void> logout() async {

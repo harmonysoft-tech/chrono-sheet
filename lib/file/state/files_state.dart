@@ -1,4 +1,5 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
+import 'package:chrono_sheet/google/state/google_login_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../logging/logging.dart';
@@ -48,6 +49,16 @@ class FilesInfoHolder extends _$FilesInfoHolder {
 
   @override
   Future<FilesInfo> build() async {
+    final loginState = ref.watch(loginStateProvider);
+    switch (loginState) {
+      case AsyncData(value:final loggedIn):
+        if (!loggedIn) {
+          return FilesInfo();
+        }
+      default:
+        return FilesInfo();
+    }
+
     var selected = _deserialize(await _prefs.getString(_Key.selected));
     if (selected == null) {
       return FilesInfo();

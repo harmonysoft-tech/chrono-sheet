@@ -78,72 +78,84 @@ class SelectedFileWidget extends ConsumerWidget {
     final localization = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Container(
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide()),
-        ),
-        child: Row(
-          // mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            asyncData.maybeWhen(
-              data: (data) => data.operationInProgress == FileOperation.creation
-                  ? CircularProgressIndicator()
-                  : IconButton(
-                      onPressed: () => _createFile(context, ref),
-                      icon: Icon(Icons.add),
-                    ),
-              orElse: () => IconButton(
-                onPressed: () => _createFile(context, ref),
-                icon: Icon(Icons.add),
-              ),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide()),
+      ),
+      child: Row(
+        // mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          asyncData.maybeWhen(
+            data: (data) => data.operationInProgress == FileOperation.creation
+                ? CircularProgressIndicator()
+                : IconButton(
+                    onPressed: () => _createFile(context, ref),
+                    icon: Icon(Icons.add),
+                  ),
+            orElse: () => IconButton(
+              onPressed: () => _createFile(context, ref),
+              icon: Icon(Icons.add),
             ),
-            Expanded(
-              child: GestureDetector(
-                onTap: () => _selectFile(context),
-                // we use Container here in order for it to fill all the
-                // available space occupied by Expanded. Otherwise
-                // GestureDetector reacts only on taps on the nested Text.
-                child: Container(
-                  color: Colors.transparent,
-                  child: Center(
-                    child: asyncData.when(
-                      data: (data) => Text(
-                        data.selected?.name ?? localization.hintSelectFile,
-                        style: data.selected == null ? TextStyle(color: theme.disabledColor) : null,
-                      ),
-                      error: (_, __) => Text(
-                        localization.hintSelectFile,
-                        style: TextStyle(color: theme.disabledColor),
-                      ),
-                      loading: () => Text(
-                        localization.hintSelectFile,
-                        style: TextStyle(color: theme.disabledColor),
-                      ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _selectFile(context),
+              // we use Container here in order for it to fill all the
+              // available space occupied by Expanded. Otherwise
+              // GestureDetector reacts only on taps on the nested Text.
+              child: Container(
+                color: Colors.transparent,
+                child: Center(
+                  child: asyncData.when(
+                    data: (data) => Text(
+                      data.operationInProgress == FileOperation.none
+                          ? data.selected?.name ?? localization.hintSelectFile
+                          : "",
+                      style: (data.selected == null || data.operationInProgress != FileOperation.none)
+                          ? TextStyle(color: theme.disabledColor)
+                          : null,
+                    ),
+                    error: (_, __) => Text(
+                      localization.hintSelectFile,
+                      style: TextStyle(color: theme.disabledColor),
+                    ),
+                    loading: () => Text(
+                      localization.hintSelectFile,
+                      style: TextStyle(color: theme.disabledColor),
                     ),
                   ),
                 ),
               ),
             ),
-            asyncData.when(
-              data: (data) => PopupMenuButton<GoogleFile>(
-                icon: Icon(Icons.arrow_drop_down),
-                onSelected: (file) => _onFileSelected(file, ref),
-                itemBuilder: (context) => data.recent.map((file) {
-                  return PopupMenuItem(
-                    value: file,
-                    child: Text(file.name),
-                  );
-                }).toList(),
-              ),
-              error: (_, __) => PopupMenuButton(
-                icon: Icon(Icons.arrow_drop_down),
-                itemBuilder: (context) => [],
-              ),
-              loading: () => PopupMenuButton(
-                icon: Icon(Icons.arrow_drop_down),
-                itemBuilder: (context) => [],
-              ),
-            ),
-          ],
-        ));
+          ),
+          asyncData.maybeWhen(
+            data: (data) => data.operationInProgress == FileOperation.none
+                ? PopupMenuButton<GoogleFile>(
+                    icon: Icon(Icons.arrow_drop_down),
+                    onSelected: (file) => _onFileSelected(file, ref),
+                    itemBuilder: (context) => data.recent.map((file) {
+                      return PopupMenuItem(
+                        value: file,
+                        child: Text(file.name),
+                      );
+                    }).toList(),
+                  )
+                : DisabledPopupMenuItem(),
+            orElse: () => DisabledPopupMenuItem(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DisabledPopupMenuItem extends StatelessWidget {
+  const DisabledPopupMenuItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton(
+      icon: Icon(Icons.arrow_drop_down),
+      itemBuilder: (context) => [],
+    );
   }
 }

@@ -9,8 +9,11 @@
   "textSave": "Save",
   "textCancel": "Cancel",
   "textAdd": "Add",
+  "textOk": "Ok",
+  "textClose": "Close",
+  "textPermissionsRationale": "**Why Does This App Need Permissions?**\n\nOur app requires access to your Google Drive and Google Sheets to function properly:\n\n  1. **Google Drive:** To show you a list of your existing Google Sheets and let you create a new one if needed.\n\n  2. **Google Sheets:** To store your stopwatch measurements directly in your chosen Google Sheet.\n\nWe only access the files you select or create through the app. Your data remains private and secure.",
 
-  "hintTapToCreateCategory": "tap to create a category",
+  "hintCreateCategory": "create a category",
   "hintSelectFile": "tap to select a file",
 
   "labelCategoryName": "category name",
@@ -20,5 +23,6 @@
   "errorNoFileIsSelected": "no file is selected",
   "errorNoCategoryIsSelected": "no category is selected",
 
+  "progressFileCreationInProgress": "file creation is in progress...",
   "progressParsingCategories": "parsing categories from file..."
 }
