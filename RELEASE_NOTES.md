@@ -1,3 +1,5 @@
+## v1.49.0+50 released on 01 Jan 2025 UTC
+  * 1c502ee81ab5b53933f1bf863710d9fa48ebeb68 fix build
 ## v1.48.0+49 released on 31 Dec 2024 UTC
   * 5b22a80caf9955620f4e696dc1eea7a71d639f93 #8 Allow to create a new google sheet document
 ## v1.47.0+48 released on 31 Dec 2024 UTC
