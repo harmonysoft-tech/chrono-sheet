@@ -15,11 +15,12 @@
   "actionStart": "Start",
   "actionPause": "Pause",
   "actionResume": "Resume",
+  "actionViewSelectedFile": "View Selected File",
 
   "textPermissionsRationale": "Our app requires access to your Google Drive and Google Sheets to function properly:\n\n  1. **Google Drive:** To show you a list of your existing Google Sheets and let you create a new one if needed.\n\n  2. **Google Sheets:** To store your stopwatch measurements directly in your chosen Google Sheet.\n\nWe only access the files you select or create through the app. Your data remains private and secure.",
 
   "hintCreateCategory": "create a category",
-  "hintSelectFile": "tap to select a file",
+  "hintSelectFile": "select a measurements file",
 
   "labelCategoryName": "category name",
   "labelFileName": "file name",
@@ -30,6 +31,7 @@
   "errorNoFileIsSelected": "no file is selected",
   "errorNoCategoryIsSelected": "no category is selected",
   "errorPermissionsNotGranted": "The following mandatory permissions are not granted:\n",
+  "errorCanNotOpenFile": "Can not open the measurements file, try to open if from the browser or Google Sheets application",
 
   "permissionDrive": "Google Drive",
   "permissionSheets": "Google Sheets",

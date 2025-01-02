@@ -1,3 +1,4 @@
+import 'package:chrono_sheet/file/widget/view_selected_file_widget.dart';
 import 'package:chrono_sheet/file/widget/selected_file_widget.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/google/state/google_login_state.dart';
@@ -13,6 +14,7 @@ class MainScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loggedInAsync = ref.watch(loginStateProvider);
+    final columnVerticalInset = 24.0;
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).appName),
@@ -36,10 +38,12 @@ class MainScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             StopWatchWidget(),
-            SizedBox(height: 24),
+            SizedBox(height: columnVerticalInset),
             SelectedFileWidget(),
-            SizedBox(height: 24),
+            SizedBox(height: columnVerticalInset),
             CategoryWidget(),
+            SizedBox(height: columnVerticalInset),
+            ViewSelectedFileWidget(),
           ],
         ),
       ),
