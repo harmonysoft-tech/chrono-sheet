@@ -96,7 +96,7 @@ Future<void> _showPermissionsRationale([Set<String> missingScopes = const {}]) {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context).textOk),
+            child: Text(AppLocalizations.of(context).actionOk),
           ),
         ],
       );

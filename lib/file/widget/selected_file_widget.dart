@@ -39,7 +39,7 @@ class SelectedFileWidget extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.textCancel),
+            child: Text(l10n.actionCancel),
           ),
           ValueListenableBuilder(
             valueListenable: hasNameNotifier,
@@ -65,7 +65,7 @@ class SelectedFileWidget extends ConsumerWidget {
                       Navigator.of(context).pop();
                     }
                   : null,
-              child: Text(l10n.textAdd),
+              child: Text(l10n.actionAdd),
             ),
           ),
         ],

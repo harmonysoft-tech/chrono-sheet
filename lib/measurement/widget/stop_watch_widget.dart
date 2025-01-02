@@ -168,6 +168,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -195,16 +196,29 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            _running
+                ? ElevatedButton.icon(
+                    onPressed: _toggle,
+                    icon: Icon(Icons.stop),
+                    label: Text(l10n.actionPause),
+                  )
+                : ElevatedButton.icon(
+                    onPressed: _toggle,
+                    icon: Icon(Icons.play_arrow),
+                    label: Text(_hasMeasurement() ? l10n.actionResume : l10n.actionStart),
+                  ),
+            SizedBox(width: 8),
             ElevatedButton.icon(
               onPressed: _hasMeasurement() ? _reset : null,
               icon: Icon(Icons.refresh),
-              label: Text(AppLocalizations.of(context).textReset),
+              label: Text(l10n.actionReset),
             ),
-            SizedBox(width: 20),
+            SizedBox(width: 18),
             ElevatedButton.icon(
-                onPressed: _hasMeasurement() ? _saveMeasurement : null,
-                icon: Icon(Icons.save),
-                label: Text(AppLocalizations.of(context).textSave)),
+              onPressed: _hasMeasurement() ? _saveMeasurement : null,
+              icon: Icon(Icons.save),
+              label: Text(l10n.actionSave),
+            ),
           ],
         )
       ],

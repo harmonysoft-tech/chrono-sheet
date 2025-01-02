@@ -150,7 +150,7 @@ void _addCategory(BuildContext context, FileCategories categoriesNotifier) {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.textCancel),
+          child: Text(l10n.actionCancel),
         ),
         ValueListenableBuilder(
           valueListenable: hasCategoryNameNotifier,
@@ -162,7 +162,7 @@ void _addCategory(BuildContext context, FileCategories categoriesNotifier) {
                     Navigator.of(context).pop();
                   }
                 : null,
-            child: Text(l10n.textAdd),
+            child: Text(l10n.actionAdd),
           ),
         ),
       ],
