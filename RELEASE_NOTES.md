@@ -1,3 +1,5 @@
+## v1.50.0+51 released on 02 Jan 2025 UTC
+  * cdee0883c642b0c66826af77e57656a214797501 offered explicit actions for start/pause/resume
 ## v1.49.0+50 released on 01 Jan 2025 UTC
   * 1c502ee81ab5b53933f1bf863710d9fa48ebeb68 fix build
 ## v1.48.0+49 released on 31 Dec 2024 UTC
