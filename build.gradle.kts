@@ -3,6 +3,6 @@ plugins {
 }
 
 releasePaperwork {
-    projectVersionFile.set("../pubspec.yaml")
+    projectVersionFile.set("pubspec.yaml")
     projectVersionRegex.set("version:\\s*([^\\s]+)")
 }
