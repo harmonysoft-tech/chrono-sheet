@@ -99,32 +99,30 @@ class SelectedFileWidget extends ConsumerWidget {
                   icon: Icon(Icons.add),
                 ),
               ),
+              IconButton(
+                onPressed: () => _selectFile(context),
+                icon: Icon(Icons.search),
+              ),
               Expanded(
-                child: GestureDetector(
-                  onTap: () => _selectFile(context),
-                  // we use Container here in order for it to fill all the
-                  // available space occupied by Expanded. Otherwise
-                  // GestureDetector reacts only on taps on the nested Text.
-                  child: Container(
-                    color: Colors.transparent,
-                    child: Center(
-                      child: asyncData.when(
-                        data: (data) => Text(
-                          data.operationInProgress == FileOperation.none
-                              ? data.selected?.name ?? l10n.hintSelectFile
-                              : "",
-                          style: (data.selected == null || data.operationInProgress != FileOperation.none)
-                              ? TextStyle(color: theme.disabledColor)
-                              : null,
-                        ),
-                        error: (_, __) => Text(
-                          l10n.hintSelectFile,
-                          style: TextStyle(color: theme.disabledColor),
-                        ),
-                        loading: () => Text(
-                          l10n.hintSelectFile,
-                          style: TextStyle(color: theme.disabledColor),
-                        ),
+                child: Container(
+                  color: Colors.transparent,
+                  child: Center(
+                    child: asyncData.when(
+                      data: (data) => Text(
+                        data.operationInProgress == FileOperation.none
+                            ? data.selected?.name ?? l10n.hintSelectFile
+                            : "",
+                        style: (data.selected == null || data.operationInProgress != FileOperation.none)
+                            ? TextStyle(color: theme.disabledColor)
+                            : null,
+                      ),
+                      error: (_, __) => Text(
+                        l10n.hintSelectFile,
+                        style: TextStyle(color: theme.disabledColor),
+                      ),
+                      loading: () => Text(
+                        l10n.hintSelectFile,
+                        style: TextStyle(color: theme.disabledColor),
                       ),
                     ),
                   ),
@@ -151,9 +149,7 @@ class SelectedFileWidget extends ConsumerWidget {
         SizedBox(height: Dimension.labelVerticalInset),
         Text(
           l10n.labelFile,
-          style: TextStyle(
-              fontSize: theme.textTheme.labelSmall?.fontSize
-          ),
+          style: TextStyle(fontSize: theme.textTheme.labelSmall?.fontSize),
         ),
       ],
     );
