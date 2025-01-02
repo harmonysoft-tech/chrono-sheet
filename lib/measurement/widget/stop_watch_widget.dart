@@ -199,7 +199,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
             _running
                 ? ElevatedButton.icon(
                     onPressed: _toggle,
-                    icon: Icon(Icons.stop),
+                    icon: Icon(Icons.pause),
                     label: Text(l10n.actionPause),
                   )
                 : ElevatedButton.icon(
