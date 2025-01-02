@@ -87,6 +87,7 @@ jobs:
       - name: release paperwork
         run: |
           cd ci
+          pwd
           ./gradlew release-paperwork
           cd ..
           git push
