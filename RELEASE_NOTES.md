@@ -1,3 +1,5 @@
+## v1.51.0+52 released on 02 Jan 2025 UTC
+  * 68d73b159d71d507c8e6863d83c35220c93352b7 added ability to view the selected file
 ## v1.50.0+51 released on 02 Jan 2025 UTC
   * cdee0883c642b0c66826af77e57656a214797501 offered explicit actions for start/pause/resume
 ## v1.49.0+50 released on 01 Jan 2025 UTC
