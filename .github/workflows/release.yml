@@ -86,7 +86,9 @@ jobs:
 
       - name: release paperwork
         run: |
+          cd ci
           ./gradlew release-paperwork
+          cd ..
           git push
 
       - name: build apk
