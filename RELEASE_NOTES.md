@@ -1,3 +1,5 @@
+## v1.54.0+55 released on 02 Jan 2025 UTC
+  * 8216507ad5f61b20f12615bc32c2fe5f0776b6ea move gradle config into a separate directory in order not to confuse android studio
 ## v1.53.0+54 released on 02 Jan 2025 UTC
   * f720bd3fc9626c7ce540595293e7c51cbb04028a updated 'pause' button's icon
 ## v1.52.0+53 released on 02 Jan 2025 UTC
