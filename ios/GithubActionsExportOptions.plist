@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>destination</key>
+	<string>export</string>
+	<key>generateAppStoreInformation</key>
+	<false/>
+	<key>manageAppVersionAndBuildNumber</key>
+	<true/>
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>stripSwiftSymbols</key>
+	<true/>
+	<key>teamID</key>
+	<string>B73F2CBGJ7</string>
+	<key>testFlightInternalTestingOnly</key>
+	<false/>
+	<key>uploadSymbols</key>
+	<true/>
+	<key>provisioningProfiles</key>
+    <dict>
+      <key>tech.harmonysoft.oss.chronoSheet</key>
+      <string>chrono-sheet-app-store-connect</string>
+    </dict>
+</dict>
+</plist>

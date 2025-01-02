@@ -29,6 +29,7 @@ jobs:
 
       - name: prepare sensitive data
         run: |
+          # android
           echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
           echo "${{ secrets.GOOGLE_SERVICE_JSON }}" | base64 -d >> ./android/app/google-services.json
           echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 -d >> ./android/app/chrono-sheet.jks
@@ -36,9 +37,29 @@ jobs:
           echo "storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyPassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> ./android/key.properties
           echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
+          
+          # ios
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          
           echo "${{ secrets.INFO_PLIST }}" | base64 -d >> ./ios/Runner/Info.plist
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d >> ./ios/Runner/GoogleService-Info.plist
-          echo "${{ secrets.IPHONE_CERTIFICATE_P12 }}" | base64 -d >> $RUNNER_TEMP/build_certificate.p12
+          echo "${{ secrets.IPHONE_CERTIFICATE_P12 }}" | base64 -d >> $CERTIFICATE_PATH
+          echo "${{ secrets.IPHONE_PROVISIONING_PROFILE }}" | base64 -d >> $PP_PATH
+          
+          # create temporary keychain
+          security create-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" $KEYCHAIN_PATH
+          
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "${{ secrets.IPHONE_CERTIFICATE_PASSWORD }}" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+          
+          # apply provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
       - name: generate l10n
         run: flutter gen-l10n
@@ -94,5 +115,11 @@ jobs:
           name: aab
           path: build/app/outputs/bundle/release/app-release.aab
 
-#      - name: build ios
-#        run: flutter build ios --no-codesign
+      - name: build ios
+        run: flutter build ipa --release --export-options-plist ios/GithubActionsExportOptions.plist
+
+      - name: Clean up keychain and provisioning profile
+        if: ${{ always() }}
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+          rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
