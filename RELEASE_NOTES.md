@@ -1,3 +1,5 @@
+## v1.52.0+53 released on 02 Jan 2025 UTC
+  * 14889062172f41c6ed37f42ff35e3bb5f7dd0dc3 correct 'view file' processing on android
 ## v1.51.0+52 released on 02 Jan 2025 UTC
   * 68d73b159d71d507c8e6863d83c35220c93352b7 added ability to view the selected file
 ## v1.50.0+51 released on 02 Jan 2025 UTC
