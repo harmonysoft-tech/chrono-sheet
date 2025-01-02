@@ -2,6 +2,7 @@ import 'package:chrono_sheet/category/model/category.dart';
 import 'package:chrono_sheet/category/state/categories_state.dart';
 import 'package:chrono_sheet/file/state/files_state.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
+import 'package:chrono_sheet/ui/dimension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,17 +12,30 @@ class CategoryWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncFiles = ref.watch(filesInfoHolderProvider);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(),
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(),
+            ),
+          ),
+          child: asyncFiles.maybeWhen(
+            data: (files) =>
+                files.operationInProgress == FileOperation.creation ? FileCreationWidget() : NoFileCreationWidget(),
+            orElse: () => NoFileCreationWidget(),
+          ),
         ),
-      ),
-      child: asyncFiles.maybeWhen(
-        data: (files) =>
-            files.operationInProgress == FileOperation.creation ? FileCreationWidget() : NoFileCreationWidget(),
-        orElse: () => NoFileCreationWidget(),
-      ),
+        SizedBox(height: Dimension.labelVerticalInset),
+        Text(
+          l10n.labelCategory,
+          style: TextStyle(
+              fontSize: theme.textTheme.labelSmall?.fontSize
+          ),
+        ),
+      ],
     );
   }
 }

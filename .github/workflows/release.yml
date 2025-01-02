@@ -38,6 +38,7 @@ jobs:
           echo "keyAlias=${{ secrets.RELEASE_KEYSTORE_KEY }}" >> ./android/key.properties
           echo "${{ secrets.INFO_PLIST }}" | base64 -d >> ./ios/Runner/Info.plist
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d >> ./ios/Runner/GoogleService-Info.plist
+          echo "${{ secrets.IPHONE_CERTIFICATE_P12 }}" | base64 -d >> $RUNNER_TEMP/build_certificate.p12
 
       - name: generate l10n
         run: flutter gen-l10n

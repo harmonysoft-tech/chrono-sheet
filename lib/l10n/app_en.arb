@@ -19,6 +19,8 @@
 
   "labelCategoryName": "category name",
   "labelFileName": "file name",
+  "labelCategory": "measurement category",
+  "labelFile": "file to store the measurement",
 
   "errorCanNotParseCategories": "can not parse categories",
   "errorNoFileIsSelected": "no file is selected",

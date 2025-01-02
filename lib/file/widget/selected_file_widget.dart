@@ -1,6 +1,7 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/file/service/creator/google_file_creator.dart';
 import 'package:chrono_sheet/router/router.dart';
+import 'package:chrono_sheet/ui/dimension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -75,75 +76,86 @@ class SelectedFileWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncData = ref.watch(filesInfoHolderProvider);
-    final localization = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide()),
-      ),
-      child: Row(
-        // mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          asyncData.maybeWhen(
-            data: (data) => data.operationInProgress == FileOperation.creation
-                ? CircularProgressIndicator()
-                : IconButton(
-                    onPressed: () => _createFile(context, ref),
-                    icon: Icon(Icons.add),
-                  ),
-            orElse: () => IconButton(
-              onPressed: () => _createFile(context, ref),
-              icon: Icon(Icons.add),
-            ),
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide()),
           ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => _selectFile(context),
-              // we use Container here in order for it to fill all the
-              // available space occupied by Expanded. Otherwise
-              // GestureDetector reacts only on taps on the nested Text.
-              child: Container(
-                color: Colors.transparent,
-                child: Center(
-                  child: asyncData.when(
-                    data: (data) => Text(
-                      data.operationInProgress == FileOperation.none
-                          ? data.selected?.name ?? localization.hintSelectFile
-                          : "",
-                      style: (data.selected == null || data.operationInProgress != FileOperation.none)
-                          ? TextStyle(color: theme.disabledColor)
-                          : null,
-                    ),
-                    error: (_, __) => Text(
-                      localization.hintSelectFile,
-                      style: TextStyle(color: theme.disabledColor),
-                    ),
-                    loading: () => Text(
-                      localization.hintSelectFile,
-                      style: TextStyle(color: theme.disabledColor),
+          child: Row(
+            // mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              asyncData.maybeWhen(
+                data: (data) => data.operationInProgress == FileOperation.creation
+                    ? CircularProgressIndicator()
+                    : IconButton(
+                        onPressed: () => _createFile(context, ref),
+                        icon: Icon(Icons.add),
+                      ),
+                orElse: () => IconButton(
+                  onPressed: () => _createFile(context, ref),
+                  icon: Icon(Icons.add),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _selectFile(context),
+                  // we use Container here in order for it to fill all the
+                  // available space occupied by Expanded. Otherwise
+                  // GestureDetector reacts only on taps on the nested Text.
+                  child: Container(
+                    color: Colors.transparent,
+                    child: Center(
+                      child: asyncData.when(
+                        data: (data) => Text(
+                          data.operationInProgress == FileOperation.none
+                              ? data.selected?.name ?? l10n.hintSelectFile
+                              : "",
+                          style: (data.selected == null || data.operationInProgress != FileOperation.none)
+                              ? TextStyle(color: theme.disabledColor)
+                              : null,
+                        ),
+                        error: (_, __) => Text(
+                          l10n.hintSelectFile,
+                          style: TextStyle(color: theme.disabledColor),
+                        ),
+                        loading: () => Text(
+                          l10n.hintSelectFile,
+                          style: TextStyle(color: theme.disabledColor),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+              asyncData.maybeWhen(
+                data: (data) => data.operationInProgress == FileOperation.none
+                    ? PopupMenuButton<GoogleFile>(
+                        icon: Icon(Icons.arrow_drop_down),
+                        onSelected: (file) => _onFileSelected(file, ref),
+                        itemBuilder: (context) => data.recent.map((file) {
+                          return PopupMenuItem(
+                            value: file,
+                            child: Text(file.name),
+                          );
+                        }).toList(),
+                      )
+                    : DisabledPopupMenuItem(),
+                orElse: () => DisabledPopupMenuItem(),
+              ),
+            ],
           ),
-          asyncData.maybeWhen(
-            data: (data) => data.operationInProgress == FileOperation.none
-                ? PopupMenuButton<GoogleFile>(
-                    icon: Icon(Icons.arrow_drop_down),
-                    onSelected: (file) => _onFileSelected(file, ref),
-                    itemBuilder: (context) => data.recent.map((file) {
-                      return PopupMenuItem(
-                        value: file,
-                        child: Text(file.name),
-                      );
-                    }).toList(),
-                  )
-                : DisabledPopupMenuItem(),
-            orElse: () => DisabledPopupMenuItem(),
+        ),
+        SizedBox(height: Dimension.labelVerticalInset),
+        Text(
+          l10n.labelFile,
+          style: TextStyle(
+              fontSize: theme.textTheme.labelSmall?.fontSize
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
