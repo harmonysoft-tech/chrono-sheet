@@ -122,7 +122,7 @@ jobs:
 
       - name: upload to testflight
         run: |
-          xcrun altool --validate-app -f ./build/ios/ipa/chrono_sheet.ipa -t ios --apiKey ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }} --apiIssuer ${{ secrets.APP_STORE_CONNECT_DEVELOPER_ID }}
+          xcrun  altool --validate-app -f ./build/ios/ipa/chrono_sheet.ipa -t ios --apiKey ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }} --apiIssuer ${{ secrets.APP_STORE_CONNECT_DEVELOPER_ID }}
           xcrun altool --upload-app -f ./build/ios/ipa/chrono_sheet.ipa -t ios --apiKey ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }} --apiIssuer ${{ secrets.APP_STORE_CONNECT_DEVELOPER_ID }}
 
 
