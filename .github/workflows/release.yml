@@ -47,6 +47,7 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d >> ./ios/Runner/GoogleService-Info.plist
           echo "${{ secrets.IPHONE_CERTIFICATE_P12 }}" | base64 -d >> $CERTIFICATE_PATH
           echo "${{ secrets.IPHONE_PROVISIONING_PROFILE }}" | base64 -d >> $PP_PATH
+          mkdir ./private_keys
           echo "${{ secrets.APP_STORE_CONNECT_API_KEY }}" | base64 -d >> ./private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
           
           # create temporary keychain
