@@ -1,3 +1,5 @@
+## v1.55.0+56 released on 03 Jan 2025 UTC
+  * 5d3965b8b5c6882845bf41f5ab1160a2fd346b16 #9 Prepare iphone native version
 ## v1.54.0+55 released on 02 Jan 2025 UTC
   * 8216507ad5f61b20f12615bc32c2fe5f0776b6ea move gradle config into a separate directory in order not to confuse android studio
 ## v1.53.0+54 released on 02 Jan 2025 UTC
