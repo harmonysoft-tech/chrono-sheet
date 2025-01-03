@@ -1,3 +1,5 @@
+## v1.59.0+60 released on 03 Jan 2025 UTC
+  * f1be8ca8c507fb37f71b019410d3531265829b24 #9 Prepare iphone native version
 ## v1.58.0+59 released on 03 Jan 2025 UTC
   * 0fc3f0697971dbf36d8129de0de7c37ac47df976 #9 Prepare iphone native version
 ## v1.57.0+58 released on 03 Jan 2025 UTC
