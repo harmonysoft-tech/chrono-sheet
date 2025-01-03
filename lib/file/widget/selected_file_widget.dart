@@ -149,7 +149,7 @@ class SelectedFileWidget extends ConsumerWidget {
         SizedBox(height: Dimension.labelVerticalInset),
         Text(
           l10n.labelFile,
-          style: TextStyle(fontSize: theme.textTheme.labelSmall?.fontSize),
+          style: TextStyle(fontSize: theme.textTheme.labelMedium?.fontSize),
         ),
       ],
     );

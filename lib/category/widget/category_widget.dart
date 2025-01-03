@@ -32,7 +32,7 @@ class CategoryWidget extends ConsumerWidget {
         Text(
           l10n.labelCategory,
           style: TextStyle(
-              fontSize: theme.textTheme.labelSmall?.fontSize
+              fontSize: theme.textTheme.labelMedium?.fontSize
           ),
         ),
       ],
