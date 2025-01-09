@@ -138,15 +138,23 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
     });
   }
 
-  void _saveMeasurement() {
+  Future<void> _saveMeasurement() async {
+    if (!_running || _measuredDuration <= Duration.zero) {
+      return;
+    }
+    final data = await ref.read(sheetUpdaterProvider.notifier).prepareToStore(_measuredDuration);
     setState(() {
-      _running = false;
-      final durationToStore = _measuredDuration;
-      _measuredDuration = Duration.zero;
-      _timer?.cancel();
-      _timer = null;
-      _prefs.setString(_preferencesKey, "");
-      ref.read(sheetUpdaterProvider.notifier).store(durationToStore);
+      if (data.ready) {
+        _running = false;
+        final durationToStore = _measuredDuration;
+        _measuredDuration = Duration.zero;
+        _timer?.cancel();
+        _timer = null;
+        _prefs.setString(_preferencesKey, "");
+        ref.read(sheetUpdaterProvider.notifier).store(durationToStore);
+      } else if (_running) {
+        _toggle();
+      }
     });
   }
 

@@ -1,6 +1,7 @@
 import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/sheet/updater/update_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../category/model/category.dart';
 import '../../category/state/categories_state.dart';
 import '../../file/model/google_file.dart';
 import '../../file/state/files_state.dart';
@@ -39,31 +40,41 @@ class SheetUpdater extends _$SheetUpdater {
     return SaveMeasurementState.idle;
   }
 
-  Future<void> store(Duration measurement) async {
-    if (measurement.compareTo(Duration.zero) <= 0) {
-      _logger.fine(
-          "skipped a request to store non-positive measurement $measurement"
-      );
-      return;
-    }
-
+  Future<FileAndCategory> prepareToStore(Duration measurement) async {
     final fileInfo = await ref.read(filesInfoHolderProvider.future);
     final GoogleFile? file = fileInfo.selected;
     if (file == null) {
-      _logger.fine(
-          "skipped a request to store measurement $measurement because no "
-          "google sheet file is selected"
-      );
+      _logger.fine("skipped a request to store measurement $measurement because no "
+          "google sheet file is selected");
       state = Error(SaveMeasurementsError.noFileIsSelected);
-      return;
+      return FileAndCategory();
     }
-
     final categoryInfo = await ref.read(fileCategoriesProvider.future);
     final category = categoryInfo.selected;
     if (category == null) {
       _logger.fine("skipped a request to store measurement $measurement in file "
           "'${file.name}' because no category selected");
       state = Error(SaveMeasurementsError.noCategoryIsSelected);
+      return FileAndCategory(file: file);
+    }
+
+    return FileAndCategory(file: file, category: category);
+  }
+
+  Future<void> store(Duration measurement) async {
+    if (measurement.compareTo(Duration.zero) <= 0) {
+      _logger.fine("skipped a request to store non-positive measurement $measurement");
+      return;
+    }
+
+    final fileAndCategory = await prepareToStore(measurement);
+    final file = fileAndCategory.file;
+    if (file == null) {
+      return;
+    }
+
+    final category = fileAndCategory.category;
+    if (category == null) {
       return;
     }
 
@@ -79,5 +90,22 @@ class SheetUpdater extends _$SheetUpdater {
 
   void reset() {
     state = SaveMeasurementState.idle;
+  }
+}
+
+class FileAndCategory {
+  final GoogleFile? file;
+  final Category? category;
+
+  FileAndCategory({
+    this.file,
+    this.category,
+  });
+
+  bool get ready => file != null && category != null;
+
+  @override
+  String toString() {
+    return 'FileAndCategory{file: $file, category: $category}';
   }
 }
