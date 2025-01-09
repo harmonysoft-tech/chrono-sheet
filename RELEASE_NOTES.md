@@ -1,3 +1,5 @@
+## v1.60.0+61 released on 09 Jan 2025 UTC
+  * 9f4354f05e3c8c37a699e3631d8656af534049b7 #5 Force select file if necessary on measurement save
 ## v1.59.0+60 released on 03 Jan 2025 UTC
   * f1be8ca8c507fb37f71b019410d3531265829b24 #9 Prepare iphone native version
 ## v1.58.0+59 released on 03 Jan 2025 UTC
