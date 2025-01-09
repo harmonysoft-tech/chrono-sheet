@@ -1,3 +1,5 @@
+## v1.62.0+63 released on 09 Jan 2025 UTC
+  * 5af696abeda351f423d5906e3d71f3200a25f181 don't reset the measurement if we can't store it now
 ## v1.61.0+62 released on 09 Jan 2025 UTC
   * fd69eee49c50639e8e472419a255188e5f857854 configure product web page
 ## v1.60.0+61 released on 09 Jan 2025 UTC
