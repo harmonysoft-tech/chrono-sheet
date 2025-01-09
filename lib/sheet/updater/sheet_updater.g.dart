@@ -6,7 +6,7 @@ part of 'sheet_updater.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sheetUpdaterHash() => r'66aeb02a35f9deaf63256d89d0b063b38b60f3ba';
+String _$sheetUpdaterHash() => r'1d5a1379d4e7a0a555b7095464db3fec73ca2d5d';
 
 /// See also [SheetUpdater].
 @ProviderFor(SheetUpdater)

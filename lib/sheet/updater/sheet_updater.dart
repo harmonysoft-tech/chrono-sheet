@@ -1,8 +1,6 @@
-import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/sheet/updater/update_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import '../../category/state/categories_state.dart';
 import '../../file/model/google_file.dart';
 import '../../file/state/files_state.dart';
@@ -11,32 +9,27 @@ part 'sheet_updater.g.dart';
 
 final _logger = getNamedLogger();
 
-enum SaveMeasurementStatus {
-  idle, inProgress, success, error
+sealed class SaveMeasurementState {
+  static SaveMeasurementState success = Success();
+  static SaveMeasurementState idle = Idle();
 }
 
-class SaveMeasurementState {
+class Idle extends SaveMeasurementState {}
 
-  static SaveMeasurementState success = SaveMeasurementState(status: SaveMeasurementStatus.success);
-  static SaveMeasurementState idle = SaveMeasurementState(status: SaveMeasurementStatus.idle);
+class InProgress extends SaveMeasurementState {}
 
-  final SaveMeasurementStatus status;
-  final String? error;
+class Success extends SaveMeasurementState {}
 
-  const SaveMeasurementState({
-    this.status = SaveMeasurementStatus.idle,
-    this.error,
-  });
+class Error extends SaveMeasurementState {
+  SaveMeasurementsError error;
 
-  SaveMeasurementState copyWith({
-    SaveMeasurementStatus? status,
-    String? error,
-  }) {
-    return SaveMeasurementState(
-      status: status ?? this.status,
-      error: error ?? this.error,
-    );
-  }
+  Error(this.error);
+}
+
+enum SaveMeasurementsError {
+  noFileIsSelected,
+  noCategoryIsSelected,
+  generic,
 }
 
 @riverpod
@@ -46,7 +39,7 @@ class SheetUpdater extends _$SheetUpdater {
     return SaveMeasurementState.idle;
   }
 
-  Future<void> store(Duration measurement, AppLocalizations l10n) async {
+  Future<void> store(Duration measurement) async {
     if (measurement.compareTo(Duration.zero) <= 0) {
       _logger.fine(
           "skipped a request to store non-positive measurement $measurement"
@@ -61,10 +54,7 @@ class SheetUpdater extends _$SheetUpdater {
           "skipped a request to store measurement $measurement because no "
           "google sheet file is selected"
       );
-      state = state.copyWith(
-        status: SaveMeasurementStatus.error,
-        error: l10n.errorNoFileIsSelected,
-      );
+      state = Error(SaveMeasurementsError.noFileIsSelected);
       return;
     }
 
@@ -73,10 +63,7 @@ class SheetUpdater extends _$SheetUpdater {
     if (category == null) {
       _logger.fine("skipped a request to store measurement $measurement in file "
           "'${file.name}' because no category selected");
-      state = state.copyWith(
-        status: SaveMeasurementStatus.error,
-        error: l10n.errorNoCategoryIsSelected,
-      );
+      state = Error(SaveMeasurementsError.noCategoryIsSelected);
       return;
     }
 
@@ -86,10 +73,7 @@ class SheetUpdater extends _$SheetUpdater {
       state = SaveMeasurementState.success;
     } catch (e, stack) {
       _logger.warning("can not save measurement $measurement for category '$category' in file ${file.name}", e, stack);
-      state = state.copyWith(
-        status: SaveMeasurementStatus.error,
-        error: e.toString()
-      );
+      state = Error(SaveMeasurementsError.generic);
     }
   }
 

@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'files_state.dart';
+part of 'main_hint_positions.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$filesInfoHolderHash() => r'9f6daac81ffcbb1d3a5640491a2373ec89fbf24e';
+String _$hintPositionsHash() => r'8cb03d497cd4dcc362f434807c61fed2f2240d2b';
 
-/// See also [FilesInfoHolder].
-@ProviderFor(FilesInfoHolder)
-final filesInfoHolderProvider =
-    AutoDisposeAsyncNotifierProvider<FilesInfoHolder, FilesInfo>.internal(
-  FilesInfoHolder.new,
-  name: r'filesInfoHolderProvider',
+/// See also [HintPositions].
+@ProviderFor(HintPositions)
+final hintPositionsProvider =
+    AutoDisposeNotifierProvider<HintPositions, HintPositionsState>.internal(
+  HintPositions.new,
+  name: r'hintPositionsProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$filesInfoHolderHash,
+      : _$hintPositionsHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$FilesInfoHolder = AutoDisposeAsyncNotifier<FilesInfo>;
+typedef _$HintPositions = AutoDisposeNotifier<HintPositionsState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

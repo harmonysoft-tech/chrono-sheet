@@ -146,7 +146,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
       _timer?.cancel();
       _timer = null;
       _prefs.setString(_preferencesKey, "");
-      ref.read(sheetUpdaterProvider.notifier).store(durationToStore, AppLocalizations.of(context));
+      ref.read(sheetUpdaterProvider.notifier).store(durationToStore);
     });
   }
 

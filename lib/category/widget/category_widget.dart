@@ -3,6 +3,7 @@ import 'package:chrono_sheet/category/state/categories_state.dart';
 import 'package:chrono_sheet/file/state/files_state.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
+import 'package:chrono_sheet/ui/widget_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,12 +29,10 @@ class CategoryWidget extends ConsumerWidget {
             orElse: () => NoFileCreationWidget(),
           ),
         ),
-        SizedBox(height: Dimension.labelVerticalInset),
+        SizedBox(height: AppDimension.labelVerticalInset),
         Text(
           l10n.labelCategory,
-          style: TextStyle(
-              fontSize: theme.textTheme.labelMedium?.fontSize
-          ),
+          style: TextStyle(fontSize: theme.textTheme.labelMedium?.fontSize),
         ),
       ],
     );
@@ -51,7 +50,10 @@ class FileCreationWidget extends StatelessWidget {
       children: [
         IconButton(
           onPressed: null,
-          icon: Icon(Icons.add),
+          icon: Icon(
+            Icons.add,
+            key: AppWidgetKey.createCategory,
+          ),
         ),
         Expanded(
           child: Center(
@@ -79,7 +81,10 @@ class NoFileCreationWidget extends ConsumerWidget {
       children: [
         IconButton(
           onPressed: () => _addCategory(context, ref.read(fileCategoriesProvider.notifier)),
-          icon: Icon(Icons.add),
+          icon: Icon(
+            Icons.add,
+            key: AppWidgetKey.createCategory,
+          ),
         ),
         Expanded(
           child: Center(
@@ -103,6 +108,7 @@ class NoFileCreationWidget extends ConsumerWidget {
           data: (data) => data.categories.isEmpty
               ? DisabledPopupMenuButtonWidget()
               : PopupMenuButton<Category>(
+                  key: AppWidgetKey.selectCategory,
                   icon: Icon(Icons.arrow_drop_down),
                   onSelected: (category) => ref.read(fileCategoriesProvider.notifier).select(category),
                   itemBuilder: (context) => data.categories.map((c) {

@@ -2,10 +2,10 @@ import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/file/service/creator/google_file_creator.dart';
 import 'package:chrono_sheet/router/router.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
+import 'package:chrono_sheet/ui/widget_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../generated/app_localizations.dart';
 import '../state/files_state.dart';
 
@@ -85,23 +85,31 @@ class SelectedFileWidget extends ConsumerWidget {
             border: Border(bottom: BorderSide()),
           ),
           child: Row(
-            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               asyncData.maybeWhen(
                 data: (data) => data.operationInProgress == FileOperation.creation
                     ? CircularProgressIndicator()
                     : IconButton(
                         onPressed: () => _createFile(context, ref),
-                        icon: Icon(Icons.add),
+                        icon: Icon(
+                          Icons.add,
+                          key: AppWidgetKey.createFile,
+                        ),
                       ),
                 orElse: () => IconButton(
                   onPressed: () => _createFile(context, ref),
-                  icon: Icon(Icons.add),
+                  icon: Icon(
+                    key: AppWidgetKey.createFile,
+                    Icons.add,
+                  ),
                 ),
               ),
               IconButton(
                 onPressed: () => _selectFile(context),
-                icon: Icon(Icons.search),
+                icon: Icon(
+                  Icons.search,
+                  key: AppWidgetKey.selectFile,
+                ),
               ),
               Expanded(
                 child: Container(
@@ -146,7 +154,7 @@ class SelectedFileWidget extends ConsumerWidget {
             ],
           ),
         ),
-        SizedBox(height: Dimension.labelVerticalInset),
+        SizedBox(height: AppDimension.labelVerticalInset),
         Text(
           l10n.labelFile,
           style: TextStyle(fontSize: theme.textTheme.labelMedium?.fontSize),
