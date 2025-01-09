@@ -1,3 +1,5 @@
+## v1.63.0+64 released on 09 Jan 2025 UTC
+  * c8bc9430f0b1d35dc601d53aa69fdc6ecd6e9ca4 configuring web pages
 ## v1.62.0+63 released on 09 Jan 2025 UTC
   * 5af696abeda351f423d5906e3d71f3200a25f181 don't reset the measurement if we can't store it now
 ## v1.61.0+62 released on 09 Jan 2025 UTC
