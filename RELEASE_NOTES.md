@@ -1,3 +1,5 @@
+## v1.61.0+62 released on 09 Jan 2025 UTC
+  * fd69eee49c50639e8e472419a255188e5f857854 configure product web page
 ## v1.60.0+61 released on 09 Jan 2025 UTC
   * 9f4354f05e3c8c37a699e3631d8656af534049b7 #5 Force select file if necessary on measurement save
 ## v1.59.0+60 released on 03 Jan 2025 UTC
