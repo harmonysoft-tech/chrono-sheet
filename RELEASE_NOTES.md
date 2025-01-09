@@ -1,3 +1,5 @@
+## v1.65.0+66 released on 09 Jan 2025 UTC
+  * 6f7813170172f25322fcbef7f75b9575aabe8d57 configuring web pages
 ## v1.64.0+65 released on 09 Jan 2025 UTC
   * bec16d6c384e5655ca0b334bd3de34fb09ce4aa9 configuring web pages
 ## v1.63.0+64 released on 09 Jan 2025 UTC
