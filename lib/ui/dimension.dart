@@ -17,13 +17,15 @@ Size getTextSize(String text, TextStyle style, double maxWidth) {
     textDirection: TextDirection.ltr
   )..layout(maxWidth: maxWidth);
   double minWidth = -1.0;
+  double height = 0.0;
   for (final line in painter.computeLineMetrics()) {
     if (minWidth < line.width) {
       minWidth = line.width;
     }
+    height += line.height;
   }
   if (minWidth < 0.0) {
     minWidth = maxWidth;
   }
-  return Size(minWidth, painter.height);
+  return Size(minWidth, height);
 }

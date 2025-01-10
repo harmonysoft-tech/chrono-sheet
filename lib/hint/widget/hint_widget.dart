@@ -29,10 +29,8 @@ class HintWidget extends StatelessWidget {
           painter: _HintArrowPainter(hintBounds),
           child: Padding(
             padding: EdgeInsets.all(AppDimension.hintInsets),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: hintBounds.maxTextWidth,
-              ),
+            child: SizedBox(
+              width: hintBounds.maxTextWidth,
               child: Text(
                 text,
                 style: AppTheme.labelTextStyle,
