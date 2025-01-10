@@ -1,3 +1,5 @@
+## v1.67.0+68 released on 10 Jan 2025 UTC
+  * 784a7dfe95479dcd909a1cb54b2bf6fc58954c01 making sure that we use consistent hint height
 ## v1.66.0+67 released on 10 Jan 2025 UTC
   * 2ae04f557635bdfa8ef8d2706c21bafd281d2469 make sure that we use consistent text style for hint text
 ## v1.65.0+66 released on 09 Jan 2025 UTC

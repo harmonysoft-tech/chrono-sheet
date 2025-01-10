@@ -3,7 +3,7 @@ description: "A stopwatch which data is managed by Google Sheets"
 
 publish_to: 'none'
 
-version: 1.66.0+67
+version: 1.67.0+68
 
 environment:
   sdk: 3.5.1
