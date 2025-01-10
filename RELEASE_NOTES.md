@@ -1,3 +1,5 @@
+## v1.66.0+67 released on 10 Jan 2025 UTC
+  * 2ae04f557635bdfa8ef8d2706c21bafd281d2469 make sure that we use consistent text style for hint text
 ## v1.65.0+66 released on 09 Jan 2025 UTC
   * 6f7813170172f25322fcbef7f75b9575aabe8d57 configuring web pages
 ## v1.64.0+65 released on 09 Jan 2025 UTC
