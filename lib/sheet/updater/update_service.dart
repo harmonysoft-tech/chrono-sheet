@@ -186,14 +186,21 @@ class SheetUpdateService {
     });
     context.columns = newColumns;
 
-    final newValues = context.values.map((address, value) {
+    context.values = _calculateNewValuesOnRowsInserted(rowToInsertAfter, rowsCount, context.values);
+  }
+
+  Map<CellAddress, String> _calculateNewValuesOnRowsInserted(
+    int rowToInsertAfter,
+    int rowsCount,
+    Map<CellAddress, String> values,
+  ) {
+    return values.map((address, value) {
       if (address.row > rowToInsertAfter) {
         return MapEntry(CellAddress(address.row + rowsCount, address.column), value);
       } else {
         return MapEntry(address, value);
       }
     });
-    context.values = newValues;
   }
 
   String? _getValue(CellAddress address, _Context context) {
@@ -274,12 +281,14 @@ class SheetUpdateService {
   }
 
   Future<void> _storeInExistingTable(_Context context) async {
-    final updates = <CellAddress, String>{};
+    final totalColumnValues = await _ensureThatTotalDurationColumnExists(context);
+    Map<CellAddress, String> updates = Map.of(totalColumnValues);
     int? todayRow = context.sheetInfo.todayRow;
     final dateHeaderCell = context.columns[Column.date]!;
     if (todayRow == null) {
       await _insertRows(dateHeaderCell.row, 1, context);
       todayRow = dateHeaderCell.row + 1;
+      updates = _calculateNewValuesOnRowsInserted(dateHeaderCell.row, 1, updates);
       updates[CellAddress(todayRow, dateHeaderCell.column)] = context.sheetInfo.dateFormat.format(clockProvider.now());
     }
 
@@ -311,6 +320,68 @@ class SheetUpdateService {
     updates[CellAddress(todayRow, categoryColumn)] = (currentCategoryValue + context.durationToStore).toString();
 
     await _setValues(context, updates);
+  }
+
+  Future<Map<CellAddress, String>> _ensureThatTotalDurationColumnExists(_Context context) async {
+    if (context.columns.containsKey(Column.total)) {
+      return {};
+    }
+    final dateColumnCell = context.columns[Column.date];
+    if (dateColumnCell == null) {
+      return {};
+    }
+    final row2totalValue = <int, int>{};
+    final totalColumn = dateColumnCell.column + 1;
+    await context.api.spreadsheets.batchUpdate(
+      BatchUpdateSpreadsheetRequest(
+        requests: [
+          Request(
+            insertDimension: InsertDimensionRequest(
+              range: DimensionRange(
+                sheetId: 0,
+                dimension: "COLUMNS",
+                startIndex: totalColumn,
+                endIndex: totalColumn + 1,
+              ),
+            ),
+          ),
+        ],
+      ),
+      context.file.id,
+    );
+
+    final newColumns = context.columns.map(
+      (column, address) => MapEntry(
+        column,
+        address.column >= totalColumn ? address.shiftColumn(1) : address,
+      ),
+    );
+    final totalCellAddress = CellAddress(dateColumnCell.row, totalColumn);
+    newColumns[Column.total] = totalCellAddress;
+
+    final newValues = context.values.map(
+      (address, value) {
+        if (address.column < totalColumn) {
+          return MapEntry(address, value);
+        } else {
+          final current = row2totalValue[address.row] ?? 0;
+          final cellValue = int.tryParse(value) ?? 0;
+          row2totalValue[address.row] = current + cellValue;
+          return MapEntry(address.shiftColumn(1), value);
+        }
+      },
+    );
+    newValues[totalCellAddress] = Column.total;
+    context.columns = newColumns;
+    context.values = newValues;
+    final result = row2totalValue.map(
+      (row, totalValue) => MapEntry(
+        CellAddress(row, totalColumn),
+        totalValue.toString(),
+      ),
+    );
+    result[totalCellAddress] = Column.total;
+    return result;
   }
 
   int _calculateTotalDuration(int row, _Context context) {

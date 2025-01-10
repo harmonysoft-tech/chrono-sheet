@@ -183,7 +183,8 @@ void main() async {
 void _runTests() {
   _emptySheet();
   _updateToday();
-  _existingTableNoToday();
+  _existingTableNoTodayRow();
+  _existingTableNoTotalColumn();
   _noTableNonEmptySheet();
   _customFormat();
 }
@@ -257,7 +258,7 @@ void _updateToday() {
   });
 }
 
-void _existingTableNoToday() {
+void _existingTableNoTodayRow() {
   group("existing table, no 'today' row", () {
     test("new category", () async {
       _setSheetState("""
@@ -282,6 +283,23 @@ void _existingTableNoToday() {
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 2               | 2
         $_yesterdayUs  | 5               | 5
+      """);
+    });
+  });
+}
+
+void _existingTableNoTotalColumn() {
+  group("existing table, no 'total time' column", () {
+    test("existing table, no 'total time' column", () async {
+      _setSheetState("""
+        ${Column.date} | ${_Categories.one} | ${_Categories.two}
+        $_yesterdayUs  | 5                  | 3
+      """);
+      await _service.saveMeasurement(2, _Categories.two, _file);
+      await _verifyDocumentState("""
+        ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
+        $_todayUs      | 2               |                    | 2          
+        $_yesterdayUs  | 8               | 5                  | 3          
       """);
     });
   });

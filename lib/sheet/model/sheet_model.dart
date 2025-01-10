@@ -15,6 +15,10 @@ class CellAddress {
 
   const CellAddress(this.row, this.column);
 
+  CellAddress shiftColumn(int shift) {
+    return CellAddress(row, column + shift);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
