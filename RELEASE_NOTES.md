@@ -1,3 +1,5 @@
+## v1.70.0+71 released on 10 Jan 2025 UTC
+  * 6262c42c5e9411211f8d7ed2d3ef4edc5d1c5687 don't show inplace file and category hints
 ## v1.69.0+70 released on 10 Jan 2025 UTC
   * bd7f3f0457696e333478aacf36a4d4285d360186 allow to save measurements from a paused stopwatch
 ## v1.68.0+69 released on 10 Jan 2025 UTC
