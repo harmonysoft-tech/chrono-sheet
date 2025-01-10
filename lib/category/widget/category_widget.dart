@@ -90,7 +90,7 @@ class NoFileCreationWidget extends ConsumerWidget {
           child: Center(
             child: asyncCategories.when(
               data: (data) => Text(
-                data.selected?.name ?? localization.hintCreateCategory,
+                data.selected?.name ?? "",
                 style: data.selected == null ? TextStyle(color: theme.disabledColor) : null,
               ),
               error: (_, __) => Text(

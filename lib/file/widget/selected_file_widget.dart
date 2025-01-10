@@ -118,18 +118,18 @@ class SelectedFileWidget extends ConsumerWidget {
                     child: asyncData.when(
                       data: (data) => Text(
                         data.operationInProgress == FileOperation.none
-                            ? data.selected?.name ?? l10n.hintSelectFile
+                            ? data.selected?.name ?? ""
                             : "",
                         style: (data.selected == null || data.operationInProgress != FileOperation.none)
                             ? TextStyle(color: theme.disabledColor)
                             : null,
                       ),
                       error: (_, __) => Text(
-                        l10n.hintSelectFile,
+                        "",
                         style: TextStyle(color: theme.disabledColor),
                       ),
                       loading: () => Text(
-                        l10n.hintSelectFile,
+                        "",
                         style: TextStyle(color: theme.disabledColor),
                       ),
                     ),
