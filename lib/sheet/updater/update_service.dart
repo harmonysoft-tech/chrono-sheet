@@ -94,7 +94,7 @@ class SheetUpdateService {
       CellAddress(0, 2): context.category.name,
       CellAddress(1, 0): context.sheetInfo.dateFormat.format(clockProvider.now()),
       CellAddress(1, 1): context.durationToStore.toString(),
-      CellAddress(1, 2): context.durationToStore .toString(),
+      CellAddress(1, 2): context.durationToStore.toString(),
     });
   }
 
@@ -364,6 +364,39 @@ Future<void> setSheetCellValues({
   } catch (e, stack) {
     _logger.warning("failed to set values $values in google sheet document '$sheetFileName'", e, stack);
     rethrow;
+  }
+
+  try {
+    // align the text horizontally inside the cells
+    await api.spreadsheets.batchUpdate(
+      BatchUpdateSpreadsheetRequest(
+        requests: values.keys
+            .map(
+              (address) => Request(
+                repeatCell: RepeatCellRequest(
+                  range: GridRange(
+                    sheetId: 0,
+                    startRowIndex: address.row,
+                    endRowIndex: address.row + 1,
+                    startColumnIndex: address.column,
+                    endColumnIndex: address.column + 1,
+                  ),
+                  cell: CellData(
+                    userEnteredFormat: CellFormat(
+                      horizontalAlignment: 'CENTER',
+                    ),
+                  ),
+                  fields: 'userEnteredFormat(horizontalAlignment)',
+                ),
+              ),
+            )
+            .toList(),
+      ),
+      sheetDocumentId,
+    );
+  } catch (e, stack) {
+    _logger.warning(
+        "failed to align cells ${values.keys.toList()} in google sheet document '$sheetFileName'", e, stack);
   }
 }
 
