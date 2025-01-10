@@ -35,6 +35,10 @@ class HintWidget extends StatelessWidget {
                 text,
                 style: AppTheme.labelTextStyle,
                 textAlign: TextAlign.center,
+                textHeightBehavior: TextHeightBehavior(
+                  applyHeightToFirstAscent: false,
+                  applyHeightToLastDescent: false,
+                ),
               ),
             ),
           ),
