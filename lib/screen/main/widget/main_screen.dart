@@ -13,7 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../category/widget/category_widget.dart';
 
 class MainScreen extends ConsumerWidget {
-
   const MainScreen({super.key});
 
   bool _needToShowHint(HintPositionsState state) {
@@ -38,26 +37,27 @@ class MainScreen extends ConsumerWidget {
     final hintPositions = ref.watch(hintPositionsProvider);
     final columnVerticalInset = 24.0;
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).appName),
-        actions: [
-          loggedInAsync.when(
-            data: (loggedIn) => loggedIn
-                ? IconButton(
-                    onPressed: () => ref.read(loginStateProvider.notifier).logout(),
-                    icon: Icon(Icons.logout),
-                  )
-                : LoginWidget(),
-            error: (_, __) => LoginWidget(),
-            loading: () => CircularProgressIndicator(),
+
+    return Stack(
+      key: AppWidgetKey.mainScreenCanvas,
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: Text(AppLocalizations.of(context).appName),
+            actions: [
+              loggedInAsync.when(
+                data: (loggedIn) => loggedIn
+                    ? IconButton(
+                        onPressed: () => ref.read(loginStateProvider.notifier).logout(),
+                        icon: Icon(Icons.logout),
+                      )
+                    : LoginWidget(),
+                error: (_, __) => LoginWidget(),
+                loading: () => CircularProgressIndicator(),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Stack(
-        key: AppWidgetKey.mainScreenCanvas,
-        children: [
-          Padding(
+          body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -73,40 +73,40 @@ class MainScreen extends ConsumerWidget {
               ],
             ),
           ),
-          if (_needToShowHint(hintPositions)) ...[
-            GestureDetector(
-              onTap: () => ref.read(sheetUpdaterProvider.notifier).reset(),
-              child: Container(
-                color: AppColor.hintBelow,
-              ),
-            )
-          ],
-          if (hintPositions.createFile != null) ...[
-            HintWidget(
-              text: l10n.hintCreateFile,
-              hintBounds: hintPositions.createFile!,
+        ),
+        if (_needToShowHint(hintPositions)) ...[
+          GestureDetector(
+            onTap: () => ref.read(sheetUpdaterProvider.notifier).reset(),
+            child: Container(
+              color: AppColor.hintBelow,
             ),
-          ],
-          if (hintPositions.selectFile != null) ...[
-            HintWidget(
-              text: l10n.hintSelectFile,
-              hintBounds: hintPositions.selectFile!,
-            ),
-          ],
-          if (_needToHintCategoryCreation(hintPositions)) ...[
-            HintWidget(
-              text: l10n.hintCreateCategory,
-              hintBounds: hintPositions.createCategory!,
-            ),
-          ],
-          if (_needToHintCategorySelection(hintPositions)) ...[
-            HintWidget(
-              text: l10n.hintSelectCategory,
-              hintBounds: hintPositions.selectCategory!,
-            ),
-          ],
+          )
         ],
-      ),
+        if (hintPositions.createFile != null) ...[
+          HintWidget(
+            text: l10n.hintCreateFile,
+            hintBounds: hintPositions.createFile!,
+          ),
+        ],
+        if (hintPositions.selectFile != null) ...[
+          HintWidget(
+            text: l10n.hintSelectFile,
+            hintBounds: hintPositions.selectFile!,
+          ),
+        ],
+        if (_needToHintCategoryCreation(hintPositions)) ...[
+          HintWidget(
+            text: l10n.hintCreateCategory,
+            hintBounds: hintPositions.createCategory!,
+          ),
+        ],
+        if (_needToHintCategorySelection(hintPositions)) ...[
+          HintWidget(
+            text: l10n.hintSelectCategory,
+            hintBounds: hintPositions.selectCategory!,
+          ),
+        ],
+      ],
     );
   }
 }

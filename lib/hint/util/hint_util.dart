@@ -4,6 +4,7 @@ import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/hint/model/hint_model.dart';
 import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
+import 'package:chrono_sheet/ui/theme.dart';
 import 'package:flutter/material.dart';
 
 final _logger = getNamedLogger();
@@ -28,19 +29,14 @@ HintBounds? calculateHintBounds({
     return null;
   }
   final screenSize = MediaQuery.of(context).size;
-  final style = Theme.of(context).textTheme.bodyMedium;
-  if (style == null) {
-    _logger.fine("can not calculate hint bounds for '$anchorKey' - text style is undefined");
-    return null;
-  }
   final l10n = AppLocalizations.of(context);
   final text = key2hintText[anchorKey]?.call(l10n);
   if (text == null) {
     _logger.fine("can not calculate hint bounds for '$anchorKey' - hint text is undefined");
     return null;
   }
-  final hintTextSize =
-      getTextSize(text, style, screenSize.width / 2) + Offset(AppDimension.hintInsets * 2, AppDimension.hintInsets * 2);
+  final hintTextSize = getTextSize(text, AppTheme.labelTextStyle, screenSize.width / 2) +
+      Offset(AppDimension.hintInsets * 2, AppDimension.hintInsets * 2);
   final hintX = _calculateHintX(screenSize, hintTextSize, anchorScreenRect);
   final hintY = _calculateHintY(hintTextSize, anchorScreenRect, location);
 

@@ -1,5 +1,6 @@
 import 'package:chrono_sheet/ui/color.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
+import 'package:chrono_sheet/ui/theme.dart';
 import 'package:flutter/material.dart';
 
 import '../model/hint_model.dart';
@@ -34,6 +35,7 @@ class HintWidget extends StatelessWidget {
               ),
               child: Text(
                 text,
+                style: AppTheme.labelTextStyle,
                 textAlign: TextAlign.center,
               ),
             ),
