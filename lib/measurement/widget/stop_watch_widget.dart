@@ -139,7 +139,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
   }
 
   Future<void> _saveMeasurement() async {
-    if (!_running || _measuredDuration <= Duration.zero) {
+    if (_measuredDuration <= Duration.zero) {
       return;
     }
     final data = await ref.read(sheetUpdaterProvider.notifier).prepareToStore(_measuredDuration);
