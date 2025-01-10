@@ -1,3 +1,5 @@
+## v1.71.0+72 released on 10 Jan 2025 UTC
+  * 1bff18ffaa69e2d05ad06f7b960cfab89aa91185 #15 Insert 'total duration' column as the second column if it doesn't exist
 ## v1.70.0+71 released on 10 Jan 2025 UTC
   * 6262c42c5e9411211f8d7ed2d3ef4edc5d1c5687 don't show inplace file and category hints
 ## v1.69.0+70 released on 10 Jan 2025 UTC
