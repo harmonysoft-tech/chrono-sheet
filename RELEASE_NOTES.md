@@ -1,3 +1,5 @@
+## v1.69.0+70 released on 10 Jan 2025 UTC
+  * bd7f3f0457696e333478aacf36a4d4285d360186 allow to save measurements from a paused stopwatch
 ## v1.68.0+69 released on 10 Jan 2025 UTC
   * beba2a380d1f953cd00a0d4ca5fdf65cb90d082c making sure that we use consistent hint height
 ## v1.67.0+68 released on 10 Jan 2025 UTC
