@@ -24,8 +24,14 @@ import 'package:googleapis_auth/src/service_account_credentials.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-late SheetsApi _api;
-late GoogleFile _file;
+final List<_TestContext> _contexts = [];
+int _contextCounter = 0;
+final _gDirectories = {
+  1: "1e7oHNJN7GHozelAlnHHtggFIFb8xTv4Q",
+  2: "1zwe-uJNlz08Aj5ecWlHGqoxpy_1SgC1o",
+};
+
+_TestContext get _context => _contexts[_contextCounter];
 final _sheetTitle = "Sheet1";
 final SheetUpdateService _service = SheetUpdateService();
 DateTime _today = date.fallbackDateFormat.parse("2024-12-29");
@@ -33,8 +39,8 @@ String _todayUs = _Format.us.format(_today);
 DateTime _yesterday = _today.subtract(Duration(days: 1));
 String _yesterdayUs = _Format.us.format(_yesterday);
 
-Future<AutoRefreshingAuthClient> _getClient() async {
-  final file = File("test/auto-test-service-account.json");
+Future<AutoRefreshingAuthClient> _getClient(int counter) async {
+  final file = File("test/auto-test-service-account$counter.json");
   if (!await file.exists()) {
     throw AssertionError("file ${file.path} doesn't exist");
   }
@@ -47,8 +53,8 @@ Future<AutoRefreshingAuthClient> _getClient() async {
   return await clientViaServiceAccount(credentials, scopes);
 }
 
-Future<void> _clearDocument() async {
-  await _api.spreadsheets.values.clear(ClearValuesRequest(), _file.id, _sheetTitle);
+Future<void> _clearDocument(_TestContext context) async {
+  await context.api.spreadsheets.values.clear(ClearValuesRequest(), context.file.id, _sheetTitle);
 }
 
 Future<void> _setSheetState(String raw) async {
@@ -56,16 +62,16 @@ Future<void> _setSheetState(String raw) async {
   await setSheetCellValues(
     values: values,
     sheetTitle: _sheetTitle,
-    sheetDocumentId: _file.id,
-    sheetFileName: _file.name,
-    api: _api,
+    sheetDocumentId: _context.file.id,
+    sheetFileName: _context.file.name,
+    api: _context.api,
   );
 }
 
 Future<void> _verifyDocumentState(String rawExpected) async {
   final expectedValues = _parse(rawExpected);
 
-  final valueRange = await _api.spreadsheets.values.get(_file.id, _sheetTitle, majorDimension: "ROWS");
+  final valueRange = await _context.api.spreadsheets.values.get(_context.file.id, _sheetTitle, majorDimension: "ROWS");
   final actualValues = parseSheetValues(valueRange.values!);
 
   // google sheet api doesn't return values for empty rows, that's why we need to do custom comparison here
@@ -144,35 +150,60 @@ class _Categories {
   static final two = Category("category2");
 }
 
-void main() async {
-  final client = await _getClient();
-  final format = DateFormat("yyyy-MM-dd-HH:mm:ss'");
-  final documentTitle = "${format.format(DateTime.now())}-${Uuid().v4()}";
-  final fileMetaData = drive.File()
-    ..title = documentTitle
-    ..mimeType = sheetMimeType
-    ..parents = [drive.ParentReference(id: "1e7oHNJN7GHozelAlnHHtggFIFb8xTv4Q")];
-  final driveApi = drive.DriveApi(client);
-  final gFile = await driveApi.files.insert(fileMetaData);
-  _file = GoogleFile(gFile.id!, documentTitle);
-  print("created google sheet file '$documentTitle', id: ${_file.id}");
+class _TestContext {
+  final GoogleFile file;
+  final SheetsApi api;
+  final drive.DriveApi driveApi;
+  final AutoRefreshingAuthClient client;
 
-  _api = SheetsApi(client);
-  setClientOverride(client);
+  _TestContext({
+    required this.file,
+    required this.api,
+    required this.driveApi,
+    required this.client,
+  });
+}
+
+Future<void> prepareContexts() async {
+  for (int i = 1; i <= 2; i++) {
+    final client = await _getClient(i);
+    final format = DateFormat("yyyy-MM-dd-HH:mm:ss'");
+    final documentTitle = "${format.format(DateTime.now())}-${Uuid().v4()}";
+    final fileMetaData = drive.File()
+      ..title = documentTitle
+      ..mimeType = sheetMimeType
+      ..parents = [drive.ParentReference(id: _gDirectories[i]!)];
+    final driveApi = drive.DriveApi(client);
+    final gFile = await driveApi.files.insert(fileMetaData);
+    _contexts.add(_TestContext(
+      file: GoogleFile(gFile.id!, documentTitle),
+      api:  SheetsApi(client),
+      driveApi: driveApi,
+      client: client,
+    ));
+  }
+}
+
+void main() async {
+  await prepareContexts();
 
   group("all tests", () {
     tearDownAll(() async {
-      print("deleting google file ${_file.id}");
-      await driveApi.files.delete(_file.id);
-      print("deleted google file ${_file.id}");
+      for (final context in _contexts) {
+        print("deleting google file ${context.file.id}");
+        await context.driveApi.files.delete(context.file.id);
+        print("deleted google file ${context.file.id}");
+      }
     });
 
     setUp(() {
       date.overrideNow(_today);
+      _contextCounter = (_contextCounter + 1) % _contexts.length;
+      setClientOverride(_context.client);
     });
 
     tearDown(() async {
-      await _clearDocument();
+      await _clearDocument(_context);
       date.reset();
     });
 
@@ -193,7 +224,7 @@ void _emptySheet() {
   group("empty sheet", () {
     test("empty sheet", () async {
       final duration = 2;
-      await _service.saveMeasurement(duration, _Categories.one, _file);
+      await _service.saveMeasurement(duration, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | $duration       | $duration         
@@ -209,7 +240,7 @@ void _updateToday() {
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 1               | 1
       """);
-      await _service.saveMeasurement(2, _Categories.two, _file);
+      await _service.saveMeasurement(2, _Categories.two, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
         $_todayUs      | 3               | 1                  | 2         
@@ -221,7 +252,7 @@ void _updateToday() {
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 1               | 1
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 3               | 3                          
@@ -234,7 +265,7 @@ void _updateToday() {
         |   |  | ${Column.date} | ${Column.total} | ${_Categories.one}
         |   |  | $_todayUs      | 1               | 1
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         |   |  |                |                 |
         |   |  | ${Column.date} | ${Column.total} | ${_Categories.one}
@@ -248,7 +279,7 @@ void _updateToday() {
         $_todayUs      | 3               | 1                  | 2          
         $_yesterdayUs  | 5               |                    | 5
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
         $_todayUs      | 5               | 3                  | 2          
@@ -265,7 +296,7 @@ void _existingTableNoTodayRow() {
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_yesterdayUs  | 5               | 5                 
       """);
-      await _service.saveMeasurement(2, _Categories.two, _file);
+      await _service.saveMeasurement(2, _Categories.two, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
         $_todayUs      | 2               |                    | 2          
@@ -278,7 +309,7 @@ void _existingTableNoTodayRow() {
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_yesterdayUs  | 5               | 5                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 2               | 2
@@ -295,7 +326,7 @@ void _existingTableNoTotalColumn() {
         ${Column.date} | ${_Categories.one} | ${_Categories.two}
         $_yesterdayUs  | 5                  | 3
       """);
-      await _service.saveMeasurement(2, _Categories.two, _file);
+      await _service.saveMeasurement(2, _Categories.two, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
         $_todayUs      | 2               |                    | 2          
@@ -311,7 +342,7 @@ void _noTableNonEmptySheet() {
       _setSheetState("""
         abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 2               | 2
@@ -324,7 +355,7 @@ void _noTableNonEmptySheet() {
       _setSheetState("""
         | abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 2               | 2
@@ -337,7 +368,7 @@ void _noTableNonEmptySheet() {
       _setSheetState("""
         |   |  | abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one} |
         $_todayUs      | 2               | 2                  |
@@ -350,7 +381,7 @@ void _noTableNonEmptySheet() {
       _setSheetState("""
         |   |   |   |  abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one} |   |
         $_todayUs      | 2               | 2                  |   |
@@ -364,7 +395,7 @@ void _noTableNonEmptySheet() {
         |
         | abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 2               | 2
@@ -379,7 +410,7 @@ void _noTableNonEmptySheet() {
         |   |
         |   | abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $_todayUs      | 2               | 2
@@ -399,7 +430,7 @@ void _customFormat() {
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $yesterday     | 1               | 1
       """);
-      await _service.saveMeasurement(2, _Categories.one, _file);
+      await _service.saveMeasurement(2, _Categories.one, _context.file);
       await _verifyDocumentState("""
         ${Column.date} | ${Column.total} | ${_Categories.one}
         $today         | 2               | 2         
