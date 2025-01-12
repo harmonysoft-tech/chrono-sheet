@@ -14,7 +14,12 @@ Size getTextSize(String text, TextStyle style, double maxWidth) {
   final painter = TextPainter(
     text: TextSpan(text: text, style: style),
     maxLines: null,
-    textDirection: TextDirection.ltr
+    textDirection: TextDirection.ltr,
+    textAlign: TextAlign.center,
+    textHeightBehavior: TextHeightBehavior(
+      applyHeightToFirstAscent: false,
+      applyHeightToLastDescent: false,
+    ),
   )..layout(maxWidth: maxWidth);
   double minWidth = -1.0;
   double height = 0.0;

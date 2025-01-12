@@ -35,8 +35,8 @@ HintBounds? calculateHintBounds({
     _logger.fine("can not calculate hint bounds for '$anchorKey' - hint text is undefined");
     return null;
   }
-  final hintTextSize = getTextSize(text, AppTheme.labelTextStyle, screenSize.width / 2) +
-      Offset(AppDimension.hintInsets * 2, AppDimension.hintInsets * 2);
+  final originalHintTextSize = getTextSize(text, AppTheme.labelTextStyle, screenSize.width / 2);
+  final hintTextSize = originalHintTextSize + Offset(AppDimension.hintInsets * 2, AppDimension.hintInsets * 2);
   final hintX = _calculateHintX(screenSize, hintTextSize, anchorScreenRect);
   final hintY = _calculateHintY(hintTextSize, anchorScreenRect, location);
 
@@ -51,7 +51,8 @@ HintBounds? calculateHintBounds({
     pointerArrow: Point(hintX.arrowBaseLeft + AppDimension.hintArrowWidth / 2, hintY.arrowPoint),
     pointerRight: Point(hintX.arrowBaseLeft + AppDimension.hintArrowWidth, hintY.arrowBase),
   );
-  _logger.fine("generated the following hint bounds for $anchorKey: $result");
+  _logger.fine("generated the following hint bounds for $anchorKey: $result, original text size: "
+      "$originalHintTextSize. Anchor rect: $anchorScreenRect, canvas rect: $canvasScreenRect");
   return result;
 }
 

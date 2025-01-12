@@ -27,10 +27,11 @@ class HintWidget extends StatelessWidget {
         ),
         child: CustomPaint(
           painter: _HintArrowPainter(hintBounds),
-          child: Padding(
-            padding: EdgeInsets.all(AppDimension.hintInsets),
-            child: SizedBox(
-              width: hintBounds.maxTextWidth,
+          child: SizedBox(
+            width: hintBounds.rect.width,
+            height: hintBounds.rect.height,
+            child: Padding(
+              padding: EdgeInsets.all(AppDimension.hintInsets),
               child: Text(
                 text,
                 style: AppTheme.labelTextStyle,
