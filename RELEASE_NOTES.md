@@ -1,3 +1,5 @@
+## v1.72.0+73 released on 12 Jan 2025 UTC
+  * 8bca1222393dcc8952587c54a0d829a3d8706d88 #38 make sure that tests suite doesn't fail because of quota exceeded
 ## v1.71.0+72 released on 10 Jan 2025 UTC
   * 1bff18ffaa69e2d05ad06f7b960cfab89aa91185 #15 Insert 'total duration' column as the second column if it doesn't exist
 ## v1.70.0+71 released on 10 Jan 2025 UTC
