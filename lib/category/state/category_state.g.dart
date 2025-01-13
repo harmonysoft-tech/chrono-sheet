@@ -1,26 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'files_state.dart';
+part of 'category_state.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$filesInfoHolderHash() => r'9f6daac81ffcbb1d3a5640491a2373ec89fbf24e';
+String _$categoryStateManagerHash() =>
+    r'e45d0b613f8d5c5e22797b13f1566bba5c4daa87';
 
-/// See also [FilesInfoHolder].
-@ProviderFor(FilesInfoHolder)
-final filesInfoHolderProvider =
-    AutoDisposeAsyncNotifierProvider<FilesInfoHolder, FilesInfo>.internal(
-  FilesInfoHolder.new,
-  name: r'filesInfoHolderProvider',
+/// See also [CategoryStateManager].
+@ProviderFor(CategoryStateManager)
+final categoryStateManagerProvider = AutoDisposeAsyncNotifierProvider<
+    CategoryStateManager, CategoryState>.internal(
+  CategoryStateManager.new,
+  name: r'categoryStateManagerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$filesInfoHolderHash,
+      : _$categoryStateManagerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$FilesInfoHolder = AutoDisposeAsyncNotifier<FilesInfo>;
+typedef _$CategoryStateManager = AutoDisposeAsyncNotifier<CategoryState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

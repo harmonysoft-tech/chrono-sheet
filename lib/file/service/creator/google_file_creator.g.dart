@@ -6,7 +6,7 @@ part of 'google_file_creator.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$createServiceHash() => r'843f145e1115fd0f49268b72a1ca1d594f6a2862';
+String _$createServiceHash() => r'8e267869ad810d5442e00cf9df2071bde2380af4';
 
 /// See also [createService].
 @ProviderFor(createService)

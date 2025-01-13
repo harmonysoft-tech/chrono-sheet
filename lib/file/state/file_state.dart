@@ -4,29 +4,29 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../logging/logging.dart';
 
-part 'files_state.g.dart';
+part 'file_state.g.dart';
 
 final _logger = getNamedLogger();
 
 enum FileOperation { none, creation }
 
-class FilesInfo {
+class FileState {
   final GoogleFile? selected;
   final List<GoogleFile> recent;
   final FileOperation operationInProgress;
 
-  const FilesInfo({
+  const FileState({
     this.selected,
     this.recent = const [],
     this.operationInProgress = FileOperation.none,
   });
 
-  FilesInfo copyWith({
+  FileState copyWith({
     GoogleFile? selected,
     List<GoogleFile>? recent,
     FileOperation? operationInProgress,
   }) {
-    return FilesInfo(
+    return FileState(
       selected: selected ?? this.selected,
       recent: recent ?? this.recent,
       operationInProgress: operationInProgress ?? this.operationInProgress,
@@ -41,32 +41,32 @@ class _Key {
 }
 
 @riverpod
-class FilesInfoHolder extends _$FilesInfoHolder {
+class FileStateManager extends _$FileStateManager {
   static const _separator = "___";
   static const _maxRecentItems = 5;
 
   final _prefs = SharedPreferencesAsync();
 
   @override
-  Future<FilesInfo> build() async {
+  Future<FileState> build() async {
     final loginState = ref.watch(loginStateProvider);
     switch (loginState) {
       case AsyncData(value:final loggedIn):
         if (!loggedIn) {
-          return FilesInfo();
+          return FileState();
         }
       default:
-        return FilesInfo();
+        return FileState();
     }
 
     var selected = _deserialize(await _prefs.getString(_Key.selected));
     if (selected == null) {
-      return FilesInfo();
+      return FileState();
     }
 
     var recentCount = await _prefs.getInt(_Key.recentCount);
     if (recentCount == null || recentCount <= 0) {
-      return FilesInfo(selected: selected);
+      return FileState(selected: selected);
     }
 
     List<GoogleFile> recent = [];
@@ -78,7 +78,7 @@ class FilesInfoHolder extends _$FilesInfoHolder {
         recent.add(file);
       }
     }
-    return FilesInfo(selected: selected, recent: recent);
+    return FileState(selected: selected, recent: recent);
   }
 
   Future<void> select(GoogleFile file) async {
@@ -93,7 +93,7 @@ class FilesInfoHolder extends _$FilesInfoHolder {
     if (recent.length > _maxRecentItems) {
       recent.removeRange(_maxRecentItems, recent.length);
     }
-    state = AsyncValue.data(FilesInfo(selected: file, recent: recent));
+    state = AsyncValue.data(FileState(selected: file, recent: recent));
     await _prefs.setString(_Key.selected, _serialize(file));
     await _prefs.setInt(_Key.recentCount, recent.length);
     for (int i = 0; i < recent.length; i++) {

@@ -2,9 +2,9 @@ import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/sheet/updater/update_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../category/model/category.dart';
-import '../../category/state/categories_state.dart';
+import '../../category/state/category_state.dart';
 import '../../file/model/google_file.dart';
-import '../../file/state/files_state.dart';
+import '../../file/state/file_state.dart';
 
 part 'sheet_updater.g.dart';
 
@@ -41,15 +41,15 @@ class SheetUpdater extends _$SheetUpdater {
   }
 
   Future<FileAndCategory> prepareToStore(Duration measurement) async {
-    final fileInfo = await ref.read(filesInfoHolderProvider.future);
-    final GoogleFile? file = fileInfo.selected;
+    final fileState = await ref.read(fileStateManagerProvider.future);
+    final GoogleFile? file = fileState.selected;
     if (file == null) {
       _logger.fine("skipped a request to store measurement $measurement because no "
           "google sheet file is selected");
       state = Error(SaveMeasurementsError.noFileIsSelected);
       return FileAndCategory();
     }
-    final categoryInfo = await ref.read(fileCategoriesProvider.future);
+    final categoryInfo = await ref.read(categoryStateManagerProvider.future);
     final category = categoryInfo.selected;
     if (category == null) {
       _logger.fine("skipped a request to store measurement $measurement in file "

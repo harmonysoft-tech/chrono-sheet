@@ -1,4 +1,4 @@
-import 'package:chrono_sheet/file/state/files_state.dart';
+import 'package:chrono_sheet/file/state/file_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +60,7 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
                         style: theme.textTheme.headlineSmall,
                       ),
                       onTap: () {
-                        ref.read(filesInfoHolderProvider.notifier).select(
+                        ref.read(fileStateManagerProvider.notifier).select(
                             state.files[index]
                         );
                         context.pop();

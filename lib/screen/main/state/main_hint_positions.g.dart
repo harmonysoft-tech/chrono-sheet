@@ -6,7 +6,7 @@ part of 'main_hint_positions.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$hintPositionsHash() => r'8cb03d497cd4dcc362f434807c61fed2f2240d2b';
+String _$hintPositionsHash() => r'3cbfeda22841294647ab398c33f30a842a17076b';
 
 /// See also [HintPositions].
 @ProviderFor(HintPositions)

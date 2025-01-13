@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../generated/app_localizations.dart';
-import '../state/files_state.dart';
+import '../state/file_state.dart';
 
 class SelectedFileWidget extends ConsumerWidget {
   const SelectedFileWidget({super.key});
@@ -17,7 +17,7 @@ class SelectedFileWidget extends ConsumerWidget {
   }
 
   void _onFileSelected(GoogleFile file, WidgetRef ref) {
-    ref.read(filesInfoHolderProvider.notifier).select(file);
+    ref.read(fileStateManagerProvider.notifier).select(file);
   }
 
   void _createFile(BuildContext widgetContext, WidgetRef ref) {
@@ -59,7 +59,7 @@ class SelectedFileWidget extends ConsumerWidget {
                             break;
                         }
                         if (file != null) {
-                          ref.read(filesInfoHolderProvider.notifier).select(file);
+                          ref.read(fileStateManagerProvider.notifier).select(file);
                         }
                       });
                       Navigator.of(context).pop();
@@ -75,7 +75,7 @@ class SelectedFileWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncData = ref.watch(filesInfoHolderProvider);
+    final asyncData = ref.watch(fileStateManagerProvider);
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Column(

@@ -1,5 +1,5 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
-import 'package:chrono_sheet/file/state/files_state.dart';
+import 'package:chrono_sheet/file/state/file_state.dart';
 import 'package:chrono_sheet/logging/logging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/drive/v3.dart';
@@ -13,7 +13,7 @@ final _logger = getNamedLogger();
 
 @riverpod
 FileCreateService createService(Ref ref) {
-  return FileCreateService(ref.read(filesInfoHolderProvider.notifier));
+  return FileCreateService(ref.read(fileStateManagerProvider.notifier));
 }
 
 sealed class FileCreationResult {}
@@ -37,7 +37,7 @@ class Error extends FileCreationResult {
 }
 
 class FileCreateService {
-  final FilesInfoHolder _filesInfoHolder;
+  final FileStateManager _filesInfoHolder;
 
   FileCreateService(this._filesInfoHolder);
 

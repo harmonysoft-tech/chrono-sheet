@@ -1,5 +1,5 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
-import 'package:chrono_sheet/file/state/files_state.dart';
+import 'package:chrono_sheet/file/state/file_state.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/logging/logging.dart';
 import 'package:flutter/material.dart';
@@ -38,10 +38,10 @@ class ViewSelectedFileWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filesAsync = ref.watch(filesInfoHolderProvider);
+    final fileStateAsync = ref.watch(fileStateManagerProvider);
     final l10n = AppLocalizations.of(context);
     return Center(
-      child: filesAsync.maybeWhen(
+      child: fileStateAsync.maybeWhen(
         data: (files) => files.selected == null
             ? DisabledViewFileButton()
             : ElevatedButton.icon(

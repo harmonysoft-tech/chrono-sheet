@@ -1,6 +1,6 @@
 import 'package:chrono_sheet/category/model/category.dart';
-import 'package:chrono_sheet/category/state/categories_state.dart';
-import 'package:chrono_sheet/file/state/files_state.dart';
+import 'package:chrono_sheet/category/state/category_state.dart';
+import 'package:chrono_sheet/file/state/file_state.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
 import 'package:chrono_sheet/ui/widget_key.dart';
@@ -12,7 +12,7 @@ class CategoryWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncFiles = ref.watch(filesInfoHolderProvider);
+    final asyncFiles = ref.watch(fileStateManagerProvider);
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     return Column(
@@ -74,13 +74,13 @@ class NoFileCreationWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncCategories = ref.watch(fileCategoriesProvider);
+    final asyncCategories = ref.watch(categoryStateManagerProvider);
     final theme = Theme.of(context);
     final localization = AppLocalizations.of(context);
     return Row(
       children: [
         IconButton(
-          onPressed: () => _addCategory(context, ref.read(fileCategoriesProvider.notifier)),
+          onPressed: () => _addCategory(context, ref.read(categoryStateManagerProvider.notifier)),
           icon: Icon(
             Icons.add,
             key: AppWidgetKey.createCategory,
@@ -110,7 +110,7 @@ class NoFileCreationWidget extends ConsumerWidget {
               : PopupMenuButton<Category>(
                   key: AppWidgetKey.selectCategory,
                   icon: Icon(Icons.arrow_drop_down),
-                  onSelected: (category) => ref.read(fileCategoriesProvider.notifier).select(category),
+                  onSelected: (category) => ref.read(categoryStateManagerProvider.notifier).select(category),
                   itemBuilder: (context) => data.categories.map((c) {
                     return PopupMenuItem(
                       value: c,
@@ -137,7 +137,7 @@ class DisabledPopupMenuButtonWidget extends StatelessWidget {
   }
 }
 
-void _addCategory(BuildContext context, FileCategories categoriesNotifier) {
+void _addCategory(BuildContext context, CategoryStateManager categoriesNotifier) {
   final controller = TextEditingController();
   final hasCategoryNameNotifier = ValueNotifier(false);
   controller.addListener(() => hasCategoryNameNotifier.value = controller.text.trim().isNotEmpty);
