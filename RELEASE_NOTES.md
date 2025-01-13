@@ -1,3 +1,5 @@
+## v1.73.0+74 released on 13 Jan 2025 UTC
+  * 88f56cc3f63a43340414f4ecfbc0ee6232e66f91 reuse cached categories as much as possible
 ## v1.72.0+73 released on 12 Jan 2025 UTC
   * 8bca1222393dcc8952587c54a0d829a3d8706d88 #38 make sure that tests suite doesn't fail because of quota exceeded
 ## v1.71.0+72 released on 10 Jan 2025 UTC
