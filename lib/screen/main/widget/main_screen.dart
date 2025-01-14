@@ -33,7 +33,7 @@ class MainScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loggedInAsync = ref.watch(loginStateProvider);
+    final logingStateAsync = ref.watch(loginStateManagerProvider);
     final hintPositions = ref.watch(hintPositionsProvider);
     final columnVerticalInset = 24.0;
     final l10n = AppLocalizations.of(context);
@@ -45,10 +45,10 @@ class MainScreen extends ConsumerWidget {
           appBar: AppBar(
             title: Text(AppLocalizations.of(context).appName),
             actions: [
-              loggedInAsync.when(
+              logingStateAsync.when(
                 data: (loggedIn) => loggedIn
                     ? IconButton(
-                        onPressed: () => ref.read(loginStateProvider.notifier).logout(),
+                        onPressed: () => ref.read(loginStateManagerProvider.notifier).logout(),
                         icon: Icon(Icons.logout),
                       )
                     : LoginWidget(),
@@ -117,7 +117,7 @@ class LoginWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
-      onPressed: () => ref.read(loginStateProvider.notifier).login(),
+      onPressed: () => ref.read(loginStateManagerProvider.notifier).login(),
       icon: Icon(Icons.login),
     );
   }

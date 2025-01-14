@@ -7,7 +7,7 @@ part of 'category_state.dart';
 // **************************************************************************
 
 String _$categoryStateManagerHash() =>
-    r'e45d0b613f8d5c5e22797b13f1566bba5c4daa87';
+    r'6ff5ffce713e067a5e4cb28a667c2f902e4ef982';
 
 /// See also [CategoryStateManager].
 @ProviderFor(CategoryStateManager)

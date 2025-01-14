@@ -49,7 +49,7 @@ class FileStateManager extends _$FileStateManager {
 
   @override
   Future<FileState> build() async {
-    final loginState = ref.watch(loginStateProvider);
+    final loginState = ref.watch(loginStateManagerProvider);
     switch (loginState) {
       case AsyncData(value:final loggedIn):
         if (!loggedIn) {
