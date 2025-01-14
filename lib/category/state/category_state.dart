@@ -54,6 +54,9 @@ class CategoryStateManager extends _$CategoryStateManager {
       }
       categories.add(Category(categoryName));
     }
+    if (categories.isEmpty) {
+      return null;
+    }
 
     final selectedCategoryName = await _prefs.getString(_getSelectedCategoryKey(file));
     if (selectedCategoryName == null) {
@@ -73,7 +76,9 @@ class CategoryStateManager extends _$CategoryStateManager {
       return CategoryState.empty;
     }
     if (cached == null) {
-      return CategoryState(categories: current);
+      final selected = current.first;
+      current.removeAt(0);
+      return CategoryState(selected: selected, categories: current);
     }
     final List<Category> sortedCategories = List.of(cached.categories);
     sortedCategories.removeWhere((category) => !current.contains(category));
@@ -83,6 +88,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     Category? selected = cached.selected;
     if (selected == null || !sortedCategories.contains(selected)) {
       selected = sortedCategories.first;
+      sortedCategories.remove(selected);
     }
     return CategoryState(selected: selected, categories: sortedCategories);
   }
@@ -123,11 +129,12 @@ class CategoryStateManager extends _$CategoryStateManager {
     if (current.selected == category) {
       return current;
     }
-    List<Category> categoriesToUse = current.categories;
-    if (!current.categories.contains(category)) {
-      final newCategories = [...current.categories, category];
-      newCategories.sort();
-      categoriesToUse = newCategories;
+    List<Category> categoriesToUse = List.of(current.categories);
+    categoriesToUse.remove(category);
+    final selected = current.selected;
+    if (selected != null) {
+      categoriesToUse.remove(selected);
+      categoriesToUse.insert(0, selected);
     }
     CategoryState newState = CategoryState(selected: category, categories: categoriesToUse);
     state = AsyncValue.data(newState);
