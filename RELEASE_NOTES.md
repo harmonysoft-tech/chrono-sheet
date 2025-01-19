@@ -1,3 +1,5 @@
+## v1.75.0+76 released on 19 Jan 2025 UTC
+  * d8232dbd6966c16b3dabd92ec6aacd88ec547f05 logging categories processing
 ## v1.74.0+75 released on 14 Jan 2025 UTC
   * cc46a3b4d6913562dd112528e37ef0600770a72f sort categories by last usage
 ## v1.73.0+74 released on 13 Jan 2025 UTC
