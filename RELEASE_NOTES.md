@@ -1,3 +1,5 @@
+## v1.76.0+77 released on 19 Jan 2025 UTC
+  * 1af69a044603a0bf1511fa95ee58936dfc66e3ce #40 Add 'copy logs' button
 ## v1.75.0+76 released on 19 Jan 2025 UTC
   * d8232dbd6966c16b3dabd92ec6aacd88ec547f05 logging categories processing
 ## v1.74.0+75 released on 14 Jan 2025 UTC
