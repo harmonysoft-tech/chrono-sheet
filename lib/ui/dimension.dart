@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 
 class AppDimension {
+  static const double screenPadding = 16.0;
+  static const double elementPadding = 8.0;
   static const double historyIconButtonSize = 40.0;
   static const double labelVerticalInset = 8.0;
   static const double hintBorderRadius = 8.0;

@@ -1,10 +1,11 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/file/state/file_state.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
-import 'package:chrono_sheet/logging/logging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../log/util/log_util.dart';
 
 final _logger = getNamedLogger();
 

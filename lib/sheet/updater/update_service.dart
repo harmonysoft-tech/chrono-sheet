@@ -1,13 +1,13 @@
-import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/util/date_util.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../util/collection_util.dart';
 import '../../category/model/category.dart';
 import '../../file/model/google_file.dart';
 import '../../google/google_helper.dart';
+import '../../log/util/log_util.dart';
+import '../../util/collection_util.dart';
 import '../model/sheet_model.dart';
 import '../parser/sheet_parser.dart';
 import '../util/sheet_util.dart';
@@ -27,8 +27,8 @@ class SheetUpdateService {
     Category category,
     GoogleFile file,
   ) async {
-    final http = await getAuthenticatedGoogleApiHttpClient();
-    final api = SheetsApi(http);
+    final data = await getGoogleClientData();
+    final api = SheetsApi(data.authenticatedClient);
     GoogleSheetInfo sheetInfo = await parseSheetDocument(file);
     sheetInfo = await _createSheetIfNecessary(sheetInfo, file, api);
     final context = _Context(

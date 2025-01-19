@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:chrono_sheet/logging/logging.dart';
+import 'package:chrono_sheet/di/di.dart';
+import 'package:chrono_sheet/log/boostrap/log_bootstrap.dart';
 import 'package:chrono_sheet/router/router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 import 'generated/app_localizations.dart';
+import 'log/util/log_util.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -28,7 +30,9 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    runApp(const ProviderScope(child: MyApp()));
+    runApp(const ProviderScope(
+      child: MyApp(),
+    ));
   }, (error, stackTrace) {
     logger.severe("unexpected exception - $error\n$stackTrace");
   });
@@ -40,6 +44,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      diContainer = ProviderScope.containerOf(context);
+    });
     return MaterialApp(
       navigatorKey: navigatorKey,
       onGenerateTitle: (context) => AppLocalizations.of(context).appName,

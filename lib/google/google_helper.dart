@@ -1,14 +1,15 @@
 import 'dart:convert';
 
 import 'package:chrono_sheet/generated/app_localizations.dart';
-import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/main.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:googleapis/sheets/v4.dart' as sheets;
 import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:googleapis/sheets/v4.dart' as sheets;
 import 'package:http/http.dart' as http;
+
 import '../http/AuthenticatedHttpClient.dart';
+import '../log/util/log_util.dart';
 import '../util/rich_text_util.dart';
 
 final _logger = getNamedLogger();
@@ -17,14 +18,21 @@ final signIn = GoogleSignIn(scopes: [
   sheets.SheetsApi.spreadsheetsScope,
   drive.DriveApi.driveScope,
 ]);
-http.Client? _clientOverride;
+GoogleData? _dataOverride;
 
-void setClientOverride(http.Client client) {
-  _clientOverride = client;
+void setDataOverride(GoogleIdentity identity, http.Client client) {
+  _dataOverride = GoogleData(identity, client);
 }
 
-Future<http.Client> getAuthenticatedGoogleApiHttpClient() async {
-  final client = _clientOverride;
+class GoogleData {
+  final GoogleIdentity identity;
+  final http.Client authenticatedClient;
+
+  GoogleData(this.identity, this.authenticatedClient);
+}
+
+Future<GoogleData> getGoogleClientData() async {
+  final client = _dataOverride;
   if (client != null) {
     return client;
   }
@@ -55,7 +63,7 @@ Future<http.Client> getAuthenticatedGoogleApiHttpClient() async {
       googleAccount = await signIn.signInSilently();
     } else {
       final headers = await googleAccount.authHeaders;
-      return AuthenticatedHttpClient(headers);
+      return GoogleData(googleAccount, AuthenticatedHttpClient(headers));
     }
   }
 }

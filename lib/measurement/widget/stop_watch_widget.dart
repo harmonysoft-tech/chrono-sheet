@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:chrono_sheet/generated/app_localizations.dart';
-import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
 import 'package:chrono_sheet/util/date_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../log/util/log_util.dart';
 
 final _logger = getNamedLogger();
 

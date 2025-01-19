@@ -1,17 +1,18 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/google/google_helper.dart';
-import 'package:chrono_sheet/logging/logging.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:intl/intl.dart';
-import '../model/sheet_model.dart';
+
+import '../../log/util/log_util.dart';
 import '../../util/date_util.dart';
+import '../model/sheet_model.dart';
 import '../util/sheet_util.dart';
 
 final _logger = getNamedLogger();
 
 Future<GoogleSheetInfo> parseSheetDocument(GoogleFile file) async {
-  final http = await getAuthenticatedGoogleApiHttpClient();
-  final api = SheetsApi(http);
+  final data = await getGoogleClientData();
+  final api = SheetsApi(data.authenticatedClient);
   final document = await api.spreadsheets.get(file.id);
   final sheets = document.sheets;
   if (sheets == null || sheets.isEmpty) {

@@ -1,24 +1,12 @@
+import 'package:chrono_sheet/di/di.dart';
+import 'package:chrono_sheet/log/state/log_state.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
-final regex = RegExp(r'package:([^:]+)');
+import '../util/log_util.dart';
 
 final _logger = getNamedLogger();
-
-Logger getNamedLogger() {
-  final stackTrace = StackTrace.current.toString();
-  final matches = regex.allMatches(stackTrace).toList();
-  var name = '';
-  if (matches.length > 1) {
-    name = matches[1][0] ?? '';
-    final i = name.lastIndexOf('/');
-    if (i > 0) {
-      name = name.substring(i + 1);
-    }
-  }
-  return Logger(name);
-}
 
 void setupLogging() {
   var level = Level.INFO;
@@ -36,19 +24,18 @@ void setupLogging() {
       message += "\n";
       message += record.stackTrace.toString();
     }
+    final messageToPrint = "${record.time} [${record.level}] ${record.loggerName}: $message";
     // ignore: avoid_print
-    print('${record.time} [${record.level}] ${record.loggerName}: $message');
+    print(messageToPrint);
+    diContainer?.read(logStateManagerProvider.notifier).onLogRecord(messageToPrint);
 
     if (!kDebugMode) {
       if (record.level.compareTo(Level.INFO) > 0) {
         if (record.error == null) {
           FirebaseCrashlytics.instance.recordError(message, record.stackTrace);
         } else {
-          FirebaseCrashlytics.instance.recordError(
-              record.error,
-              record.stackTrace,
-              reason: "[${record.level}] ${record.message}"
-          );
+          FirebaseCrashlytics.instance
+              .recordError(record.error, record.stackTrace, reason: "[${record.level}] ${record.message}");
         }
       }
     }

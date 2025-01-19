@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:chrono_sheet/category/model/category.dart';
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/google/google_helper.dart';
+import 'package:chrono_sheet/google/state/google_login_state.dart';
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:chrono_sheet/sheet/parser/sheet_parser.dart';
 import 'package:chrono_sheet/sheet/updater/update_service.dart';
@@ -199,7 +200,7 @@ void main() async {
     setUp(() {
       date.overrideNow(_today);
       _contextCounter = (_contextCounter + 1) % _contexts.length;
-      setClientOverride(_context.client);
+      setDataOverride(CachedGoogleIdentity(id: "dummy-id", email: "dummy-email"), _context.client);
     });
 
     tearDown(() async {

@@ -1,16 +1,17 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
-import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis/drive/v3.dart';
+
 import '../../../google/google_helper.dart';
+import '../../../log/util/log_util.dart';
 
 final _logger = getNamedLogger();
 
 Future<FileList> fetchSheets(String? pageToken) async {
-  final client = await getAuthenticatedGoogleApiHttpClient();
-  final driveApi = drive.DriveApi(client);
+  final data = await getGoogleClientData();
+  final driveApi = drive.DriveApi(data.authenticatedClient);
   return driveApi.files.list(
     q: "mimeType='$sheetMimeType' and trashed=false",
     spaces: 'drive',

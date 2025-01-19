@@ -2,10 +2,11 @@ import 'dart:math';
 
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/hint/model/hint_model.dart';
-import 'package:chrono_sheet/logging/logging.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
 import 'package:chrono_sheet/ui/theme.dart';
 import 'package:flutter/material.dart';
+
+import '../../log/util/log_util.dart';
 
 final _logger = getNamedLogger();
 

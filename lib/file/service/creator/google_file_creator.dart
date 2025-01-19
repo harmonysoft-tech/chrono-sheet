@@ -1,10 +1,11 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/file/state/file_state.dart';
-import 'package:chrono_sheet/logging/logging.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../../google/google_helper.dart';
+import '../../../log/util/log_util.dart';
 import '../../../sheet/model/sheet_model.dart';
 
 part "google_file_creator.g.dart";
@@ -44,8 +45,8 @@ class FileCreateService {
   Future<FileCreationResult> create(String name) async {
     return await _filesInfoHolder.execute(FileOperation.creation, () async {
       try {
-        final http = await getAuthenticatedGoogleApiHttpClient();
-        final api = DriveApi(http);
+        final data = await getGoogleClientData();
+        final api = DriveApi(data.authenticatedClient);
 
         final existingFile = await _tryToFindExistingFile(name, api);
         if (existingFile != null) {

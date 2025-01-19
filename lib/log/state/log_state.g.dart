@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'file_state.dart';
+part of 'log_state.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$fileStateManagerHash() => r'a664e6855335471342fc2ce4ae8f127d337bac17';
+String _$logStateManagerHash() => r'97c982bdb7516db83fdc1a149df058950ece1788';
 
-/// See also [FileStateManager].
-@ProviderFor(FileStateManager)
-final fileStateManagerProvider =
-    AutoDisposeAsyncNotifierProvider<FileStateManager, FileState>.internal(
-  FileStateManager.new,
-  name: r'fileStateManagerProvider',
+/// See also [LogStateManager].
+@ProviderFor(LogStateManager)
+final logStateManagerProvider =
+    NotifierProvider<LogStateManager, List<String>>.internal(
+  LogStateManager.new,
+  name: r'logStateManagerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$fileStateManagerHash,
+      : _$logStateManagerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$FileStateManager = AutoDisposeAsyncNotifier<FileState>;
+typedef _$LogStateManager = Notifier<List<String>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
