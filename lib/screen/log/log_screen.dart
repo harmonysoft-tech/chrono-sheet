@@ -2,6 +2,7 @@ import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/log/state/log_state.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LogScreen extends ConsumerWidget {
@@ -14,6 +15,20 @@ class LogScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.titleLogs),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(
+                text: logState.join("\n"),
+              )).then((_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.textCopiedToClipboard)));
+                }
+              });
+            },
+            icon: Icon(Icons.copy),
+          )
+        ],
       ),
       body: logState.isEmpty
           ? Center(
