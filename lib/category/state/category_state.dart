@@ -1,5 +1,6 @@
 import 'package:chrono_sheet/category/model/category.dart';
 import 'package:chrono_sheet/file/state/file_state.dart';
+import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:chrono_sheet/sheet/parser/sheet_parser.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -10,6 +11,7 @@ import '../../file/model/google_file.dart';
 part 'category_state.g.dart';
 
 final _categoriesToHideInUi = {Category(Column.date), Category(Column.total)};
+final _logger = getNamedLogger();
 
 class CategoryState {
   static CategoryState empty = CategoryState();
@@ -21,6 +23,11 @@ class CategoryState {
     this.selected,
     this.categories = const [],
   });
+
+  @override
+  String toString() {
+    return 'CategoryState{selected: $selected, categories: $categories}';
+  }
 }
 
 @riverpod
@@ -36,6 +43,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     }
     final cached = await _getCachedCategoryState(selectedFile);
     if (cached != null) {
+      _logger.info("found cached category state: $cached");
       state = AsyncValue.data(cached);
     }
     final categories = await _parseCategories(selectedFile);
@@ -72,6 +80,7 @@ class CategoryStateManager extends _$CategoryStateManager {
   }
 
   CategoryState merge(CategoryState? cached, List<Category> current) {
+    _logger.info("merging cached categories state ($cached) and current categories (${current.join(", ")})");
     if (current.isEmpty) {
       return CategoryState.empty;
     }
@@ -88,9 +97,11 @@ class CategoryStateManager extends _$CategoryStateManager {
     Category? selected = cached.selected;
     if (selected == null || !sortedCategories.contains(selected)) {
       selected = sortedCategories.first;
-      sortedCategories.remove(selected);
     }
-    return CategoryState(selected: selected, categories: sortedCategories);
+    sortedCategories.remove(selected);
+    final result = CategoryState(selected: selected, categories: sortedCategories);
+    _logger.info("categories after merge: $result");
+    return result;
   }
 
   Future<void> _cacheCategoryState(GoogleFile file, CategoryState state) async {
@@ -113,6 +124,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     final result =
         info.columns.keys.map((name) => Category(name)).where((c) => !_categoriesToHideInUi.contains(c)).toList();
     result.sort();
+    _logger.info("parsed ${result.length} categories from google sheet document '${file.name}': ${result.join(", ")}");
     return result;
   }
 
@@ -125,8 +137,10 @@ class CategoryStateManager extends _$CategoryStateManager {
   }
 
   Future<CategoryState> select(Category category) async {
+    _logger.info("got a request to select category '$category'");
     final current = await future;
     if (current.selected == category) {
+      _logger.info("category '$category' is already selected");
       return current;
     }
     List<Category> categoriesToUse = List.of(current.categories);
@@ -143,6 +157,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     if (file != null) {
       await _cacheCategoryState(file, newState);
     }
+    _logger.info("categories state after '$category' is selected: $newState");
     return newState;
   }
 }
