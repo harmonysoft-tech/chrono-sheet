@@ -69,16 +69,14 @@ class CategoryStateManager extends _$CategoryStateManager {
 
     final selectedCategoryName = await _prefs.getString(_getSelectedCategoryKey(file));
     _logger.info("found selected category '$selectedCategoryName' for file ${file.id} (${file.name})");
+    Category selectedCategory;
     if (selectedCategoryName == null) {
-      return CategoryState(categories: categories);
-    }
-
-    final selectedCategory = Category(selectedCategoryName);
-    if (categories.contains(selectedCategory)) {
-      return CategoryState(selected: selectedCategory, categories: categories);
+      selectedCategory = categories.first;
     } else {
-      return CategoryState(categories: categories);
+      selectedCategory = Category(selectedCategoryName);
     }
+    categories.remove(selectedCategory);
+    return CategoryState(selected: selectedCategory, categories: categories);
   }
 
   CategoryState merge(CategoryState? cached, List<Category> current) {
