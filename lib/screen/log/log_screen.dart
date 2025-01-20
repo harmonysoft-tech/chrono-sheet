@@ -27,7 +27,13 @@ class LogScreen extends ConsumerWidget {
               });
             },
             icon: Icon(Icons.copy),
-          )
+          ),
+          IconButton(
+            onPressed: () {
+              ref.read(logStateManagerProvider.notifier).clear();
+            },
+            icon: Icon(Icons.delete),
+          ),
         ],
       ),
       body: logState.isEmpty

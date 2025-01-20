@@ -20,4 +20,10 @@ class LogStateManager extends _$LogStateManager {
     newLogRecords.insert(0, record);
     state = newLogRecords;
   }
+
+  void clear() {
+    if (state.isNotEmpty) {
+      state = [];
+    }
+  }
 }
