@@ -62,11 +62,13 @@ class CategoryStateManager extends _$CategoryStateManager {
       }
       categories.add(Category(categoryName));
     }
+    _logger.info("found ${categories.length} categories for file ${file.id} (${file.name}): ${categories.join(", ")}");
     if (categories.isEmpty) {
       return null;
     }
 
     final selectedCategoryName = await _prefs.getString(_getSelectedCategoryKey(file));
+    _logger.info("found selected category '$selectedCategoryName' for file ${file.id} (${file.name})");
     if (selectedCategoryName == null) {
       return CategoryState(categories: categories);
     }
@@ -117,6 +119,7 @@ class CategoryStateManager extends _$CategoryStateManager {
       await _prefs.setString(_getCategoryKey(file, i), categories[i].name);
     }
     await _prefs.remove(_getCategoryKey(file, categories.length));
+    _logger.info("cached categories state for file ${file.id} (${file.name}): $state");
   }
 
   Future<List<Category>> _parseCategories(GoogleFile file) async {
