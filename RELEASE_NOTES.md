@@ -1,3 +1,5 @@
+## v1.77.0+78 released on 20 Jan 2025 UTC
+  * 696cede8c191153ce6680038bc5c3fd6c78eb652 added ability to clear logs from the UI
 ## v1.76.0+77 released on 19 Jan 2025 UTC
   * 1af69a044603a0bf1511fa95ee58936dfc66e3ce #40 Add 'copy logs' button
 ## v1.75.0+76 released on 19 Jan 2025 UTC
