@@ -6,6 +6,8 @@
   "titleAddNewFile": "Add New File",
   "titlePermissionsRationale": "**Your Permissions Enable Key Features**",
   "titleLogs": "Logs",
+  "titleLogin": "Login",
+  "titleLogout": "Logout",
 
   "actionReset": "Reset",
   "actionSave": "Save",
