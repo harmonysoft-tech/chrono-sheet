@@ -1,3 +1,5 @@
+## v1.79.0+80 released on 29 Jan 2025 UTC
+  * 8456630f6a06849c5ac963f18dabd71a978b3eb4 replaced toolbar icons by a menu
 ## v1.78.0+79 released on 20 Jan 2025 UTC
   * c55a353cf8cfe29c9112afda0bcb063f7f30e037 corrected categories deserialization
 ## v1.77.0+78 released on 20 Jan 2025 UTC
