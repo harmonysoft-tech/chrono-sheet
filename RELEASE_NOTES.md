@@ -1,3 +1,5 @@
+## v1.80.0+81 released on 30 Jan 2025 UTC
+  * 230f3311f3c417f20842f9f03515b336e8812c65 #37 support offline mode
 ## v1.79.0+80 released on 29 Jan 2025 UTC
   * 8456630f6a06849c5ac963f18dabd71a978b3eb4 replaced toolbar icons by a menu
 ## v1.78.0+79 released on 20 Jan 2025 UTC
