@@ -1,3 +1,5 @@
+## v1.81.0+82 released on 30 Jan 2025 UTC
+  * fc358f34162d9f802b5bede782d25490d94b1488 #37 support offline mode
 ## v1.80.0+81 released on 30 Jan 2025 UTC
   * 230f3311f3c417f20842f9f03515b336e8812c65 #37 support offline mode
 ## v1.79.0+80 released on 29 Jan 2025 UTC
