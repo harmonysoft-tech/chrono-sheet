@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chrono_sheet/di/di.dart';
 import 'package:chrono_sheet/log/boostrap/log_bootstrap.dart';
 import 'package:chrono_sheet/router/router.dart';
+import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,6 +47,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       diContainer = ProviderScope.containerOf(context);
+      Timer.periodic(Duration(minutes: 1), (_) {
+        diContainer?.read(sheetUpdaterProvider.notifier).storeUnsavedMeasurements();
+      });
     });
     return MaterialApp(
       navigatorKey: navigatorKey,

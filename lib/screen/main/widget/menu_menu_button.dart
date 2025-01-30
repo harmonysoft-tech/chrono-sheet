@@ -30,6 +30,16 @@ class MainMenuButtonState extends ConsumerState<MainMenuButton> {
     return PopupMenuButton(
       icon: Icon(Icons.more_vert),
       itemBuilder: (context) => [
+        PopupMenuItem(
+          child: ListTile(
+            leading: Icon(Icons.access_time),
+            title: Text(l10n.titleActivity),
+            onTap: () {
+              Navigator.pop(context);
+              context.push(AppRoute.activity);
+            },
+          ),
+        ),
         loginStateAsync.maybeWhen(
           data: (loginState) => loginState == null
               ? PopupMenuItem(

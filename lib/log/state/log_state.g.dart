@@ -6,7 +6,7 @@ part of 'log_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$logStateManagerHash() => r'97c982bdb7516db83fdc1a149df058950ece1788';
+String _$logStateManagerHash() => r'9561b5a405dabd9e5fee0f8c0731cbfcdfbe01f1';
 
 /// See also [LogStateManager].
 @ProviderFor(LogStateManager)

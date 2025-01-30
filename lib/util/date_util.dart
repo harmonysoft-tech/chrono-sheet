@@ -18,6 +18,10 @@ List<DateFormat> getDateFormats(String? locale) {
   return result;
 }
 
+DateTime getBeginningOfTheDay(DateTime dateTime) {
+  return DateTime(dateTime.year, dateTime.month, dateTime.day);
+}
+
 abstract interface class ClockProvider {
   DateTime now();
 }

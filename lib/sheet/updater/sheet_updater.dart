@@ -1,3 +1,6 @@
+import 'package:chrono_sheet/measurement/model/measurement.dart';
+import 'package:chrono_sheet/measurement/model/measurements_state.dart';
+import 'package:chrono_sheet/network/network.dart';
 import 'package:chrono_sheet/sheet/updater/update_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -34,7 +37,7 @@ enum SaveMeasurementsError {
   generic,
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class SheetUpdater extends _$SheetUpdater {
   @override
   SaveMeasurementState build() {
@@ -63,7 +66,7 @@ class SheetUpdater extends _$SheetUpdater {
   }
 
   Future<void> store(Duration measurement) async {
-    if (measurement.compareTo(Duration.zero) <= 0) {
+    if (measurement.inMinutes <= 0) {
       _logger.fine("skipped a request to store non-positive measurement $measurement");
       return;
     }
@@ -79,13 +82,51 @@ class SheetUpdater extends _$SheetUpdater {
       return;
     }
 
-    final service = ref.read(updateServiceProvider);
-    try {
-      await service.saveMeasurement(measurement.inMinutes, category, file);
-      state = SaveMeasurementState.success;
-    } catch (e, stack) {
-      _logger.warning("can not save measurement $measurement for category '$category' in file ${file.name}", e, stack);
-      state = Error(SaveMeasurementsError.generic);
+    await ref.read(measurementsProvider.notifier).save(
+          Measurement(
+            file: file,
+            category: category,
+            durationSeconds: measurement.inMinutes,
+          ),
+        );
+    await storeUnsavedMeasurements();
+  }
+
+  Future<void> storeUnsavedMeasurements() async {
+    final online = await isOnline();
+    if (!online) {
+      _logger.info("skipping attempt to store unsaved measurements because the application is currently offline");
+      return;
+    }
+
+    final measurementsAsync =  ref.read(measurementsProvider);
+    List<Measurement> measurements;
+    if (measurementsAsync is AsyncData<List<Measurement>>) {
+      measurements = measurementsAsync.value;
+    } else {
+      return;
+    }
+
+    final updateService = ref.read(updateServiceProvider);
+    final measurementsNotifier = ref.read(measurementsProvider.notifier);
+    for (final measurement in measurements) {
+      if (measurement.saved) {
+        continue;
+      }
+      try {
+        await updateService.saveMeasurement(measurement.durationSeconds, measurement.category, measurement.file);
+        measurementsNotifier.onSaved(measurement);
+        state = SaveMeasurementState.success;
+      } catch (e, stack) {
+        _logger.warning(
+          "can not save measurement $measurement for category '${measurement.category}' "
+          "in file ${measurement.file.name}",
+          e,
+          stack,
+        );
+        state = Error(SaveMeasurementsError.generic);
+        break;
+      }
     }
   }
 
