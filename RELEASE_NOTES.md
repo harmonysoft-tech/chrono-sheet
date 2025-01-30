@@ -1,3 +1,5 @@
+## v1.82.0+83 released on 30 Jan 2025 UTC
+  * 47cf65a41ce4aa13fa97e8bf6d230e32fcae845c #41 Don't offer to relogin if the phone is offline
 ## v1.81.0+82 released on 30 Jan 2025 UTC
   * fc358f34162d9f802b5bede782d25490d94b1488 #37 support offline mode
 ## v1.80.0+81 released on 30 Jan 2025 UTC
