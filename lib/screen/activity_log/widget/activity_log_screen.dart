@@ -1,4 +1,5 @@
 import 'package:chrono_sheet/generated/app_localizations.dart';
+import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:chrono_sheet/measurement/model/measurement.dart';
 import 'package:chrono_sheet/measurement/model/measurements_state.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
@@ -7,8 +8,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../network/network.dart';
+import '../../../sheet/updater/sheet_updater.dart';
+
+final _logger = getNamedLogger();
+
 class ActivityLogScreen extends ConsumerWidget {
   const ActivityLogScreen({super.key});
+
+  bool _hasUnsaved(List<Measurement> measurements) {
+    for (int i = measurements.length - 1; i >= 0; i--) {
+      if (!measurements[i].saved) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,6 +32,32 @@ class ActivityLogScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.titleActivity),
+        actions: [
+          IconButton(
+            onPressed: measurementsAsync.maybeWhen(
+              data: (measurements) => _hasUnsaved(measurements)
+                  ? () async {
+                      final online = await isOnline();
+                      if (online) {
+                        ref.read(sheetUpdaterProvider.notifier).storeUnsavedMeasurements();
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(l10n.textCanNotSaveMeasurementsWhileOffline),
+                          ));
+                        } else {
+                          _logger.info(
+                            "cannot show 'cannot save measurements' snackbar because the context is not mounted",
+                          );
+                        }
+                      }
+                    }
+                  : null,
+              orElse: () => null,
+            ),
+            icon: Icon(Icons.save),
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(AppDimension.screenPadding),
@@ -90,7 +131,14 @@ class ActivityLogWidget extends ConsumerWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Center(child: Text("${m.durationSeconds}m ${m.category.name}")),
+                    child: Center(
+                      child: Text(
+                        "${m.durationSeconds}m ${m.category.name}",
+                        style: m.saved
+                            ? theme.textTheme.bodyMedium
+                            : theme.textTheme.bodyMedium?.copyWith(color: theme.disabledColor),
+                      ),
+                    ),
                   ),
                   Icon(m.saved ? Icons.bookmark : Icons.bookmark_border),
                 ],
