@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../log/util/log_util.dart';
+import '../../network/network.dart';
 
 part "google_login_state.g.dart";
 
@@ -18,6 +19,11 @@ class LoginStateManager extends _$LoginStateManager {
   Future<GoogleIdentity?> build() async {
     final cached = await _getCached();
     if (cached == null) {
+      final online = await isOnline();
+      if (!online) {
+        _logger.info("no cached login state is found and we're offline, considering to be offline");
+        return null;
+      }
       _logger.fine("no cached record is found checking if we are logged in now silently");
       final account = await signIn.signInSilently();
       _logger.fine("observing the following google account: $account");
@@ -29,7 +35,13 @@ class LoginStateManager extends _$LoginStateManager {
 
     _logger.fine("cached record is found but checking in background if we are logged in");
     signIn.signInSilently().then((account) async {
+
       if (account == null) {
+        final online = await isOnline();
+        if (!online) {
+          _logger.info("cannot login into google, but we're offline, skip further processing");
+          return;
+        }
         _resetCached();
         state = AsyncValue.data(null);
       } else if (account.id == cached.id && account.email == cached.email) {
