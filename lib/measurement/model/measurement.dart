@@ -19,7 +19,7 @@ class Measurement {
     String? id,
     DateTime? time,
   })  : id = id ?? Uuid().v4(),
-        time = DateTime.now();
+        time = time ?? DateTime.now();
 
   Measurement copyWith({
     String? id,
