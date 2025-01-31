@@ -90,6 +90,7 @@ class ActivityLogWidget extends ConsumerWidget {
       }
 
       result.add(TitleElement(format.format(currentDate)));
+      currentDate = date;
       result.add(MeasurementElement(measurement));
     }
     if (result.isNotEmpty) {
