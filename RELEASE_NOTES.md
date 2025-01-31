@@ -1,3 +1,5 @@
+## v1.83.0+84 released on 31 Jan 2025 UTC
+  * 8e775c4e5b90f7dcbc1cf393e5aaf730ab3652ce corrected measurement construction
 ## v1.82.0+83 released on 30 Jan 2025 UTC
   * 47cf65a41ce4aa13fa97e8bf6d230e32fcae845c #41 Don't offer to relogin if the phone is offline
 ## v1.81.0+82 released on 30 Jan 2025 UTC
