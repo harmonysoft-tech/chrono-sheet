@@ -1,3 +1,5 @@
+## v1.84.0+85 released on 31 Jan 2025 UTC
+  * e5613eff7b87bd27cdf7ecb5b1bace99c42f510d corrected measurement construction
 ## v1.83.0+84 released on 31 Jan 2025 UTC
   * 8e775c4e5b90f7dcbc1cf393e5aaf730ab3652ce corrected measurement construction
 ## v1.82.0+83 released on 30 Jan 2025 UTC
