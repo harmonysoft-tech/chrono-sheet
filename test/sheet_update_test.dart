@@ -288,9 +288,9 @@ void _updateToday() {
       """);
       await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Category.one} | ${_Category.two}
-        $_todayUs      | 5               | 3                  | 2          
-        $_yesterdayUs  | 5               |                    | 5                          
+        ${Column.date} | ${Column.total} | ${_CategoryName.one} | ${_CategoryName.two}
+        $_todayUs      | 5               | 3                    | 2          
+        $_yesterdayUs  | 5               |                      | 5                          
       """);
     });
   });
