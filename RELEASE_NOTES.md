@@ -1,3 +1,5 @@
+## v1.87.0+88 released on 10 Mar 2025 UTC
+  * 5e8ae34b8313bfe3ce926665c5b9fce26a9765b5 make sure that category icons files directory is created
 ## v1.86.0+87 released on 10 Mar 2025 UTC
   * 9f8675020359ff00dab47aef546c7009f423899c store the picked files in the app directory
 ## v1.85.0+86 released on 10 Mar 2025 UTC
