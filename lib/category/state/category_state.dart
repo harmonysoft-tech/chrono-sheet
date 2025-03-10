@@ -24,12 +24,13 @@ class CategoryState {
 
   final Category? selected;
   final List<Category> categories;
-  final String id = Uuid().v4();
+  final String id;
 
   CategoryState({
     this.selected,
     this.categories = const [],
-  });
+    String? id,
+  }) : id = id ?? Uuid().v4();
 
   @override
   String toString() {
@@ -38,6 +39,11 @@ class CategoryState {
 }
 
 class _Key {
+
+  static String getStateId(GoogleFile file) {
+    return "category.${file.id}.state.id";
+  }
+
   static String getSelected(GoogleFile file) {
     return "category.${file.id}.selected";
   }
@@ -111,7 +117,8 @@ class CategoryStateManager extends _$CategoryStateManager {
       normalisedCategories.removeAt(0);
     }
 
-    final result = CategoryState(selected: selectedCategory, categories: normalisedCategories);
+    final id = await _prefs.getString(_Key.getStateId(file));
+    final result = CategoryState(id: id, selected: selectedCategory, categories: normalisedCategories);
 
     if (shouldSaveAfterNormalisation) {
       _logger.info("detected that normalised categories differ from originally read categories, caching "
@@ -248,6 +255,8 @@ class CategoryStateManager extends _$CategoryStateManager {
     } else {
       fileToUse = file;
     }
+
+    await _prefs.setString(_Key.getStateId(fileToUse), state.id);
 
     final selected = state.selected;
     if (selected == null) {
