@@ -1,3 +1,5 @@
+## v1.88.0+89 released on 10 Mar 2025 UTC
+  * 9af673fa0a1385a2ad31216a8e52835eda78f3ea logging category state id
 ## v1.87.0+88 released on 10 Mar 2025 UTC
   * 5e8ae34b8313bfe3ce926665c5b9fce26a9765b5 make sure that category icons files directory is created
 ## v1.86.0+87 released on 10 Mar 2025 UTC
