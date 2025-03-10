@@ -7,10 +7,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../category/model/category.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../ui/dimension.dart';
+import '../../../ui/path.dart';
 
 final _logger = getNamedLogger();
 
@@ -120,9 +122,11 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
       return;
     }
     final File originalFile = File(path);
+    final fileToStore = File("${AppPaths.categoryIconDir}/${Uuid().v4()}.jpg");
+    await originalFile.copy(fileToStore.path);
     if (context.mounted) {
       setState(() {
-        _iconFile = originalFile;
+        _iconFile = fileToStore;
       });
       // final file = await context.push<File>(AppRoute.cropIcon, extra: originalFile);
       // if (file != null) {

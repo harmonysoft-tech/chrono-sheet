@@ -10,6 +10,7 @@ import 'package:chrono_sheet/util/regexp_util.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../file/model/google_file.dart';
 
@@ -23,6 +24,7 @@ class CategoryState {
 
   final Category? selected;
   final List<Category> categories;
+  final String id = Uuid().v4();
 
   CategoryState({
     this.selected,
@@ -31,7 +33,7 @@ class CategoryState {
 
   @override
   String toString() {
-    return 'CategoryState{selected: $selected, categories: $categories}';
+    return 'CategoryState{id: $id, selected: $selected, categories: $categories}';
   }
 }
 
