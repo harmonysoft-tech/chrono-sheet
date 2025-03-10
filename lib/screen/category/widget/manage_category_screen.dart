@@ -123,6 +123,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     }
     final File originalFile = File(path);
     final fileToStore = File("${AppPaths.categoryIconDir}/${Uuid().v4()}.jpg");
+    fileToStore.createSync(recursive: true);
     await originalFile.copy(fileToStore.path);
     if (context.mounted) {
       setState(() {
