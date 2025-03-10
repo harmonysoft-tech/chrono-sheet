@@ -147,9 +147,14 @@ class _Format {
   static final us = DateFormat.yMMMd("en_US");
 }
 
-class _Categories {
-  static final one = Category(name: "category1", representation: TextCategoryRepresentation("c1"));
-  static final two = Category(name: "category2", representation: TextCategoryRepresentation("c2"));
+class _CategoryName {
+  static final one = "category1";
+  static final two = "category2";
+}
+
+class _Category {
+  static final one = Category(name: _CategoryName.one, representation: TextCategoryRepresentation("c1"));
+  static final two = Category(name: _CategoryName.two, representation: TextCategoryRepresentation("c2"));
 }
 
 class _TestContext {
@@ -226,9 +231,9 @@ void _emptySheet() {
   group("empty sheet", () {
     test("empty sheet", () async {
       final duration = 2;
-      await _service.saveMeasurement(duration, _Categories.one, _context.file);
+      await _service.saveMeasurement(duration, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_todayUs      | $duration       | $duration         
       """);
     });
@@ -239,24 +244,24 @@ void _updateToday() {
   group("existing 'today' row", () {
     test("new category", () async {
       _setSheetState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_todayUs      | 1               | 1
       """);
-      await _service.saveMeasurement(2, _Categories.two, _context.file);
+      await _service.saveMeasurement(2, _Category.two, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
-        $_todayUs      | 3               | 1                  | 2         
+        ${Column.date} | ${Column.total} | ${_CategoryName.one} | ${_CategoryName.two}
+        $_todayUs      | 3               | 1                    | 2         
       """);
     });
 
     test("existing category", () async {
       _setSheetState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_todayUs      | 1               | 1
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_todayUs      | 3               | 3                          
       """);
     });
@@ -264,26 +269,26 @@ void _updateToday() {
     test("non-standard  table location", () async {
       _setSheetState("""
         |   |  |                |                 |
-        |   |  | ${Column.date} | ${Column.total} | ${_Categories.one}
+        |   |  | ${Column.date} | ${Column.total} | ${_CategoryName.one}
         |   |  | $_todayUs      | 1               | 1
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
         |   |  |                |                 |
-        |   |  | ${Column.date} | ${Column.total} | ${_Categories.one}
+        |   |  | ${Column.date} | ${Column.total} | ${_CategoryName.one}
         |   |  | $_todayUs      | 3               | 3                          
       """);
     });
 
     test("historical records", () async {
       _setSheetState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one} | ${_CategoryName.two}
         $_todayUs      | 3               | 1                  | 2          
         $_yesterdayUs  | 5               |                    | 5
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
+        ${Column.date} | ${Column.total} | ${_Category.one} | ${_Category.two}
         $_todayUs      | 5               | 3                  | 2          
         $_yesterdayUs  | 5               |                    | 5                          
       """);
@@ -295,25 +300,25 @@ void _existingTableNoTodayRow() {
   group("existing table, no 'today' row", () {
     test("new category", () async {
       _setSheetState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_yesterdayUs  | 5               | 5                 
       """);
-      await _service.saveMeasurement(2, _Categories.two, _context.file);
+      await _service.saveMeasurement(2, _Category.two, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
-        $_todayUs      | 2               |                    | 2          
-        $_yesterdayUs  | 5               | 5                  |                           
+        ${Column.date} | ${Column.total} | ${_CategoryName.one} | ${_CategoryName.two}
+        $_todayUs      | 2               |                      | 2          
+        $_yesterdayUs  | 5               | 5                    |                           
       """);
     });
 
     test("existing category", () async {
       _setSheetState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_yesterdayUs  | 5               | 5                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_todayUs      | 2               | 2
         $_yesterdayUs  | 5               | 5
       """);
@@ -325,14 +330,14 @@ void _existingTableNoTotalColumn() {
   group("existing table, no 'total time' column", () {
     test("existing table, no 'total time' column", () async {
       _setSheetState("""
-        ${Column.date} | ${_Categories.one} | ${_Categories.two}
-        $_yesterdayUs  | 5                  | 3
+        ${Column.date} | ${_CategoryName.one} | ${_CategoryName.two}
+        $_yesterdayUs  | 5                    | 3
       """);
-      await _service.saveMeasurement(2, _Categories.two, _context.file);
+      await _service.saveMeasurement(2, _Category.two, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one} | ${_Categories.two}
-        $_todayUs      | 2               |                    | 2          
-        $_yesterdayUs  | 8               | 5                  | 3          
+        ${Column.date} | ${Column.total} | ${_CategoryName.one} | ${_CategoryName.two}
+        $_todayUs      | 2               |                      | 2          
+        $_yesterdayUs  | 8               | 5                    | 3          
       """);
     });
   });
@@ -344,9 +349,9 @@ void _noTableNonEmptySheet() {
       _setSheetState("""
         abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_todayUs      | 2               | 2
         
         abc                            
@@ -357,9 +362,9 @@ void _noTableNonEmptySheet() {
       _setSheetState("""
         | abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_todayUs      | 2               | 2
                        |                 |
                        | abc             |                            
@@ -370,12 +375,12 @@ void _noTableNonEmptySheet() {
       _setSheetState("""
         |   |  | abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one} |
-        $_todayUs      | 2               | 2                  |
-                       |                 |                    |                            
-                       |                 |                    | abc                            
+        ${Column.date} | ${Column.total} | ${_CategoryName.one} |
+        $_todayUs      | 2               | 2                    |
+                       |                 |                      |                            
+                       |                 |                      | abc                            
       """);
     });
 
@@ -383,12 +388,12 @@ void _noTableNonEmptySheet() {
       _setSheetState("""
         |   |   |   |  abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one} |   |
-        $_todayUs      | 2               | 2                  |   |
-                       |                 |                    |   |                            
-                       |                 |                    |   | abc                            
+        ${Column.date} | ${Column.total} | ${_CategoryName.one} |   |
+        $_todayUs      | 2               | 2                    |   |
+                       |                 |                      |   |                            
+                       |                 |                      |   | abc                            
       """);
     });
 
@@ -397,9 +402,9 @@ void _noTableNonEmptySheet() {
         |
         | abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_todayUs      | 2               | 2
                        |                 |
                        | abc             |                            
@@ -412,9 +417,9 @@ void _noTableNonEmptySheet() {
         |   |
         |   | abc                 
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $_todayUs      | 2               | 2
                        |                 |
                        |                 | abc                            
@@ -429,12 +434,12 @@ void _customFormat() {
       final yesterday = date.fallbackDateFormat.format(_yesterday);
       final today = date.fallbackDateFormat.format(_today);
       _setSheetState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $yesterday     | 1               | 1
       """);
-      await _service.saveMeasurement(2, _Categories.one, _context.file);
+      await _service.saveMeasurement(2, _Category.one, _context.file);
       await _verifyDocumentState("""
-        ${Column.date} | ${Column.total} | ${_Categories.one}
+        ${Column.date} | ${Column.total} | ${_CategoryName.one}
         $today         | 2               | 2         
         $yesterday     | 1               | 1         
       """);
