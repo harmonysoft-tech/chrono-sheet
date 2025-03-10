@@ -10,6 +10,7 @@
 import 'dart:io';
 
 import 'package:chrono_sheet/category/model/category.dart';
+import 'package:chrono_sheet/category/model/category_representation.dart';
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/google/google_helper.dart';
 import 'package:chrono_sheet/google/state/google_login_state.dart';
@@ -147,8 +148,8 @@ class _Format {
 }
 
 class _Categories {
-  static final one = Category("category1");
-  static final two = Category("category2");
+  static final one = Category(name: "category1", representation: TextCategoryRepresentation("c1"));
+  static final two = Category(name: "category2", representation: TextCategoryRepresentation("c2"));
 }
 
 class _TestContext {
