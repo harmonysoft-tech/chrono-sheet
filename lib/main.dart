@@ -4,6 +4,7 @@ import 'package:chrono_sheet/di/di.dart';
 import 'package:chrono_sheet/log/boostrap/log_bootstrap.dart';
 import 'package:chrono_sheet/router/router.dart';
 import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
+import 'package:chrono_sheet/ui/path.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,10 +40,24 @@ void main() async {
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State createState() => MyAppState();
+}
+
+class MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppPaths.init(context);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {

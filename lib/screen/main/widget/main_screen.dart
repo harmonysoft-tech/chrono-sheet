@@ -13,7 +13,7 @@ import 'package:chrono_sheet/ui/widget_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../category/widget/category_widget.dart';
+import '../../../category/widget/categories_widget.dart';
 
 class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
@@ -60,7 +60,7 @@ class MainScreen extends ConsumerWidget {
                 SizedBox(height: columnVerticalInset),
                 SelectedFileWidget(),
                 SizedBox(height: columnVerticalInset),
-                CategoryWidget(),
+                Expanded(child: CategoriesWidget()),
                 SizedBox(height: columnVerticalInset),
                 ViewSelectedFileWidget(),
               ],

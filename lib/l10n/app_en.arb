@@ -9,6 +9,9 @@
   "titleLogin": "Login",
   "titleLogout": "Logout",
   "titleActivity": "Activity Log",
+  "titleCreateCategory": "Create Category",
+  "titleEditCategory": "Edit Category",
+  "titleChooseIconImage": "Choose Icon Image",
 
   "actionReset": "Reset",
   "actionSave": "Save",
@@ -20,6 +23,7 @@
   "actionPause": "Pause",
   "actionResume": "Resume",
   "actionViewSelectedFile": "View Selected File",
+  "actionEdit": "Edit",
 
   "textPermissionsRationale": "Our app requires access to your Google Drive and Google Sheets to function properly:\n\n  1. **Google Drive:** To show you a list of your existing Google Sheets and let you create a new one if needed.\n\n  2. **Google Sheets:** To store your stopwatch measurements directly in your chosen Google Sheet.\n\nWe only access the files you select or create through the app. Your data remains private and secure.",
   "textCopiedToClipboard": "Copied to clipboard",
@@ -30,9 +34,11 @@
   "hintCreateFile": "create a file to store the measurements OR",
   "hintSelectFile": "select a file to store the measurements",
 
-  "labelCategoryName": "category name",
   "labelFileName": "file name",
   "labelCategory": "measurement category",
+  "labelName": "name:",
+  "labelNameToShow": "name to show:",
+  "labelIcon": "icon:",
   "labelFile": "file to store the measurement",
 
   "errorCanNotParseCategories": "can not parse categories",
@@ -40,6 +46,12 @@
   "errorNoCategoryIsSelected": "no category is selected",
   "errorPermissionsNotGranted": "The following mandatory permissions are not granted:\n",
   "errorCanNotOpenFile": "Can not open the measurements file, try to open if from the browser or Google Sheets application",
+  "errorCategoryNameMustBeProvided": "category name must be provided",
+  "errorCategoryNameMustBeUnique": "this category name is already used",
+  "errorCanNotDecodeImage": "cannot decode image",
+  "errorNeedStoragePermissionForCategoryIcon": "'storage' permission is required for configuring category icon",
+  "errorNeedPhotosPermissionForCategoryIcon": "'photo' permission is required for configuring category icon",
+  "errorNeedMediaPermissionForCategoryIcon": "'media' permission is required for configuring category icon",
 
   "permissionDrive": "Google Drive",
   "permissionSheets": "Google Sheets",

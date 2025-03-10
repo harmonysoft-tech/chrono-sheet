@@ -16,27 +16,27 @@ class _Key {
   static const first = "measurements.firstIndex";
   static const count = "measurements.count";
 
-  static getId(int i) {
+  static String getId(int i) {
     return "measurements.$i.id";
   }
 
-  static getFilePrefix(int i) {
-    return "measurements.$i.file";
-  }
-
-  static getCategory(int i) {
+  static String getCategoryPrefix(int i) {
     return "measurements.$i.category";
   }
 
-  static getDuration(int i) {
+  static String getFilePrefix(int i) {
+    return "measurements.$i.file";
+  }
+
+  static String getDuration(int i) {
     return "measurements.$i.duration";
   }
 
-  static getSaved(int i) {
+  static String getSaved(int i) {
     return "measurements.$i.saved";
   }
 
-  static getTime(int i) {
+  static String getTime(int i) {
     return "measurements.$i.time";
   }
 }
@@ -77,8 +77,8 @@ class Measurements extends _$Measurements {
     if (id == null) {
       return null;
     }
-    final categoryName = await _prefs.getString(_Key.getCategory(i));
-    if (categoryName == null) {
+    final category = await Category.deserialiseIfPossible(_prefs, _Key.getCategoryPrefix(i));
+    if (category == null) {
       return null;
     }
     final durationSeconds = await _prefs.getInt(_Key.getDuration(i));
@@ -101,7 +101,7 @@ class Measurements extends _$Measurements {
         id: id,
         time: DateTime.parse(time),
         file: file,
-        category: Category(categoryName),
+        category: category,
         durationSeconds: durationSeconds,
         saved: saved);
     _logger.info("loaded cached measurement from index $i: $result");
@@ -146,7 +146,7 @@ class Measurements extends _$Measurements {
 
   Future<void> _doSave(Measurement measurement, int i) async {
     await _prefs.setString(_Key.getId(i), measurement.id);
-    await _prefs.setString(_Key.getCategory(i), measurement.category.name);
+    await measurement.category.serialize(_prefs, _Key.getCategoryPrefix(i));
     await _prefs.setInt(_Key.getDuration(i), measurement.durationSeconds);
     await _prefs.setBool(_Key.getSaved(i), measurement.saved);
     await _prefs.setString(_Key.getTime(i), measurement.time.toIso8601String());

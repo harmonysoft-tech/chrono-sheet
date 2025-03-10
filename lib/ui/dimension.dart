@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AppDimension {
   static const double screenPadding = 16.0;
@@ -10,6 +11,11 @@ class AppDimension {
   static const double minHintArrowIndent = 8.0;
   static const double hintArrowHeight = 8.0;
   static const double hintArrowWidth = hintArrowHeight * 2;
+  static const borderCornerRadius = 12.0;
+
+  static double getCategoryWidgetEdgeLength(BuildContext context) {
+    return MediaQuery.of(context).size.width / 6;
+  }
 }
 
 Size getTextSize(String text, TextStyle style, double maxWidth) {
