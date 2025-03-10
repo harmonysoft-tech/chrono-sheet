@@ -1,3 +1,5 @@
+## v1.86.0+87 released on 10 Mar 2025 UTC
+  * 9f8675020359ff00dab47aef546c7009f423899c store the picked files in the app directory
 ## v1.85.0+86 released on 10 Mar 2025 UTC
   * aad60930a25b6d163b9d2369cee32087970db7fd fix tests, attempt3
 ## v1.84.0+85 released on 31 Jan 2025 UTC
