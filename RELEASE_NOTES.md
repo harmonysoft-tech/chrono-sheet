@@ -1,3 +1,5 @@
+## v1.89.0+90 released on 11 Mar 2025 UTC
+  * 60560cc33b1d0af3011c6feebe15cfd413ddbe58 correct icon-based layout
 ## v1.88.0+89 released on 10 Mar 2025 UTC
   * 9af673fa0a1385a2ad31216a8e52835eda78f3ea logging category state id
 ## v1.87.0+88 released on 10 Mar 2025 UTC
