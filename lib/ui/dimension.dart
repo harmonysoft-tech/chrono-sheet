@@ -12,6 +12,7 @@ class AppDimension {
   static const double hintArrowHeight = 8.0;
   static const double hintArrowWidth = hintArrowHeight * 2;
   static const borderCornerRadius = 12.0;
+  static const columnVerticalInset = 24.0;
 
   static double getCategoryWidgetEdgeLength(BuildContext context) {
     return MediaQuery.of(context).size.width / 6;

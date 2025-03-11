@@ -39,7 +39,6 @@ class CategoryState {
 }
 
 class _Key {
-
   static String getStateId(GoogleFile file) {
     return "category.${file.id}.state.id";
   }
@@ -82,22 +81,36 @@ class CategoryStateManager extends _$CategoryStateManager {
       _logger.info("found cached category state: $cached");
       state = AsyncValue.data(cached);
     }
-    final categories = await _parseCategories(selectedFile);
-    final newCategoryState = _merge(cached, categories);
+    final categoryNamesFromFile = await _parseCategoryNames(selectedFile);
+    final newCategoryState = await _merge(cached, categoryNamesFromFile);
     await _cacheCategoryState(newCategoryState, selectedFile);
     return newCategoryState;
+  }
+
+  Future<Category> _getCategoryByName(String name) async {
+    final category = await Category.deserialiseIfPossible(_prefs, _Key.getCommonCategoryPrefix(name));
+    if (category != null) {
+      return category;
+    }
+    return Category(
+      name: name,
+      representation: TextCategoryRepresentation(_getDefaultRepresentationText(name)),
+    );
   }
 
   Future<CategoryState?> _readCachedCategoryState(GoogleFile file) async {
     List<Category> categories = [];
     for (int i = 0;; i++) {
-      final category = await Category.deserialiseIfPossible(_prefs, _Key.getFileCategoryPrefix(file, i));
-      if (category == null) {
+      final categoryName = await _prefs.getString(_Key.getFileCategoryPrefix(file, i));
+      if (categoryName == null) {
         break;
       }
+      final category = await _getCategoryByName(categoryName);
       categories.add(category);
     }
-    _logger.info("found ${categories.length} categories for file ${file.id} (${file.name}): ${categories.join(", ")}");
+    _logger.info(
+      "found ${categories.length} cached categories for file ${file.id} (${file.name}): ${categories.join(", ")}",
+    );
     if (categories.isEmpty) {
       return null;
     }
@@ -112,10 +125,7 @@ class CategoryStateManager extends _$CategoryStateManager {
       selectedCategory = normalisedCategories.firstWhereOrNull((c) => c.name == selectedCategoryName);
     }
 
-    if (selectedCategory == null) {
-      selectedCategory = normalisedCategories.first;
-      normalisedCategories.removeAt(0);
-    }
+    selectedCategory ??= normalisedCategories.first;
 
     final id = await _prefs.getString(_Key.getStateId(file));
     final result = CategoryState(id: id, selected: selectedCategory, categories: normalisedCategories);
@@ -182,26 +192,22 @@ class CategoryStateManager extends _$CategoryStateManager {
     }
   }
 
-  Map<String, String> _resolveTextRepresentationClash(
-    String s1,
-    String s2,
-    Map<String, int> usedRepresentations,
-  ) {
+  Map<String, String> _resolveTextRepresentationClash(String s1,
+      String s2,
+      Map<String, int> usedRepresentations,) {
     final partsFirstLetters1 = s1.split(AppRegexp.whitespaces).map((s) => s[0]).join();
     final partsFirstLetters2 = s2.split(AppRegexp.whitespaces).map((s) => s[0]).join();
     final fromFirstLetters =
-        _doResolveTextRepresentationClash(partsFirstLetters1, partsFirstLetters2, usedRepresentations);
+    _doResolveTextRepresentationClash(partsFirstLetters1, partsFirstLetters2, usedRepresentations);
     if (fromFirstLetters[partsFirstLetters1] != fromFirstLetters[partsFirstLetters2]) {
       return fromFirstLetters;
     }
     return _doResolveTextRepresentationClash(s1, s2, usedRepresentations);
   }
 
-  Map<String, String> _doResolveTextRepresentationClash(
-    String s1,
-    String s2,
-    Map<String, int> usedRepresentations,
-  ) {
+  Map<String, String> _doResolveTextRepresentationClash(String s1,
+      String s2,
+      Map<String, int> usedRepresentations,) {
     for (int i = 1, limit = min(s1.length, s2.length); i < limit; i++) {
       if (s1[i] != s2[i]) {
         return {
@@ -216,26 +222,34 @@ class CategoryStateManager extends _$CategoryStateManager {
     };
   }
 
-  CategoryState _merge(CategoryState? cached, List<Category> current) {
-    _logger.info("merging cached categories state ($cached) and current categories (${current.join(", ")})");
-    if (current.isEmpty) {
+  Future<CategoryState> _merge(CategoryState? cached, List<String> currentCategoryNames) async {
+    _logger.info("merging cached categories state ($cached) and current categories ($currentCategoryNames)");
+    if (currentCategoryNames.isEmpty) {
       return CategoryState.empty;
     }
     if (cached == null) {
-      final selected = current.first;
-      current.removeAt(0);
-      return CategoryState(selected: selected, categories: current);
+      List<Category> categories = await Future.wait(currentCategoryNames.map((name) async {
+        return await _getCategoryByName(name);
+      }));
+      categories = ensureNoDuplicateTextRepresentations(categories);
+      final selected = categories.first;
+      return CategoryState(selected: selected, categories: categories);
     }
-    final List<Category> sortedCategories = List.of(cached.categories);
-    sortedCategories.removeWhere((category) => !current.contains(category));
-    final categoriesToAdd = current.where((category) => !sortedCategories.contains(category));
+    List<Category> sortedCategories = List.of(cached.categories);
+    sortedCategories.removeWhere((category) => !currentCategoryNames.contains(category.name));
+    final Set<String> cachedCategoryNames = Set.of(cached.categories.map((c) => c.name));
+    final categoryNamesToAdd = currentCategoryNames.where((name) => !cachedCategoryNames.contains(name));
+    final categoriesToAdd = await Future.wait(categoryNamesToAdd.map((name) async {
+      return await _getCategoryByName(name);
+    }));
     sortedCategories.addAll(categoriesToAdd);
 
+    sortedCategories = ensureNoDuplicateTextRepresentations(sortedCategories);
+
     Category? selected = cached.selected;
-    if (selected == null || !sortedCategories.contains(selected)) {
+    if (selected == null || !currentCategoryNames.contains(selected.name)) {
       selected = sortedCategories.first;
     }
-    sortedCategories.remove(selected);
     final result = CategoryState(selected: selected, categories: sortedCategories);
     _logger.info("categories after merge: $result");
     return result;
@@ -270,30 +284,18 @@ class CategoryStateManager extends _$CategoryStateManager {
 
     final categories = state.categories;
     for (int i = 0; i < categories.length; i++) {
-      await categories[i].serialize(_prefs, _Key.getFileCategoryPrefix(fileToUse, i));
+      await _prefs.setString(_Key.getFileCategoryPrefix(fileToUse, i), categories[i].name);
     }
     _logger.info("cached categories state for file ${fileToUse.id} (${fileToUse.name}): $state");
     return SaveCategoryResult.success;
   }
 
-  Future<List<Category>> _parseCategories(GoogleFile file) async {
+  Future<List<String>> _parseCategoryNames(GoogleFile file) async {
     final info = await parseSheetDocument(file);
-    var result = await Future.wait(
-        info.columns.keys.where((c) => !_categoryNamesToHideInUi.contains(c)).map((categoryName) async {
-      var category = await Category.deserialiseIfPossible(_prefs, _Key.getCommonCategoryPrefix(categoryName));
-      category ??= Category(
-        name: categoryName,
-        representation: TextCategoryRepresentation(_getDefaultRepresentationText(categoryName)),
-      );
-      return category;
-    }));
-    result = ensureNoDuplicateTextRepresentations(result);
-    result.sort();
-    _logger.info("parsed ${result.length} categories from google sheet document '${file.name}': ${result.join(", ")}");
-    return result;
+    return info.columns.keys.where((c) => !_categoryNamesToHideInUi.contains(c)).toList();
   }
 
-  Category? _findCategoryWithName(CategoryState state, String name, [Category? toSkip])  {
+  Category? _findCategoryWithName(CategoryState state, String name, [Category? toSkip]) {
     if (state.selected?.name == name && state.selected != toSkip) {
       return state.selected;
     }
@@ -342,28 +344,17 @@ class CategoryStateManager extends _$CategoryStateManager {
       return SaveCategoryResult.nameConflict;
     }
 
-    if (current.selected == from) {
-      final newState = CategoryState(
-        selected: to,
-        categories: current.categories,
-      );
-      state = AsyncValue.data(newState);
-      final result = await _cacheCategoryState(newState);
-      if (result == SaveCategoryResult.success) {
-        _logger.info("categories state after replacing category '$from' by '$to': $newState");
-      }
-      return result;
-    }
-
     final i = current.categories.indexOf(from);
     if (i < 0) {
       _logger.info("cannot replace non-selected category '$from' by '$to' because no 'from' category is registered");
       return SaveCategoryResult.wrongOriginalCategory;
     }
 
+    await to.serialize(_prefs, _Key.getCommonCategoryPrefix(to.name));
     final newCategories = List.of(current.categories);
     newCategories[i] = to;
-    final newState = CategoryState(selected: current.selected, categories: newCategories);
+    final newSelected = current.selected == from ? to : current.selected;
+    final newState = CategoryState(selected: newSelected, categories: newCategories);
     state = AsyncValue.data(newState);
     final result = await _cacheCategoryState(newState);
     if (result == SaveCategoryResult.success) {
@@ -379,23 +370,37 @@ class CategoryStateManager extends _$CategoryStateManager {
       _logger.info("category '$category' is already selected");
       return current;
     }
-    List<Category> categoriesToUse = List.of(current.categories);
-    final removed = categoriesToUse.remove(category);
-    if (!removed) {
+    if (!current.categories.contains(category)) {
       _logger.info("cannot select category '$category' because it's not registered");
       return current;
     }
-    final selected = current.selected;
-    if (selected != null) {
-      categoriesToUse.remove(selected);
-      categoriesToUse.insert(0, selected);
-    }
-    CategoryState newState = CategoryState(selected: category, categories: categoriesToUse);
-    state = AsyncValue.data(newState);
+
+    CategoryState newState = CategoryState(selected: category, categories: current.categories);
     final saveResult = await _cacheCategoryState(newState);
     if (saveResult == SaveCategoryResult.success) {
       _logger.info("categories state after '$category' is selected: $newState");
     }
+    state = AsyncValue.data(newState);
     return newState;
+  }
+
+  Future<void> onMeasurement(Category category) async {
+    final current = await future;
+    final i = current.categories.indexWhere((c) => c.name == category.name);
+    if (i < 0) {
+      _logger.info("skipping onMeasurement() for category '${category.name}' because it's not registered");
+      return;
+    }
+    if (i == 0) {
+      _logger.info("category ${category.name} is already the first, skipping onMeasurement()");
+      return;
+    }
+    final categoriesToUse = List.of(current.categories);
+    final categoryToUse = categoriesToUse[i];
+    categoriesToUse.removeAt(i);;
+    categoriesToUse.insert(0, categoryToUse);
+    final newState = CategoryState(selected: categoryToUse, categories: categoriesToUse);
+    await _cacheCategoryState(newState);
+    state = AsyncValue.data(newState);
   }
 }

@@ -37,7 +37,6 @@ class MainScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hintPositions = ref.watch(hintPositionsProvider);
-    final columnVerticalInset = 24.0;
     final l10n = AppLocalizations.of(context);
 
     return Stack(
@@ -57,11 +56,11 @@ class MainScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 StopWatchWidget(),
-                SizedBox(height: columnVerticalInset),
+                SizedBox(height: AppDimension.columnVerticalInset),
                 SelectedFileWidget(),
-                SizedBox(height: columnVerticalInset),
+                SizedBox(height: AppDimension.columnVerticalInset),
                 Expanded(child: CategoriesWidget()),
-                SizedBox(height: columnVerticalInset),
+                SizedBox(height: AppDimension.columnVerticalInset),
                 ViewSelectedFileWidget(),
               ],
             ),

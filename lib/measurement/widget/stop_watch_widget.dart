@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chrono_sheet/category/state/category_state.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
 import 'package:chrono_sheet/util/date_util.dart';
@@ -153,6 +154,7 @@ class StopWatchState extends ConsumerState<StopWatchWidget> {
         _timer = null;
         _prefs.setString(_preferencesKey, "");
         ref.read(sheetUpdaterProvider.notifier).store(durationToStore);
+        ref.read(categoryStateManagerProvider.notifier).onMeasurement(data.category!);
       } else if (_running) {
         _toggle();
       }

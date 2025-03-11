@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../generated/app_localizations.dart';
 import '../../router/router.dart';
 
 class CategoriesWidget extends ConsumerWidget {
@@ -40,60 +41,63 @@ class NoFileCreationWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncCategoryState = ref.watch(categoryStateManagerProvider);
     final theme = Theme.of(context);
-    return SizedBox.expand(
-      child: SingleChildScrollView(
-        child: LayoutBuilder(
-          builder: (context, constraints) => Wrap(
-            alignment: WrapAlignment.start,
-            spacing: _calculateSpacing(context, constraints.maxWidth),
-            runSpacing: AppDimension.elementPadding,
-            children: asyncCategoryState.maybeWhen(
-              data: (categoryState) => [
-                IconButton(
-                  onPressed: () {
-                    context.push(AppRoute.manageCategory, extra: null);
-                  },
-                  icon: Container(
-                    width: AppDimension.getCategoryWidgetEdgeLength(context),
-                    height: AppDimension.getCategoryWidgetEdgeLength(context),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
-                      border: Border.all(
-                        color: theme.disabledColor,
-                        width: 1,
+    final l10n = AppLocalizations.of(context);
+    final activeCategoryName = asyncCategoryState.maybeWhen(
+          data: (categoryState) => categoryState.selected?.name,
+          orElse: () => null,
+        ) ??
+        l10n.textNoValue;
+    return Column(
+      children: [
+        Text("${l10n.labelCategory}: $activeCategoryName"),
+        SizedBox(height: AppDimension.columnVerticalInset),
+        Expanded(
+          child: SingleChildScrollView(
+            child: LayoutBuilder(
+              builder: (context, constraints) => Wrap(
+                alignment: WrapAlignment.start,
+                spacing: _calculateSpacing(context, constraints.maxWidth),
+                runSpacing: AppDimension.elementPadding,
+                children: asyncCategoryState.maybeWhen(
+                  data: (categoryState) => [
+                    IconButton(
+                      onPressed: () {
+                        context.push(AppRoute.manageCategory, extra: null);
+                      },
+                      icon: Container(
+                        width: AppDimension.getCategoryWidgetEdgeLength(context),
+                        height: AppDimension.getCategoryWidgetEdgeLength(context),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
+                          border: Border.all(
+                            color: theme.disabledColor,
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(Icons.add),
                       ),
                     ),
-                    child: Icon(Icons.add),
-                  ),
+                    ...categoryState.categories.map(
+                      (category) => CategoryWidget(
+                        category: category,
+                        selected: category == categoryState.selected,
+                        pressCallback: () {
+                          ref.read(categoryStateManagerProvider.notifier).select(category);
+                        },
+                      ),
+                    )
+                  ],
+                  orElse: () => [
+                    Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  ],
                 ),
-                ...categoryState.selected == null
-                    ? []
-                    : [
-                        CategoryWidget(
-                          category: categoryState.selected!,
-                          selected: true,
-                          pressCallback: () {},
-                        ),
-                      ],
-                ...categoryState.categories.map(
-                  (category) => CategoryWidget(
-                    category: category,
-                    selected: false,
-                    pressCallback: () {
-                      ref.read(categoryStateManagerProvider.notifier).select(category);
-                    },
-                  ),
-                )
-              ],
-              orElse: () => [
-                Center(
-                  child: CircularProgressIndicator(),
-                )
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        )
+      ],
     );
   }
 }
