@@ -1,3 +1,5 @@
+## v1.90.0+91 released on 13 Mar 2025 UTC
+  * fc4532caefa26e4b3674265431a295c2089929c7 cropper, initial iteration
 ## v1.89.0+90 released on 11 Mar 2025 UTC
   * 60560cc33b1d0af3011c6feebe15cfd413ddbe58 correct icon-based layout
 ## v1.88.0+89 released on 10 Mar 2025 UTC
