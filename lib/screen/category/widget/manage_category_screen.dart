@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:chrono_sheet/category/model/category_representation.dart';
 import 'package:chrono_sheet/category/state/category_state.dart';
@@ -10,8 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
-import 'package:image/image.dart' as img;
-import 'dart:ui' as ui;
 
 import '../../../category/model/category.dart';
 import '../../../generated/app_localizations.dart';
