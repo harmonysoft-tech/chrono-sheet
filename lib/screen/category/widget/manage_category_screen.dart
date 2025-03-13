@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:chrono_sheet/category/model/category_representation.dart';
 import 'package:chrono_sheet/category/state/category_state.dart';
@@ -6,8 +7,11 @@ import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
+import 'package:image/image.dart' as img;
+import 'dart:ui' as ui;
 
 import '../../../category/model/category.dart';
 import '../../../generated/app_localizations.dart';
@@ -76,10 +80,8 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
           content: Text(errorText),
         ));
       } else {
-        _logger.info(
-            "permission request for $permission is permanently disabled and cannot tell user about that "
-                "- the build context is not mounted"
-        );
+        _logger.info("permission request for $permission is permanently disabled and cannot tell user about that "
+            "- the build context is not mounted");
       }
       openAppSettings();
       return false;
@@ -94,20 +96,18 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     //   return;
     // }
     if (!context.mounted) {
-      _logger.info(
-          "skipped icon selection for category '${_nameController.text}' - the build context is not mounted "
-              "on attempt to check photos permission"
-      );
+      _logger.info("skipped icon selection for category '${_nameController.text}' - the build context is not mounted "
+          "on attempt to check photos permission");
       return;
     }
-    if (! await _ensurePermission(Permission.photos, context, l10n.errorNeedPhotosPermissionForCategoryIcon)) {
+    if (!await _ensurePermission(Permission.photos, context, l10n.errorNeedPhotosPermissionForCategoryIcon)) {
       return;
     }
     if (!context.mounted) {
       _logger.info("skipped icon selection for category '${_nameController.text}' - the build context is not mounted");
       return;
     }
-    if (! await _ensurePermission(Permission.mediaLibrary, context, l10n.errorNeedMediaPermissionForCategoryIcon)) {
+    if (!await _ensurePermission(Permission.mediaLibrary, context, l10n.errorNeedMediaPermissionForCategoryIcon)) {
       return;
     }
 
@@ -121,20 +121,28 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
       _logger.info("no path is available after image selection, selection result: $result");
       return;
     }
-    final File originalFile = File(path);
+    // TODO refactor
+    CroppedFile? croppedFile = await ImageCropper().cropImage(sourcePath: path, uiSettings: [
+      AndroidUiSettings(
+        toolbarTitle: "Crop Icon", // TODO implement
+        aspectRatioPresets: [
+          CropAspectRatioPreset.square,
+        ],
+      ),
+      // TODO implement for iOS
+    ]);
+    if (croppedFile == null) {
+      _logger.info("cannot get cropped file");
+      return;
+    }
+
     final fileToStore = File("${AppPaths.categoryIconDir}/${Uuid().v4()}.jpg");
     fileToStore.createSync(recursive: true);
-    await originalFile.copy(fileToStore.path);
+    await File(croppedFile.path).copy(fileToStore.path);
     if (context.mounted) {
       setState(() {
         _iconFile = fileToStore;
       });
-      // final file = await context.push<File>(AppRoute.cropIcon, extra: originalFile);
-      // if (file != null) {
-      //   setState(() {
-      //     _iconFile = file;
-      //   });
-      // }
     } else {
       _logger.info("skipped icon selection for category '${_nameController.text}' - the build context is not mounted");
     }

@@ -72,7 +72,10 @@ class CategoryWidget extends StatelessWidget {
             ),
           ),
           alignment: Alignment.center,
-          child: _buildRepresentation(category.representation, theme, selected),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
+            child: _buildRepresentation(category.representation, theme, selected),
+          ),
         ),
       ),
     );
