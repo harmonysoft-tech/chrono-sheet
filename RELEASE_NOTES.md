@@ -1,3 +1,5 @@
+## v1.92.0+93 released on 15 Mar 2025 UTC
+  * f14459796bc480b62cb15e890e14bcc08a0dcc6d revised android permissions for category icon selection
 ## v1.91.0+92 released on 15 Mar 2025 UTC
   * 40630208876902c92079a451b2cdf5b121c42302 * make sure that category widget border is the same as ClipRRect edge * move file picker code into separate function
 ## v1.90.0+91 released on 13 Mar 2025 UTC
