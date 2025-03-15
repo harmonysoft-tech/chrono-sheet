@@ -11,7 +11,8 @@
   "titleActivity": "Activity Log",
   "titleCreateCategory": "Create Category",
   "titleEditCategory": "Edit Category",
-  "titleChooseIconImage": "Choose Icon Image",
+  "titleChooseCategoryImage": "Choose Category Image",
+  "titleCropImage": "Crop Image",
 
   "actionReset": "Reset",
   "actionSave": "Save",

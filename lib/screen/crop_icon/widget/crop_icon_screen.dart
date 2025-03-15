@@ -71,7 +71,7 @@ class CropIconScreeState extends State<CropIconScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.titleChooseIconImage),
+        title: Text(l10n.titleChooseCategoryImage),
         actions: [
           IconButton(
             icon: Icon(Icons.check),

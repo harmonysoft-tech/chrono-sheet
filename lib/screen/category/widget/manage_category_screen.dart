@@ -87,6 +87,29 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     return false;
   }
 
+  Future<String?> _selectFile(AppLocalizations l10n) async {
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        dialogTitle: l10n.titleChooseCategoryImage,
+        type: FileType.image,
+      );
+      if (result == null) {
+        _logger.info("no icon file is selected");
+        return null;
+      }
+      final path = result.files.single.path;
+      if (path == null) {
+        _logger.info("no path is available after image selection, selection result: $result");
+        return null;
+      } else {
+        return path;
+      }
+    } catch (e, stack) {
+      _logger.info("unexpected exception on attempt to select a file", e, stack);
+      return null;
+    }
+  }
+
   Future<void> _selectIcon(BuildContext context, double edgeSize) async {
     final l10n = AppLocalizations.of(context);
     // if (! await _ensurePermission(Permission.storage, context, l10n.errorNeedStoragePermissionForCategoryIcon)) {
@@ -108,26 +131,25 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
       return;
     }
 
-    final FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
-    if (result == null) {
-      _logger.info("no icon file is selected");
-      return;
-    }
-    final path = result.files.single.path;
+    final path = await _selectFile(l10n);
     if (path == null) {
-      _logger.info("no path is available after image selection, selection result: $result");
       return;
     }
     // TODO refactor
-    CroppedFile? croppedFile = await ImageCropper().cropImage(sourcePath: path, uiSettings: [
-      AndroidUiSettings(
-        toolbarTitle: "Crop Icon", // TODO implement
-        aspectRatioPresets: [
-          CropAspectRatioPreset.square,
-        ],
-      ),
-      // TODO implement for iOS
-    ]);
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
+      sourcePath: path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: l10n.titleCropImage,
+          lockAspectRatio: true,
+          initAspectRatio: CropAspectRatioPreset.square,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+          ],
+        ),
+        // TODO implement for iOS
+      ],
+    );
     if (croppedFile == null) {
       _logger.info("cannot get cropped file");
       return;

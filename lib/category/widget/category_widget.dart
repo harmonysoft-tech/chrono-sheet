@@ -61,20 +61,25 @@ class CategoryWidget extends StatelessWidget {
       },
       child: IconButton(
         onPressed: pressCallback,
-        icon: Container(
+        icon: SizedBox(
           width: edgeLength,
           height: edgeLength,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
-            border: Border.all(
-              color: selected ? theme.primaryColor : theme.disabledColor,
-              width: selected ? 2 : 1,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
-            child: _buildRepresentation(category.representation, theme, selected),
+          child: Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
+                child: _buildRepresentation(category.representation, theme, selected),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
+                  border: Border.all(
+                    color: selected ? theme.primaryColor : theme.disabledColor,
+                    width: selected ? 3.0 : 1.0,
+                  ),
+                ),
+              )
+            ],
           ),
         ),
       ),
