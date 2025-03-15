@@ -1,3 +1,5 @@
+## v1.93.0+94 released on 15 Mar 2025 UTC
+  * 0a02ac87736f22b8d78ff84a938354e2d7746429 * correct crop setup for iphone * refactor category image selection
 ## v1.92.0+93 released on 15 Mar 2025 UTC
   * f14459796bc480b62cb15e890e14bcc08a0dcc6d revised android permissions for category icon selection
 ## v1.91.0+92 released on 15 Mar 2025 UTC
