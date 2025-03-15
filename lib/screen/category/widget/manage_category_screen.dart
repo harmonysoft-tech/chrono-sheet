@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:chrono_sheet/category/model/category_representation.dart';
 import 'package:chrono_sheet/category/state/category_state.dart';
+import 'package:chrono_sheet/category/widget/category_widget.dart';
 import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,6 @@ class ManageCategoryScreen extends ConsumerStatefulWidget {
 
 class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _textRepresentationController = TextEditingController();
   final FocusNode _nameFocusNode = FocusNode();
   File? _iconFile;
 
@@ -39,8 +39,8 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     if (category != null) {
       _nameController.text = category.name;
       switch (category.representation) {
-        case TextCategoryRepresentation(text: final t):
-          _textRepresentationController.text = t;
+        case TextCategoryRepresentation():
+          break;
         case ImageCategoryRepresentation(file: final f):
           _iconFile = f;
       }
@@ -53,7 +53,6 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _textRepresentationController.dispose();
     _nameFocusNode.dispose();
     super.dispose();
   }
@@ -65,25 +64,12 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
       return;
     }
 
-    final path = await _selectFile(l10n);
-    if (path == null) {
+    final originalImageFilePath = await _selectFile(l10n);
+    if (originalImageFilePath == null) {
       return;
     }
-    // TODO refactor
-    CroppedFile? croppedFile = await ImageCropper().cropImage(
-      sourcePath: path,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: l10n.titleCropImage,
-          lockAspectRatio: true,
-          initAspectRatio: CropAspectRatioPreset.square,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.square,
-          ],
-        ),
-        // TODO implement for iOS
-      ],
-    );
+
+    final croppedFile = await _cropImage(originalImageFilePath, l10n);
     if (croppedFile == null) {
       _logger.info("cannot get cropped file");
       return;
@@ -119,10 +105,8 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
             content: Text(l10n.errorNeedPermissionForCategoryIcon),
           ));
         } else {
-          _logger.info(
-              "skipped icon selection for category '${_nameController.text}' - permission is not granted "
-                  "and the build context is not mounted"
-          );
+          _logger.info("skipped icon selection for category '${_nameController.text}' - permission is not granted "
+              "and the build context is not mounted");
         }
         return false;
       }
@@ -152,6 +136,31 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
       _logger.info("unexpected exception on attempt to select a file", e, stack);
       return null;
     }
+  }
+
+  Future<CroppedFile?> _cropImage(String originalImageFilePath, AppLocalizations l10n) async {
+    return await ImageCropper().cropImage(
+      sourcePath: originalImageFilePath,
+      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: l10n.titleCropImage,
+          lockAspectRatio: true,
+          initAspectRatio: CropAspectRatioPreset.square,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+          ],
+        ),
+        IOSUiSettings(
+          title: l10n.titleCropImage,
+          aspectRatioLockEnabled: true,
+          aspectRatioPickerButtonHidden: true,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+          ],
+        ),
+      ],
+    );
   }
 
   Future<void> _saveCategoryIfPossible(BuildContext context, CategoryStateManager stateManager) async {
@@ -229,43 +238,38 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
             ),
             Row(
               children: [
-                Text(l10n.labelNameToShow, style: labelTheme),
-                SizedBox(
-                  width: AppDimension.elementPadding,
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _textRepresentationController,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: AppDimension.elementPadding,
-            ),
-            Row(
-              children: [
                 Text(l10n.labelIcon, style: labelTheme),
                 SizedBox(
                   width: AppDimension.elementPadding,
                 ),
-                IconButton(
-                  onPressed: () {
-                    _selectIcon(context, AppDimension.getCategoryWidgetEdgeLength(context));
-                  },
-                  icon: Container(
-                    width: AppDimension.getCategoryWidgetEdgeLength(context),
-                    height: AppDimension.getCategoryWidgetEdgeLength(context),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
-                      border: Border.all(
-                        color: theme.disabledColor,
-                        width: 1,
+                _iconFile == null
+                    ? IconButton(
+                        onPressed: () {
+                          _selectIcon(context, AppDimension.getCategoryWidgetEdgeLength(context));
+                        },
+                        icon: Container(
+                          width: AppDimension.getCategoryWidgetEdgeLength(context),
+                          height: AppDimension.getCategoryWidgetEdgeLength(context),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
+                            border: Border.all(
+                              color: theme.disabledColor,
+                              width: 1,
+                            ),
+                          ),
+                          child: Icon(Icons.add),
+                        ),
+                      )
+                    : CategoryWidget(
+                        category: Category(
+                          name: _nameController.text,
+                          representation: ImageCategoryRepresentation(_iconFile!),
+                        ),
+                        selected: false,
+                        pressCallback: () {
+                          _selectIcon(context, AppDimension.getCategoryWidgetEdgeLength(context));
+                        },
                       ),
-                    ),
-                    child: Icon(Icons.add),
-                  ),
-                ),
               ],
             ),
           ],
