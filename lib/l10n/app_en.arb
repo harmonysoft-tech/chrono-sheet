@@ -51,9 +51,7 @@
   "errorCategoryNameMustBeProvided": "category name must be provided",
   "errorCategoryNameMustBeUnique": "this category name is already used",
   "errorCanNotDecodeImage": "cannot decode image",
-  "errorNeedStoragePermissionForCategoryIcon": "'storage' permission is required for configuring category icon",
-  "errorNeedPhotosPermissionForCategoryIcon": "'photo' permission is required for configuring category icon",
-  "errorNeedMediaPermissionForCategoryIcon": "'media' permission is required for configuring category icon",
+  "errorNeedPermissionForCategoryIcon": "target permission is required for configuring category icon",
 
   "permissionDrive": "Google Drive",
   "permissionSheets": "Google Sheets",

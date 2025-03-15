@@ -68,7 +68,9 @@ class CategoryWidget extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
-                child: _buildRepresentation(category.representation, theme, selected),
+                child: Center(
+                  child: _buildRepresentation(category.representation, theme, selected),
+                ),
               ),
               Container(
                 decoration: BoxDecoration(

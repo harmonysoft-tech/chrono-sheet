@@ -58,76 +58,10 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     super.dispose();
   }
 
-  Future<bool> _ensurePermission(Permission permission, BuildContext context, String errorText) async {
-    final status = await permission.request();
-    if (status.isGranted) {
-      return true;
-    } else if (status.isDenied) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(errorText),
-        ));
-      } else {
-        _logger.info("skipped permission request for $permission - the build context is not mounted");
-      }
-      return false;
-    } else if (status.isPermanentlyDenied) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(errorText),
-        ));
-      } else {
-        _logger.info("permission request for $permission is permanently disabled and cannot tell user about that "
-            "- the build context is not mounted");
-      }
-      openAppSettings();
-      return false;
-    }
-    _logger.info("permission request for $permission is an undefined state - $status");
-    return false;
-  }
-
-  Future<String?> _selectFile(AppLocalizations l10n) async {
-    try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
-        dialogTitle: l10n.titleChooseCategoryImage,
-        type: FileType.image,
-      );
-      if (result == null) {
-        _logger.info("no icon file is selected");
-        return null;
-      }
-      final path = result.files.single.path;
-      if (path == null) {
-        _logger.info("no path is available after image selection, selection result: $result");
-        return null;
-      } else {
-        return path;
-      }
-    } catch (e, stack) {
-      _logger.info("unexpected exception on attempt to select a file", e, stack);
-      return null;
-    }
-  }
-
   Future<void> _selectIcon(BuildContext context, double edgeSize) async {
     final l10n = AppLocalizations.of(context);
-    // if (! await _ensurePermission(Permission.storage, context, l10n.errorNeedStoragePermissionForCategoryIcon)) {
-    //   return;
-    // }
-    if (!context.mounted) {
-      _logger.info("skipped icon selection for category '${_nameController.text}' - the build context is not mounted "
-          "on attempt to check photos permission");
-      return;
-    }
-    if (!await _ensurePermission(Permission.photos, context, l10n.errorNeedPhotosPermissionForCategoryIcon)) {
-      return;
-    }
-    if (!context.mounted) {
-      _logger.info("skipped icon selection for category '${_nameController.text}' - the build context is not mounted");
-      return;
-    }
-    if (!await _ensurePermission(Permission.mediaLibrary, context, l10n.errorNeedMediaPermissionForCategoryIcon)) {
+    final haveNecessaryPermissions = await _ensureFileSelectionPermissions(context);
+    if (!haveNecessaryPermissions) {
       return;
     }
 
@@ -164,6 +98,59 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
       });
     } else {
       _logger.info("skipped icon selection for category '${_nameController.text}' - the build context is not mounted");
+    }
+  }
+
+  Future<bool> _ensureFileSelectionPermissions(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    if (Platform.isAndroid) {
+      if (await Permission.storage.request().isGranted) {
+        // for android < 13
+        _logger.info("detected that permission ${Permission.storage} is granted");
+        return true;
+      } else if (await Permission.mediaLibrary.request().isGranted) {
+        // for android >= 13
+        _logger.info("detected that permission ${Permission.mediaLibrary} is granted");
+        return true;
+      } else {
+        _logger.info("do not have necessary permissions for icon selection");
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.errorNeedPermissionForCategoryIcon),
+          ));
+        } else {
+          _logger.info(
+              "skipped icon selection for category '${_nameController.text}' - permission is not granted "
+                  "and the build context is not mounted"
+          );
+        }
+        return false;
+      }
+    } else {
+      return true;
+    }
+  }
+
+  Future<String?> _selectFile(AppLocalizations l10n) async {
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        dialogTitle: l10n.titleChooseCategoryImage,
+        type: FileType.image,
+      );
+      if (result == null) {
+        _logger.info("no icon file is selected");
+        return null;
+      }
+      final path = result.files.single.path;
+      if (path == null) {
+        _logger.info("no path is available after image selection, selection result: $result");
+        return null;
+      } else {
+        return path;
+      }
+    } catch (e, stack) {
+      _logger.info("unexpected exception on attempt to select a file", e, stack);
+      return null;
     }
   }
 
