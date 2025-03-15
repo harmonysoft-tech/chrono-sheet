@@ -1,3 +1,5 @@
+## v1.91.0+92 released on 15 Mar 2025 UTC
+  * 40630208876902c92079a451b2cdf5b121c42302 * make sure that category widget border is the same as ClipRRect edge * move file picker code into separate function
 ## v1.90.0+91 released on 13 Mar 2025 UTC
   * fc4532caefa26e4b3674265431a295c2089929c7 cropper, initial iteration
 ## v1.89.0+90 released on 11 Mar 2025 UTC
