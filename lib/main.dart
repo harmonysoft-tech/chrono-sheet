@@ -5,6 +5,7 @@ import 'package:chrono_sheet/log/boostrap/log_bootstrap.dart';
 import 'package:chrono_sheet/router/router.dart';
 import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
 import 'package:chrono_sheet/ui/path.dart';
+import 'package:chrono_sheet/ui/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,13 +70,11 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       navigatorKey: navigatorKey,
       onGenerateTitle: (context) => AppLocalizations.of(context).appName,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.theme,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: MaterialApp.router(
+        theme: AppTheme.theme,
         routerConfig: router,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

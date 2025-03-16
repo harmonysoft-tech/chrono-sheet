@@ -1,4 +1,4 @@
-import 'package:chrono_sheet/file/widget/selected_file_widget.dart';
+import 'package:chrono_sheet/file/widget/file_widget.dart';
 import 'package:chrono_sheet/file/widget/view_selected_file_widget.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/google/state/google_login_state.dart';
@@ -44,10 +44,14 @@ class MainScreen extends ConsumerWidget {
       children: [
         Scaffold(
           appBar: AppBar(
-            title: Text(AppLocalizations.of(context).appName),
-            actions: [
-              MainMenuButton(),
-            ],
+            title: Row(
+              children: [
+                Text(AppLocalizations.of(context).appName),
+                Spacer(),
+                FileWidget(),
+                MainMenuButton(),
+              ],
+            ),
           ),
           body: Padding(
             padding: const EdgeInsets.all(AppDimension.screenPadding),
@@ -57,8 +61,8 @@ class MainScreen extends ConsumerWidget {
               children: [
                 StopWatchWidget(),
                 SizedBox(height: AppDimension.columnVerticalInset),
-                SelectedFileWidget(),
-                SizedBox(height: AppDimension.columnVerticalInset),
+                // SelectedFileWidget(),
+                // SizedBox(height: AppDimension.columnVerticalInset),
                 Expanded(child: CategoriesWidget()),
                 SizedBox(height: AppDimension.columnVerticalInset),
                 ViewSelectedFileWidget(),

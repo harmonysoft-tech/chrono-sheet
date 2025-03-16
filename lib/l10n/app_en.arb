@@ -30,6 +30,7 @@
   "textCopiedToClipboard": "Copied to clipboard",
   "textCanNotSaveMeasurementsWhileOffline": "Cannot save measurements while offline",
   "textNoValue": "<no value>",
+  "textNoFileIsSelected": "<no file is selected>",
 
   "hintCreateCategory": "create a measurement category",
   "hintSelectCategory": "select a previously used category",

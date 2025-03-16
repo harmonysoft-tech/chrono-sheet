@@ -5,9 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../file/service/loader/google_files_loader.dart';
 import '../../../generated/app_localizations.dart';
+import '../../../ui/dimension.dart';
 
 class ChooseSheetScreen extends ConsumerStatefulWidget {
-
   const ChooseSheetScreen({super.key});
 
   @override
@@ -15,7 +15,6 @@ class ChooseSheetScreen extends ConsumerStatefulWidget {
 }
 
 class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -37,11 +36,10 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
         onRefresh: () => notifier.loadFiles(initialLoad: true),
         child: NotificationListener<ScrollNotification>(
           onNotification: (notification) {
-            if (notification is ScrollEndNotification
-                && notification.metrics.extentAfter == 0
-                && state.nextPageToken != null
-                && !state.loading
-            ) {
+            if (notification is ScrollEndNotification &&
+                notification.metrics.extentAfter == 0 &&
+                state.nextPageToken != null &&
+                !state.loading) {
               notifier.loadFiles();
             }
             return false;
@@ -49,31 +47,28 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
           child: Column(
             children: [
               Expanded(
-                  child: ListView.builder(
-                    itemCount: state.files.length,
-                    itemBuilder: (context, index) => ListTile(
-                      leading: CircleAvatar(
-                        child: Icon(Icons.table_chart)
-                      ),
-                      title: Text(
-                        state.files[index].name,
-                        style: theme.textTheme.headlineSmall,
-                      ),
-                      onTap: () {
-                        ref.read(fileStateManagerProvider.notifier).select(
-                            state.files[index]
-                        );
-                        context.pop();
-                      },
+                child: ListView.separated(
+                  itemCount: state.files.length,
+                  itemBuilder: (context, index) => ListTile(
+                    leading: Image.asset(
+                      "assets/icon/google-sheet.png",
+                      width: AppDimension.iconSize,
+                      height: AppDimension.iconSize,
+                      fit: BoxFit.contain,
                     ),
-                  )
+                    title: Text(
+                      state.files[index].name,
+                      style: theme.textTheme.headlineSmall,
+                    ),
+                    onTap: () {
+                      ref.read(fileStateManagerProvider.notifier).select(state.files[index]);
+                      context.pop();
+                    },
+                  ),
+                  separatorBuilder: (context, index) => Divider(),
+                ),
               ),
-              if (state.loading) ...[
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: LinearProgressIndicator()
-                )
-              ]
+              if (state.loading) ...[Padding(padding: const EdgeInsets.all(16.0), child: LinearProgressIndicator())]
             ],
           ),
         ),
