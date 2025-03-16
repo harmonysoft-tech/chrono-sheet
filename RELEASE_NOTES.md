@@ -1,3 +1,5 @@
+## v1.95.0+96 released on 16 Mar 2025 UTC
+  * 788af6b185c7a44753b4ce4f64541652f512f696 new stop watch controls
 ## v1.94.0+95 released on 16 Mar 2025 UTC
   * 1e11fceb79be9749adc1f1aaf422a26fb68e0f1e move file widget to the toolbar
 ## v1.93.0+94 released on 15 Mar 2025 UTC
