@@ -49,7 +49,7 @@ class NoFileCreationWidget extends ConsumerWidget {
         l10n.textNoValue;
     return Column(
       children: [
-        Text("${l10n.labelCategory}: $activeCategoryName"),
+        Text(activeCategoryName, style: theme.textTheme.displayMedium),
         SizedBox(height: AppDimension.columnVerticalInset),
         Expanded(
           child: SingleChildScrollView(
