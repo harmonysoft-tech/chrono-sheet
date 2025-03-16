@@ -8,12 +8,14 @@ import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:chrono_sheet/sheet/parser/sheet_parser.dart';
 import 'package:chrono_sheet/util/regexp_util.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../file/model/google_file.dart';
+import '../../network/network.dart';
 import '../../sheet/updater/sheet_updater.dart';
 import '../../sheet/updater/update_service.dart';
 
@@ -98,28 +100,42 @@ class CategoryStateManager extends _$CategoryStateManager {
     }
     final cached = await _readCachedCategoryState(selectedFile);
     if (cached == null) {
-      return await _parseAndApplyCategoriesFromSheet(selectedFile);
+      final result = await _parseAndApplyCategoriesFromSheet(selectedFile);
+      return result.match(
+          (error) => CategoryState(),
+          (newState) => newState
+      );
     } else {
       _logger.info("found cached category state: $cached");
-      _parseAndApplyCategoriesFromSheet(selectedFile).then((newState) {
-        state = AsyncValue.data(newState);
+      _parseAndApplyCategoriesFromSheet(selectedFile).then((result) {
+        result.map((newState) {
+          state = AsyncValue.data(newState);
+        });
       });
       return cached;
     }
   }
 
-  Future<CategoryState> _parseAndApplyCategoriesFromSheet(GoogleFile file) async {
+  Future<Either<Unit, CategoryState>> _parseAndApplyCategoriesFromSheet(GoogleFile file) async {
     _logger.info("loading categories from the remote document");
-    final categoryNamesFromFile = await _parseCategoryNames(file);
-    _logger.info("fetched remote categories: $categoryNamesFromFile");
-    final currentState = state;
-    CategoryState? cached;
-    if (currentState is AsyncData) {
-      cached = currentState.value;
-    }
-    final newCategoryState = await _merge(cached, categoryNamesFromFile);
-    await _cacheCategoryState(newCategoryState, file);
-    return newCategoryState;
+    final categoryNamesFromFileResult = await _parseCategoryNames(file);
+    return categoryNamesFromFileResult.match(
+        (error) {
+          _logger.info("failed to load categories from $file");
+          return Either.left(unit);
+        },
+        (categoryNamesFromFile) async {
+          _logger.info("fetched remote categories: $categoryNamesFromFile");
+          final currentState = state;
+          CategoryState? cached;
+          if (currentState is AsyncData) {
+            cached = currentState.value;
+          }
+          final newCategoryState = await _merge(cached, categoryNamesFromFile);
+          await _cacheCategoryState(newCategoryState, file);
+          return Either.right(newCategoryState);
+        }
+    );
   }
 
   Future<Category> _getCategoryByName(String name) async {
@@ -329,9 +345,13 @@ class CategoryStateManager extends _$CategoryStateManager {
     return ManageCategoryResult.success;
   }
 
-  Future<List<String>> _parseCategoryNames(GoogleFile file) async {
+  Future<Either<Unit,List<String>>> _parseCategoryNames(GoogleFile file) async {
+    final online = await isOnline();
+    if (!online) {
+      return Either.left(unit);
+    }
     final info = await parseSheetDocument(file);
-    return info.columns.keys.where((c) => !_categoryNamesToHideInUi.contains(c)).toList();
+    return Either.right(info.columns.keys.where((c) => !_categoryNamesToHideInUi.contains(c)).toList());
   }
 
   Category? _findCategoryWithName(CategoryState state, String name, [Category? toSkip]) {

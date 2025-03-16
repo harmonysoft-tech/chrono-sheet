@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../category/model/category.dart';
 import '../../file/model/google_file.dart';
 import '../../google/google_helper.dart';
 import '../../log/util/log_util.dart';
@@ -49,9 +48,10 @@ class SheetUpdateService {
 
   Future<void> saveMeasurement(
     int duration,
-    Category category,
+    String category,
     GoogleFile file,
   ) async {
+    _logger.info("saving measurement of $duration in category '$category' in file '${file.name}'");
     final data = await getGoogleClientData();
     final api = SheetsApi(data.authenticatedClient);
     GoogleSheetInfo sheetInfo = await parseSheetDocument(file);
@@ -116,7 +116,7 @@ class SheetUpdateService {
     await _setValues(context, {
       CellAddress(0, 0): Column.date,
       CellAddress(0, 1): Column.total,
-      CellAddress(0, 2): context.category.name,
+      CellAddress(0, 2): context.category,
       CellAddress(1, 0): context.sheetInfo.dateFormat.format(clockProvider.now()),
       CellAddress(1, 1): context.durationToStore.toString(),
       CellAddress(1, 2): context.durationToStore.toString(),
@@ -272,7 +272,7 @@ class SheetUpdateService {
 
     int currentTotalTime = _calculateTotalDuration(todayRow, context);
     int? totalColumn = context.columns[Column.total]?.column;
-    int? categoryColumn = context.columns[context.category.name]?.column;
+    int? categoryColumn = context.columns[context.category]?.column;
 
     int newColumnShift = 0;
 
@@ -284,7 +284,7 @@ class SheetUpdateService {
 
     if (categoryColumn == null) {
       categoryColumn = _calculateNewColumn(context) + newColumnShift++;
-      updates[CellAddress(dateHeaderCell.row, categoryColumn)] = context.category.name;
+      updates[CellAddress(dateHeaderCell.row, categoryColumn)] = context.category;
     }
     final categoryValueCellAddress = CellAddress(todayRow, categoryColumn);
     final currentCategoryStringValue = _getValue(categoryValueCellAddress, context);
@@ -466,7 +466,7 @@ class _Addresses {
 class _SaveMeasurementContext {
   final int durationToStore;
   final GoogleFile file;
-  final Category category;
+  final String category;
   final SheetsApi api;
   final GoogleSheetInfo sheetInfo;
 

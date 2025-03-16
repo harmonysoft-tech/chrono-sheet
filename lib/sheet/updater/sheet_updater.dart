@@ -2,6 +2,7 @@ import 'package:chrono_sheet/measurement/model/measurement.dart';
 import 'package:chrono_sheet/measurement/model/measurements_state.dart';
 import 'package:chrono_sheet/network/network.dart';
 import 'package:chrono_sheet/sheet/updater/update_service.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../category/model/category.dart';
@@ -40,6 +41,7 @@ class GenericError extends SaveMeasurementState {
 enum SaveMeasurementsError {
   noFileIsSelected,
   noCategoryIsSelected,
+  offline,
 }
 
 @Riverpod(keepAlive: true)
@@ -49,10 +51,10 @@ class SheetUpdater extends _$SheetUpdater {
     return SaveMeasurementState.idle;
   }
 
-  Future<FileAndCategory> prepareToStore(Duration measurement) async {
+  Future<Either<AppError, FileAndCategory>> prepareToStore(Duration measurement) async {
     final GoogleFile? file = await prepareToChange();
     if (file == null) {
-      return FileAndCategory();
+      return Either.left(AppError(SaveMeasurementsError.noCategoryIsSelected));
     }
     final categoryInfo = await ref.read(categoryStateManagerProvider.future);
     final category = categoryInfo.selected;
@@ -60,10 +62,10 @@ class SheetUpdater extends _$SheetUpdater {
       _logger.fine("skipped a request to store measurement $measurement in file "
           "'${file.name}' because no category selected");
       state = AppError(SaveMeasurementsError.noCategoryIsSelected);
-      return FileAndCategory(file: file);
+      return Either.left(AppError(SaveMeasurementsError.noCategoryIsSelected));
     }
 
-    return FileAndCategory(file: file, category: category);
+    return Either.right(FileAndCategory(file: file, category: category));
   }
 
   Future<GoogleFile?> prepareToChange() async {
@@ -78,46 +80,23 @@ class SheetUpdater extends _$SheetUpdater {
     }
   }
 
-  Future<SaveMeasurementState> store(Duration measurement) async {
-    if (measurement.inMinutes <= 0) {
-      _logger.fine("skipped a request to store non-positive measurement $measurement");
-      return SaveMeasurementState.success;
-    }
-
-    final fileAndCategory = await prepareToStore(measurement);
-    final file = fileAndCategory.file;
-    if (file == null) {
-      return AppError(SaveMeasurementsError.noFileIsSelected);
-    }
-
-    final category = fileAndCategory.category;
-    if (category == null) {
-      return AppError(SaveMeasurementsError.noCategoryIsSelected);
-    }
-
-    await ref.read(measurementsProvider.notifier).save(
-          Measurement(
-            file: file,
-            category: category,
-            durationSeconds: measurement.inMinutes,
-          ),
-        );
-    return await storeUnsavedMeasurements();
-  }
-
   Future<SaveMeasurementState> storeUnsavedMeasurements() async {
-    final online = await isOnline();
-    if (!online) {
-      _logger.info("skipping attempt to store unsaved measurements because the application is currently offline");
-      return SaveMeasurementState.success;
-    }
-
     final measurementsAsync =  ref.read(measurementsProvider);
     List<Measurement> measurements;
     if (measurementsAsync is AsyncData<List<Measurement>>) {
       measurements = measurementsAsync.value;
     } else {
       return SaveMeasurementState.success;
+    }
+
+    if (measurements.isEmpty) {
+      return SaveMeasurementState.success;
+    }
+
+    final online = await isOnline();
+    if (!online) {
+      _logger.info("skipping attempt to store unsaved measurements because the application is currently offline");
+      return AppError(SaveMeasurementsError.offline);
     }
 
     final updateService = ref.read(updateServiceProvider);
@@ -127,7 +106,7 @@ class SheetUpdater extends _$SheetUpdater {
         continue;
       }
       try {
-        await updateService.saveMeasurement(measurement.durationSeconds, measurement.category, measurement.file);
+        await updateService.saveMeasurement(measurement.durationSeconds, measurement.category.name, measurement.file);
         measurementsNotifier.onSaved(measurement);
         state = SaveMeasurementState.success;
       } catch (e, stack) {
@@ -151,15 +130,13 @@ class SheetUpdater extends _$SheetUpdater {
 }
 
 class FileAndCategory {
-  final GoogleFile? file;
-  final Category? category;
+  final GoogleFile file;
+  final Category category;
 
   FileAndCategory({
-    this.file,
-    this.category,
+    required this.file,
+    required this.category,
   });
-
-  bool get ready => file != null && category != null;
 
   @override
   String toString() {

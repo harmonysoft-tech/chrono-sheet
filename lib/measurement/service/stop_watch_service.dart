@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../category/state/category_state.dart';
 import '../../sheet/updater/sheet_updater.dart';
 import '../../util/date_util.dart';
+import '../model/measurement.dart';
+import '../model/measurements_state.dart';
 
 part 'stop_watch_service.g.dart';
 
@@ -19,7 +21,8 @@ class StopWatchState {
   StopWatchState({
     bool? running,
     Duration? measuredDuration,
-  })  : running = running ?? false,
+  })
+      : running = running ?? false,
         measuredDuration = measuredDuration ?? Duration.zero;
 
   StopWatchState copyWith({
@@ -35,7 +38,6 @@ class StopWatchState {
 
 @Riverpod(keepAlive: true)
 class StopWatchService extends _$StopWatchService {
-
   static const _preferencesKey = "measurement.duration.ongoing";
   static final _storeFrequency = Duration(seconds: 15);
 
@@ -77,14 +79,12 @@ class StopWatchService extends _$StopWatchService {
 
       _lastMeasurementTime = now;
 
-
-
       state = StopWatchState(
         measuredDuration: storedDuration + runInBackgroundDuration,
-          running: storedLastMeasurementTime != null,
+        running: storedLastMeasurementTime != null,
       );
       _startTimerIfNecessary();
-      });
+    });
     return StopWatchState();
   }
 
@@ -164,26 +164,46 @@ class StopWatchService extends _$StopWatchService {
   }
 
   Future<SaveMeasurementState> saveMeasurement() async {
+    final duration = state.measuredDuration;
     if (state.measuredDuration <= Duration.zero) {
+      _logger.fine("skipped a request to store non-positive measurement $duration");
+      state = StopWatchState();
       return SaveMeasurementState.success;
     }
-    final data = await ref.read(sheetUpdaterProvider.notifier).prepareToStore(state.measuredDuration);
-    if (data.ready) {
-      final durationToStore = state.measuredDuration;
-      _timer?.cancel();
-      _timer = null;
-      _prefs.setString(_preferencesKey, "");
-      final storeResult = await ref.read(sheetUpdaterProvider.notifier).store(durationToStore);
-      if (storeResult is Success) {
-        ref.read(categoryStateManagerProvider.notifier).onMeasurement(data.category!);
-        state = StopWatchState();
-        return SaveMeasurementState.success;
-      } else {
-        return storeResult;
-      }
-    } else {
-      toggle();
-      return GenericError("no measurement to store");
+
+    final fileAndCategoryResult = await ref.read(sheetUpdaterProvider.notifier).prepareToStore(duration);
+    return fileAndCategoryResult.match(
+            (error) => _onError(error),
+            (fileAndCategory) => _saveMeasurement(duration, fileAndCategory)
+    );
+  }
+
+  Future<SaveMeasurementState> _onError(AppError error) async {
+    toggle();
+    return error;
+  }
+
+  Future<SaveMeasurementState> _saveMeasurement(Duration duration, FileAndCategory fileAndCategory) async {
+    final durationToStore = duration.inMinutes;
+    if (durationToStore <= 0) {
+      _logger.fine("skipped a request to store non-positive rounded measurement $duration");
+      state = StopWatchState();
+      ref.read(categoryStateManagerProvider.notifier).onMeasurement(fileAndCategory.category);
+      return SaveMeasurementState.success;
     }
+
+    await ref.read(measurementsProvider.notifier).save(
+      Measurement(
+        file: fileAndCategory.file,
+        category: fileAndCategory.category,
+        durationSeconds: durationToStore,
+      ),
+    );
+    state = StopWatchState();
+    ref.read(categoryStateManagerProvider.notifier).onMeasurement(fileAndCategory.category);
+    _timer?.cancel();
+    _timer = null;
+    _prefs.setString(_preferencesKey, "");
+    return await ref.read(sheetUpdaterProvider.notifier).storeUnsavedMeasurements();
   }
 }

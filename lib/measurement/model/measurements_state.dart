@@ -109,7 +109,8 @@ class Measurements extends _$Measurements {
   }
 
   Future<void> save(Measurement measurement) async {
-    return _save(measurement, false);
+    await _save(measurement, false);
+    _logger.info("stored the measurement locally: $measurement");
   }
 
   Future<void> _save(Measurement measurement, bool nested) async {

@@ -62,7 +62,7 @@ class StopWatchButtonsWidget extends ConsumerWidget {
               onPressed: () async {
                 final saveMeasurementState = await state.record.onPressed?.call();
                 if (saveMeasurementState is GenericError) {
-                  SnackBarUtil.showSnackBarIfPossible(context, saveMeasurementState.error, _logger);
+                  SnackBarUtil.showMessage(context, saveMeasurementState.error, _logger);
                 }
               },
               icon: Container(
