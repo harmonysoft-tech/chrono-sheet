@@ -14,6 +14,14 @@ class FileWidget extends ConsumerWidget {
     context.push(AppRoute.chooseSheet);
   }
 
+  String _getFileName(String? fileName, AppLocalizations l10n) {
+    String result = fileName ?? l10n.textNoFileIsSelected;
+    if (result.length > 10) {
+      result = "${result.substring(0, 10)}...";
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fileStateAsync = ref.watch(fileStateManagerProvider);
@@ -32,8 +40,8 @@ class FileWidget extends ConsumerWidget {
           SizedBox(width: AppDimension.elementPadding),
           Text(
             fileStateAsync.maybeWhen(
-              data: (fileState) => fileState.selected?.name ?? l10n.textNoFileIsSelected,
-              orElse: () => l10n.textNoFileIsSelected,
+              data: (fileState) => _getFileName(fileState.selected?.name, l10n),
+              orElse: () => _getFileName(null, l10n),
             ),
           )
         ],
