@@ -1,3 +1,5 @@
+## v1.98.0+99 released on 16 Mar 2025 UTC
+  * 0c3c02d2917df1038820b0bf072c32429963a1ad supported category renaming
 ## v1.97.0+98 released on 16 Mar 2025 UTC
   * 9a2ea61db131b7f5d8194bb919b1a5b776b12eac strip long file name if necessary
 ## v1.96.0+97 released on 16 Mar 2025 UTC
