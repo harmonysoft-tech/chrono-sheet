@@ -286,7 +286,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _getSaveCallback,
+        onPressed: _getSaveCallback(),
         child: Icon(Icons.save),
       ),
     );

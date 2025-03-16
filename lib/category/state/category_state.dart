@@ -91,18 +91,34 @@ class CategoryStateManager extends _$CategoryStateManager {
   @override
   Future<CategoryState> build() async {
     final fileState = await ref.watch(fileStateManagerProvider.future);
+    _logger.info("start building categories state");
     final selectedFile = fileState.selected;
     if (selectedFile == null) {
       return CategoryState.empty;
     }
     final cached = await _readCachedCategoryState(selectedFile);
-    if (cached != null) {
+    if (cached == null) {
+      return await _parseAndApplyCategoriesFromSheet(selectedFile);
+    } else {
       _logger.info("found cached category state: $cached");
-      state = AsyncValue.data(cached);
+      _parseAndApplyCategoriesFromSheet(selectedFile).then((newState) {
+        state = AsyncValue.data(newState);
+      });
+      return cached;
     }
-    final categoryNamesFromFile = await _parseCategoryNames(selectedFile);
+  }
+
+  Future<CategoryState> _parseAndApplyCategoriesFromSheet(GoogleFile file) async {
+    _logger.info("loading categories from the remote document");
+    final categoryNamesFromFile = await _parseCategoryNames(file);
+    _logger.info("fetched remote categories: $categoryNamesFromFile");
+    final currentState = state;
+    CategoryState? cached;
+    if (currentState is AsyncData) {
+      cached = currentState.value;
+    }
     final newCategoryState = await _merge(cached, categoryNamesFromFile);
-    await _cacheCategoryState(newCategoryState, selectedFile);
+    await _cacheCategoryState(newCategoryState, file);
     return newCategoryState;
   }
 
