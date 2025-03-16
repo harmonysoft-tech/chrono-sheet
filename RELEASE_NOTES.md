@@ -1,3 +1,5 @@
+## v1.94.0+95 released on 16 Mar 2025 UTC
+  * 1e11fceb79be9749adc1f1aaf422a26fb68e0f1e move file widget to the toolbar
 ## v1.93.0+94 released on 15 Mar 2025 UTC
   * 0a02ac87736f22b8d78ff84a938354e2d7746429 * correct crop setup for iphone * refactor category image selection
 ## v1.92.0+93 released on 15 Mar 2025 UTC
