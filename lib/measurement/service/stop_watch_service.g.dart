@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'category_state.dart';
+part of 'stop_watch_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$categoryStateManagerHash() =>
-    r'06ca0e0e800f02cfac644344b83c80ced3b9a90c';
+String _$stopWatchServiceHash() => r'438bb9212051cab8721bdb8472ca11c03c629ce0';
 
-/// See also [CategoryStateManager].
-@ProviderFor(CategoryStateManager)
-final categoryStateManagerProvider = AutoDisposeAsyncNotifierProvider<
-    CategoryStateManager, CategoryState>.internal(
-  CategoryStateManager.new,
-  name: r'categoryStateManagerProvider',
+/// See also [StopWatchService].
+@ProviderFor(StopWatchService)
+final stopWatchServiceProvider =
+    NotifierProvider<StopWatchService, StopWatchState>.internal(
+  StopWatchService.new,
+  name: r'stopWatchServiceProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$categoryStateManagerHash,
+      : _$stopWatchServiceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$CategoryStateManager = AutoDisposeAsyncNotifier<CategoryState>;
+typedef _$StopWatchService = Notifier<StopWatchState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
