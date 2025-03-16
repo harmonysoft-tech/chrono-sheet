@@ -1,3 +1,5 @@
+## v1.97.0+98 released on 16 Mar 2025 UTC
+  * 9a2ea61db131b7f5d8194bb919b1a5b776b12eac strip long file name if necessary
 ## v1.96.0+97 released on 16 Mar 2025 UTC
   * a4a02331ebf23174d2e3af144089b20d44247a0a keep more logs
 ## v1.95.0+96 released on 16 Mar 2025 UTC
