@@ -3,7 +3,7 @@ import 'package:chrono_sheet/file/widget/view_selected_file_widget.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/google/state/google_login_state.dart';
 import 'package:chrono_sheet/hint/widget/hint_widget.dart';
-import 'package:chrono_sheet/measurement/widget/stop_watch_widget.dart';
+import 'package:chrono_sheet/measurement/widget/stop_watch_buttons_widget.dart';
 import 'package:chrono_sheet/screen/main/state/main_hint_positions.dart';
 import 'package:chrono_sheet/screen/main/widget/menu_menu_button.dart';
 import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
@@ -59,7 +59,8 @@ class MainScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                StopWatchWidget(),
+                // StopWatchWidget(),
+                StopWatchButtonsWidget(),
                 SizedBox(height: AppDimension.columnVerticalInset),
                 // SelectedFileWidget(),
                 // SizedBox(height: AppDimension.columnVerticalInset),
