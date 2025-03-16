@@ -452,7 +452,6 @@ class CategoryStateManager extends _$CategoryStateManager {
     final categoriesToUse = List.of(current.categories);
     final categoryToUse = categoriesToUse[i];
     categoriesToUse.removeAt(i);
-    ;
     categoriesToUse.insert(0, categoryToUse);
     final newState = CategoryState(selected: categoryToUse, categories: categoriesToUse);
     await _cacheCategoryState(newState);

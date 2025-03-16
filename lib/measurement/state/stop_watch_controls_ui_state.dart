@@ -1,6 +1,8 @@
 import 'package:chrono_sheet/measurement/service/stop_watch_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../sheet/updater/sheet_updater.dart';
+
 part "stop_watch_controls_ui_state.g.dart";
 
 class StopWatchControlsUiState {
@@ -36,7 +38,7 @@ class StopWatchPlayPauseState {
 }
 
 class StopWatchRecordState {
-  final void Function()? onPressed;
+  final Future<SaveMeasurementState> Function()? onPressed;
   final bool active;
 
   StopWatchRecordState({

@@ -1,9 +1,14 @@
+import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:chrono_sheet/measurement/state/stop_watch_controls_ui_state.dart';
 import 'package:chrono_sheet/measurement/widget/stop_watch_timer_widget.dart';
+import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
+import 'package:chrono_sheet/util/snackbar_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ui/color.dart';
+
+final _logger = getNamedLogger();
 
 class StopWatchButtonsWidget extends ConsumerWidget {
   const StopWatchButtonsWidget({super.key});
@@ -54,7 +59,12 @@ class StopWatchButtonsWidget extends ConsumerWidget {
               ),
             ),
             IconButton(
-              onPressed: state.record.onPressed,
+              onPressed: () async {
+                final saveMeasurementState = await state.record.onPressed?.call();
+                if (saveMeasurementState is GenericError) {
+                  SnackBarUtil.showSnackBarIfPossible(context, saveMeasurementState.error, _logger);
+                }
+              },
               icon: Container(
                 width: secondaryIconOuterSize,
                 height: secondaryIconOuterSize,

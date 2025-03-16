@@ -163,9 +163,9 @@ class StopWatchService extends _$StopWatchService {
     state = StopWatchState();
   }
 
-  Future<void> saveMeasurement() async {
+  Future<SaveMeasurementState> saveMeasurement() async {
     if (state.measuredDuration <= Duration.zero) {
-      return;
+      return SaveMeasurementState.success;
     }
     final data = await ref.read(sheetUpdaterProvider.notifier).prepareToStore(state.measuredDuration);
     if (data.ready) {
@@ -173,12 +173,17 @@ class StopWatchService extends _$StopWatchService {
       _timer?.cancel();
       _timer = null;
       _prefs.setString(_preferencesKey, "");
-      ref.read(sheetUpdaterProvider.notifier).store(durationToStore);
-      ref.read(categoryStateManagerProvider.notifier).onMeasurement(data.category!);
-      state = StopWatchState();;
+      final storeResult = await ref.read(sheetUpdaterProvider.notifier).store(durationToStore);
+      if (storeResult is Success) {
+        ref.read(categoryStateManagerProvider.notifier).onMeasurement(data.category!);
+        state = StopWatchState();
+        return SaveMeasurementState.success;
+      } else {
+        return storeResult;
+      }
     } else {
       toggle();
+      return GenericError("no measurement to store");
     }
   }
-
 }

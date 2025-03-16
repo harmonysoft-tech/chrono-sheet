@@ -26,7 +26,7 @@ class HintPositions extends _$HintPositions {
   @override
   HintPositionsState build() {
     final state = ref.watch(sheetUpdaterProvider);
-    if (state is! Error) {
+    if (state is! AppError) {
       return HintPositionsState();
     }
     if (state.error == SaveMeasurementsError.noFileIsSelected) {
