@@ -1,3 +1,5 @@
+## v1.100.0+101 released on 16 Mar 2025 UTC
+  * 9b42e07946874a894f82a7763b4689e20af51ecc show errors on saving measurements
 ## v1.99.0+100 released on 16 Mar 2025 UTC
   * 8e3cc8b9e466c3da2307793b76b8899500298293 preserve selected category during merging local and remote categories
 ## v1.98.0+99 released on 16 Mar 2025 UTC
