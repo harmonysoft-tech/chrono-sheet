@@ -1,3 +1,5 @@
+## v1.96.0+97 released on 16 Mar 2025 UTC
+  * a4a02331ebf23174d2e3af144089b20d44247a0a keep more logs
 ## v1.95.0+96 released on 16 Mar 2025 UTC
   * 788af6b185c7a44753b4ce4f64541652f512f696 new stop watch controls
 ## v1.94.0+95 released on 16 Mar 2025 UTC
