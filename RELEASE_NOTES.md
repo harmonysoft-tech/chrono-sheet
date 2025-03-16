@@ -1,3 +1,5 @@
+## v1.99.0+100 released on 16 Mar 2025 UTC
+  * 8e3cc8b9e466c3da2307793b76b8899500298293 preserve selected category during merging local and remote categories
 ## v1.98.0+99 released on 16 Mar 2025 UTC
   * 0c3c02d2917df1038820b0bf072c32429963a1ad supported category renaming
 ## v1.97.0+98 released on 16 Mar 2025 UTC
