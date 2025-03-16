@@ -5,7 +5,7 @@ part 'log_state.g.dart';
 @Riverpod(keepAlive: true)
 class LogStateManager extends _$LogStateManager {
 
-  static const _maxLogRecords = 100;
+  static const _maxLogRecords = 200;
 
   @override
   List<String> build() {
