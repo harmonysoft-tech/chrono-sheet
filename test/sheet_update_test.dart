@@ -225,6 +225,7 @@ void _runTests() {
   _existingTableNoTotalColumn();
   _noTableNonEmptySheet();
   _customFormat();
+  _renameCategory();
 }
 
 void _emptySheet() {
@@ -443,6 +444,46 @@ void _customFormat() {
         $today         | 2               | 2         
         $yesterday     | 1               | 1         
       """);
+    });
+  });
+}
+
+void _renameCategory() {
+  group("rename category", () {
+    test("existing category", () async {
+      _setSheetState("""
+        ${Column.date} | ${_CategoryName.one} | ${_CategoryName.two}
+        $_todayUs      | 5                    | 3
+      """);
+
+      final newName = "newCategory";
+      final result = await _service.renameCategory(
+        from: _CategoryName.one,
+        to: newName,
+        file: _context.file,
+      );
+      await _verifyDocumentState("""
+        ${Column.date} | $newName | ${_CategoryName.two}
+        $_todayUs      | 5        | 3          
+      """);
+      expect(result, equals(true));
+    });
+
+    test("non existing category", () async {
+      _setSheetState("""
+        ${Column.date} | ${_CategoryName.one} | ${_CategoryName.two}
+        $_todayUs      | 5                    | 3
+      """);
+      final result = await _service.renameCategory(
+        from: "nonExistingCategory",
+        to: "something",
+        file: _context.file,
+      );
+      await _verifyDocumentState("""
+        ${Column.date} | ${_CategoryName.one} | ${_CategoryName.two}
+        $_todayUs      | 5                    | 3          
+      """);
+      expect(result, equals(false));
     });
   });
 }

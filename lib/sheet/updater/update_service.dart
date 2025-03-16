@@ -22,6 +22,31 @@ SheetUpdateService updateService(Ref ref) {
 }
 
 class SheetUpdateService {
+  Future<bool> renameCategory({
+    required String from,
+    required String to,
+    required GoogleFile file,
+  }) async {
+    final data = await getGoogleClientData();
+    final api = SheetsApi(data.authenticatedClient);
+    GoogleSheetInfo sheetInfo = await parseSheetDocument(file);
+    final address = sheetInfo.columns[from];
+    if (address == null) {
+      return false;
+    }
+
+    await setSheetCellValues(
+      values: {
+        address: to,
+      },
+      sheetTitle: sheetInfo.title!,
+      sheetDocumentId: file.id,
+      sheetFileName: file.name,
+      api: api,
+    );
+    return true;
+  }
+
   Future<void> saveMeasurement(
     int duration,
     Category category,
@@ -31,7 +56,7 @@ class SheetUpdateService {
     final api = SheetsApi(data.authenticatedClient);
     GoogleSheetInfo sheetInfo = await parseSheetDocument(file);
     sheetInfo = await _createSheetIfNecessary(sheetInfo, file, api);
-    final context = _Context(
+    final context = _SaveMeasurementContext(
       durationToStore: duration,
       file: file,
       category: category,
@@ -83,7 +108,7 @@ class SheetUpdateService {
     return info.copyWith(id: createdSheetId, title: newSheetName);
   }
 
-  Future<void> _createColumnsAndStore(_Context context) async {
+  Future<void> _createColumnsAndStore(_SaveMeasurementContext context) async {
     int rowsToCreate = _calculateNumberOfRowsToCreateForSheetWithoutPreviousData(context);
     if (rowsToCreate > 0) {
       await _insertRows(-1, rowsToCreate, context);
@@ -98,7 +123,7 @@ class SheetUpdateService {
     });
   }
 
-  int _calculateNumberOfRowsToCreateForSheetWithoutPreviousData(_Context context) {
+  int _calculateNumberOfRowsToCreateForSheetWithoutPreviousData(_SaveMeasurementContext context) {
     if (context.sheetInfo.rowsNumber <= 0) {
       // the sheet has no rows, we just need to create two empty rows then
       return 2;
@@ -149,7 +174,7 @@ class SheetUpdateService {
     return 0;
   }
 
-  Future<void> _insertRows(int rowToInsertAfter, int rowsCount, _Context context) async {
+  Future<void> _insertRows(int rowToInsertAfter, int rowsCount, _SaveMeasurementContext context) async {
     final batchUpdateRequest = BatchUpdateSpreadsheetRequest(requests: [
       Request(
         insertDimension: InsertDimensionRequest(
@@ -176,7 +201,7 @@ class SheetUpdateService {
     }
   }
 
-  void _onRowsInserted(int rowToInsertAfter, int rowsCount, _Context context) {
+  void _onRowsInserted(int rowToInsertAfter, int rowsCount, _SaveMeasurementContext context) {
     final newColumns = context.columns.map((column, address) {
       if (address.row > rowToInsertAfter) {
         return MapEntry(column, CellAddress(address.row + rowsCount, address.column));
@@ -203,7 +228,7 @@ class SheetUpdateService {
     });
   }
 
-  String? _getValue(CellAddress address, _Context context) {
+  String? _getValue(CellAddress address, _SaveMeasurementContext context) {
     final values = _getValues({address}, context);
     if (values.isNotEmpty) {
       return values.values.first;
@@ -212,7 +237,7 @@ class SheetUpdateService {
     }
   }
 
-  Map<CellAddress, String> _getValues(Set<CellAddress> addresses, _Context context) {
+  Map<CellAddress, String> _getValues(Set<CellAddress> addresses, _SaveMeasurementContext context) {
     final result = <CellAddress, String>{};
     for (final address in addresses) {
       final value = context.values[address];
@@ -221,56 +246,9 @@ class SheetUpdateService {
       }
     }
     return result;
-
-    // final ranges = addresses.map((address) {
-    //   return "${context.sheetInfo.title}!${getCellAddress(address.row, address.column)}";
-    // }).toList();
-    // final response = await context.api.spreadsheets.values.batchGet(context.file.id, ranges: ranges);
-    //
-    // final result = <CellAddress, String>{};
-    // response.valueRanges?.forEach((range) {
-    //   final responseRange = range.range;
-    //   if (responseRange == null) {
-    //     _logger.severe(
-    //         "can not parse response to the 'get value' request made to the google sheet '${context.sheetInfo.title}' "
-    //         "- expected 'range' response property to be not empty. Full response: ${response.toJson()}");
-    //     return;
-    //   }
-    //
-    //   final i = responseRange.indexOf("!");
-    //   String addressString = responseRange;
-    //   if (i > 0) {
-    //     addressString = responseRange.substring(i + 1);
-    //   }
-    //   final address = parseCellAddress(addressString);
-    //   if (address == null) {
-    //     _logger.severe(
-    //         "can not parse response to the 'get value' request made to the google sheet '${context.sheetInfo.title}' "
-    //         "- failed to parse cell address from '$addressString'. Full response: ${response.toJson()}");
-    //     return;
-    //   }
-    //   final values = range.values;
-    //   String? value;
-    //   if (values != null) {
-    //     if (values.length > 1) {
-    //       _logger.warning("expected that a google sheet data is [[<data>]] but got '$values'");
-    //     }
-    //     if (values.isNotEmpty) {
-    //       final subValues = values.first;
-    //       if (subValues.length > 1) {
-    //         _logger.warning("expected that a google sheet data is [[<data>]] but got '$values'");
-    //       }
-    //       if (subValues.isNotEmpty) {
-    //         value = subValues.first?.toString();
-    //       }
-    //     }
-    //   }
-    //   result[address] = value ?? "";
-    // });
-    // return result;
   }
 
-  Future<void> _setValues(_Context context, Map<CellAddress, String> values) async {
+  Future<void> _setValues(_SaveMeasurementContext context, Map<CellAddress, String> values) async {
     await setSheetCellValues(
       values: values,
       sheetTitle: context.sheetInfo.title!,
@@ -280,7 +258,7 @@ class SheetUpdateService {
     );
   }
 
-  Future<void> _storeInExistingTable(_Context context) async {
+  Future<void> _storeInExistingTable(_SaveMeasurementContext context) async {
     final totalColumnValues = await _ensureThatTotalDurationColumnExists(context);
     Map<CellAddress, String> updates = Map.of(totalColumnValues);
     int? todayRow = context.sheetInfo.todayRow;
@@ -322,7 +300,7 @@ class SheetUpdateService {
     await _setValues(context, updates);
   }
 
-  Future<Map<CellAddress, String>> _ensureThatTotalDurationColumnExists(_Context context) async {
+  Future<Map<CellAddress, String>> _ensureThatTotalDurationColumnExists(_SaveMeasurementContext context) async {
     if (context.columns.containsKey(Column.total)) {
       return {};
     }
@@ -384,7 +362,7 @@ class SheetUpdateService {
     return result;
   }
 
-  int _calculateTotalDuration(int row, _Context context) {
+  int _calculateTotalDuration(int row, _SaveMeasurementContext context) {
     int result = 0;
     context.columns.forEach((column, address) {
       if (column != Column.date && column != Column.total) {
@@ -400,7 +378,7 @@ class SheetUpdateService {
     return result;
   }
 
-  int _calculateNewColumn(_Context context) {
+  int _calculateNewColumn(_SaveMeasurementContext context) {
     int currentMax = -1;
     for (final address in context.columns.values) {
       if (address.column > currentMax) {
@@ -485,7 +463,7 @@ class _Addresses {
   };
 }
 
-class _Context {
+class _SaveMeasurementContext {
   final int durationToStore;
   final GoogleFile file;
   final Category category;
@@ -498,7 +476,7 @@ class _Context {
   Map<String, CellAddress> columns;
   Map<CellAddress, String> values;
 
-  _Context({
+  _SaveMeasurementContext({
     required this.durationToStore,
     required this.file,
     required this.category,

@@ -45,12 +45,8 @@ class SheetUpdater extends _$SheetUpdater {
   }
 
   Future<FileAndCategory> prepareToStore(Duration measurement) async {
-    final fileState = await ref.read(fileStateManagerProvider.future);
-    final GoogleFile? file = fileState.selected;
+    final GoogleFile? file = await prepareToChange();
     if (file == null) {
-      _logger.fine("skipped a request to store measurement $measurement because no "
-          "google sheet file is selected");
-      state = Error(SaveMeasurementsError.noFileIsSelected);
       return FileAndCategory();
     }
     final categoryInfo = await ref.read(categoryStateManagerProvider.future);
@@ -63,6 +59,18 @@ class SheetUpdater extends _$SheetUpdater {
     }
 
     return FileAndCategory(file: file, category: category);
+  }
+
+  Future<GoogleFile?> prepareToChange() async {
+    final fileState = await ref.read(fileStateManagerProvider.future);
+    final GoogleFile? file = fileState.selected;
+    if (file == null) {
+      _logger.fine("skipped a request to to change google sheet because no document selected");
+      state = Error(SaveMeasurementsError.noFileIsSelected);
+      return null;
+    } else {
+      return file;
+    }
   }
 
   Future<void> store(Duration measurement) async {

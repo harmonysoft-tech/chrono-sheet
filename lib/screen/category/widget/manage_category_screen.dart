@@ -186,23 +186,33 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
       representation: representation,
     );
     final originalCategory = widget.category;
-    final SaveCategoryResult saveResult;
+    final ManageCategoryResult saveResult;
     if (originalCategory == null) {
       saveResult = await stateManager.addNewCategory(newCategory);
     } else {
       saveResult = await stateManager.replaceCategory(originalCategory, newCategory);
     }
     if (context.mounted) {
-      if (saveResult == SaveCategoryResult.success) {
+      if (saveResult == ManageCategoryResult.success) {
         Navigator.of(context).pop();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.errorCategoryNameMustBeUnique),
+          content: Text(saveResult.getMessage(l10n)),
         ));
       }
     } else {
       _logger.info("cannot handle category save attempt for category '$categoryName' "
           "($saveResult) - the build context is not mounted");
+    }
+  }
+
+  VoidCallback? _getSaveCallback() {
+    if (_nameController.text.trim().isNotEmpty) {
+      return () {
+        _saveCategoryIfPossible(context, ref.read(categoryStateManagerProvider.notifier));
+      };
+    } else {
+      return null;
     }
   }
 
@@ -276,9 +286,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _saveCategoryIfPossible(context, ref.read(categoryStateManagerProvider.notifier));
-        },
+        onPressed: _getSaveCallback,
         child: Icon(Icons.save),
       ),
     );

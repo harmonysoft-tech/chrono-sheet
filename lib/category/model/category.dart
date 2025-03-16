@@ -13,10 +13,14 @@ final class Category implements Comparable<Category> {
   final String name;
   final CategoryRepresentation representation;
 
-  const Category({
+   Category({
     required this.name,
     required this.representation,
-  });
+  }) {
+    if (name.trim().isEmpty)  {
+      throw ArgumentError.notNull("category name must be provided, representation: $representation");
+    }
+  }
 
   Category copyWith({
     String? name,

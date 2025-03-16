@@ -31,6 +31,7 @@
   "textCanNotSaveMeasurementsWhileOffline": "Cannot save measurements while offline",
   "textNoValue": "<no value>",
   "textNoFileIsSelected": "<no file>",
+  "textChangeIsSuccessful": "successfully changed",
 
   "hintCreateCategory": "create a measurement category",
   "hintSelectCategory": "select a previously used category",
@@ -53,6 +54,8 @@
   "errorCategoryNameMustBeUnique": "this category name is already used",
   "errorCanNotDecodeImage": "cannot decode image",
   "errorNeedPermissionForCategoryIcon": "target permission is required for configuring category icon",
+  "errorChangeIsStale": "cannot apply the change, the state is changed after it",
+  "errorGeneric": "something went wrong",
 
   "permissionDrive": "Google Drive",
   "permissionSheets": "Google Sheets",
