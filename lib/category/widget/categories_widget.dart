@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../generated/app_localizations.dart';
 import '../../router/router.dart';
+import '../../ui/widget_key.dart';
 
 class CategoriesWidget extends ConsumerWidget {
   const CategoriesWidget({super.key});
@@ -61,6 +62,7 @@ class NoFileCreationWidget extends ConsumerWidget {
                 children: asyncCategoryState.maybeWhen(
                   data: (categoryState) => [
                     IconButton(
+                      key: AppWidgetKey.createCategory,
                       onPressed: () {
                         context.push(AppRoute.manageCategory, extra: null);
                       },
