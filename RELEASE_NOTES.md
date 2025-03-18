@@ -1,3 +1,5 @@
+## v1.103.0+104 released on 18 Mar 2025 UTC
+  * 8d7b6ec03d34084a86083dfca3dbd2eb52a2ea84 configure 'add category' UI key
 ## v1.102.0+103 released on 18 Mar 2025 UTC
   * d21d469e2ad0a527d6cf762f4db6a41d01aca8f1 corrected new category addition
 ## v1.101.0+102 released on 16 Mar 2025 UTC
