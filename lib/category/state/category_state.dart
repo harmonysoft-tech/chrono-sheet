@@ -379,10 +379,9 @@ class CategoryStateManager extends _$CategoryStateManager {
     if (selected != null) {
       categoriesToUse.insert(0, selected);
     }
-    categoriesToUse.add(category);
+    categoriesToUse.insert(0, category);
     final normalisedCategoriesToUse = ensureNoDuplicateTextRepresentations(categoriesToUse);
-    final newSelected = normalisedCategoriesToUse.removeLast();
-    final newState = CategoryState(selected: newSelected, categories: normalisedCategoriesToUse);
+    final newState = CategoryState(selected: category, categories: normalisedCategoriesToUse);
     state = AsyncValue.data(newState);
     final result = await _cacheCategoryState(newState);
     if (result == ManageCategoryResult.success) {
