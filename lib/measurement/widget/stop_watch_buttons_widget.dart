@@ -6,6 +6,7 @@ import 'package:chrono_sheet/util/snackbar_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../network/network.dart';
 import '../../ui/color.dart';
 
 final _logger = getNamedLogger();
@@ -61,7 +62,9 @@ class StopWatchButtonsWidget extends ConsumerWidget {
             IconButton(
               onPressed: () async {
                 final saveMeasurementState = await state.record.onPressed?.call();
-                if (saveMeasurementState is GenericError) {
+                // if the application is not online, then most probably the error
+                // is caused by a corresponding exception
+                if (saveMeasurementState is GenericError && await isOnline()) {
                   SnackBarUtil.showMessage(context, saveMeasurementState.error, _logger);
                 }
               },
