@@ -35,6 +35,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(() => setState(() {}));
     final category = widget.category;
     if (category != null) {
       _nameController.text = category.name;
