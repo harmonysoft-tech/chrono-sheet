@@ -171,16 +171,17 @@ class StopWatchService extends _$StopWatchService {
       return SaveMeasurementState.success;
     }
 
-    final fileAndCategoryResult = await ref.read(sheetUpdaterProvider.notifier).prepareToStore(duration);
-    return fileAndCategoryResult.match(
-            (error) => _onError(error),
-            (fileAndCategory) => _saveMeasurement(duration, fileAndCategory)
-    );
-  }
+    state = StopWatchState();
+    _timer?.cancel();
+    _timer = null;
+    _prefs.setString(_preferencesKey, "");
 
-  Future<SaveMeasurementState> _onError(AppError error) async {
-    toggle();
-    return error;
+    return ref.read(sheetUpdaterProvider.notifier).prepareToStore(duration).then((fileAndCategoryResult) {
+      return fileAndCategoryResult.match(
+          (error) => error,
+          (fileAndCategory) => _saveMeasurement(duration, fileAndCategory),
+      );
+    });
   }
 
   Future<SaveMeasurementState> _saveMeasurement(Duration duration, FileAndCategory fileAndCategory) async {
@@ -192,6 +193,8 @@ class StopWatchService extends _$StopWatchService {
       return SaveMeasurementState.success;
     }
 
+    await ref.read(categoryStateManagerProvider.notifier).onMeasurement(fileAndCategory.category);
+
     await ref.read(measurementsProvider.notifier).save(
       Measurement(
         file: fileAndCategory.file,
@@ -199,11 +202,6 @@ class StopWatchService extends _$StopWatchService {
         durationSeconds: durationToStore,
       ),
     );
-    state = StopWatchState();
-    ref.read(categoryStateManagerProvider.notifier).onMeasurement(fileAndCategory.category);
-    _timer?.cancel();
-    _timer = null;
-    _prefs.setString(_preferencesKey, "");
     return await ref.read(sheetUpdaterProvider.notifier).storeUnsavedMeasurements();
   }
 }
