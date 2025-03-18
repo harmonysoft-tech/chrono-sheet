@@ -1,3 +1,5 @@
+## v1.102.0+103 released on 18 Mar 2025 UTC
+  * d21d469e2ad0a527d6cf762f4db6a41d01aca8f1 corrected new category addition
 ## v1.101.0+102 released on 16 Mar 2025 UTC
   * ba7d12e6c814bb839ea9eed8f31177efca3e3ef0 * don't ask to login if the phone is offline * make sure to update UI state once the measurement is stored locally
 ## v1.100.0+101 released on 16 Mar 2025 UTC
