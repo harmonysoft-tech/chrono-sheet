@@ -1,3 +1,5 @@
+## v1.104.0+105 released on 19 Mar 2025 UTC
+  * 3a6caae324c3bb3e6826c3f0381a41e99c02bef1 configured splash screen
 ## v1.103.0+104 released on 18 Mar 2025 UTC
   * 8d7b6ec03d34084a86083dfca3dbd2eb52a2ea84 configure 'add category' UI key
 ## v1.102.0+103 released on 18 Mar 2025 UTC
