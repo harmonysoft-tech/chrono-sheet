@@ -3,3 +3,4 @@
 * apple developer - https://developer.apple.com/
 * appstore connect - https://appstoreconnect.apple.com/
 * generate base64 - base64 -i <input-file> > <output-file>
+* generate splash - dart run flutter_native_splash:create

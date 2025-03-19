@@ -15,6 +15,14 @@ flutter:
   assets:
     - assets/icon/
 
+flutter_native_splash:
+  background_image: assets/splash/splash.png
+  color: '#fff8ff'
+
+  android_12:
+    image: assets/splash/splash-square.png
+    color: '#fff8ff'
+
 dependencies:
   flutter:
     sdk: flutter
@@ -46,6 +54,7 @@ dependencies:
   permission_handler: 11.4.0
   image_cropper: 9.0.0
   fpdart: 1.1.1
+  flutter_native_splash: 2.4.5
 
 dev_dependencies:
   flutter_test:
