@@ -1,3 +1,5 @@
+## v1.106.0+107 released on 19 Mar 2025 UTC
+  * 7a0dc6ec9e55dc8d41514a1a37afb30579eda20d * updated square splash * removed auto-generated changes
 ## v1.105.0+106 released on 19 Mar 2025 UTC
   * 722e7005238c88e5efb9161f1bff025f8c9ff4e0 setup the build for splash
 ## v1.104.0+105 released on 19 Mar 2025 UTC
