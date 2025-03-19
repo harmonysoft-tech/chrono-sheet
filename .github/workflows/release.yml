@@ -92,6 +92,9 @@ jobs:
           ./gradlew release-paperwork
           git push
 
+      - name: prepare splash
+        run: dart run flutter_native_splash:create
+
       - name: build apk
         run: flutter build apk --release
 
