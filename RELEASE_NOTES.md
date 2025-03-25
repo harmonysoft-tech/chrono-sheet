@@ -1,3 +1,5 @@
+## v1.109.0+110 released on 25 Mar 2025 UTC
+  * a8a89a894af581bc81432c2c55b57077db83f171 more logs on navigation to file
 ## v1.108.0+109 released on 25 Mar 2025 UTC
   * 4548a0d7d9973eddfbb1a910999b2184d8a09c2c adjusted logs
 ## v1.107.0+108 released on 19 Mar 2025 UTC
