@@ -39,7 +39,7 @@ class CategoryState {
 
   @override
   String toString() {
-    return 'CategoryState{id: $id, selected: $selected, categories: $categories}';
+    return 'CategoryState{id: $id, selected: ${selected?.name}, ${categories.length} categories: \n${categories.join("\n")}}';
   }
 }
 
@@ -160,7 +160,7 @@ class CategoryStateManager extends _$CategoryStateManager {
       categories.add(category);
     }
     _logger.info(
-      "found ${categories.length} cached categories for file ${file.id} (${file.name}): ${categories.join(", ")}",
+      "found ${categories.length} cached categories for file ${file.id} (${file.name}): \n${categories.join("\n")}",
     );
     if (categories.isEmpty) {
       return null;
@@ -278,7 +278,7 @@ class CategoryStateManager extends _$CategoryStateManager {
   }
 
   Future<CategoryState> _merge(CategoryState? cached, List<String> currentCategoryNames) async {
-    _logger.info("merging cached categories state ($cached) and current categories ($currentCategoryNames)");
+    _logger.info("merging cached categories state (\n$cached\n) and current categories ($currentCategoryNames)");
     if (currentCategoryNames.isEmpty) {
       return CategoryState.empty;
     }

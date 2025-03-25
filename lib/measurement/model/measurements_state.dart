@@ -104,7 +104,7 @@ class Measurements extends _$Measurements {
         category: category,
         durationSeconds: durationSeconds,
         saved: saved);
-    _logger.info("loaded cached measurement from index $i: $result");
+    // _logger.info("loaded cached measurement from index $i: $result");
     return result;
   }
 
