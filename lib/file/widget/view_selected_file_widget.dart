@@ -32,6 +32,7 @@ class ViewSelectedFileWidget extends ConsumerWidget {
     } catch (e, stack) {
       _logger.info("failed to open the sheet document '${file.name}' in the google sheets application", e, stack);
       await _launchInBrowser(browserUri, file, context);
+      return;
     }
     await _launchInBrowser(browserUri, file, context);
   }
