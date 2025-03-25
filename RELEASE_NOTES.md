@@ -1,3 +1,5 @@
+## v1.108.0+109 released on 25 Mar 2025 UTC
+  * 4548a0d7d9973eddfbb1a910999b2184d8a09c2c adjusted logs
 ## v1.107.0+108 released on 19 Mar 2025 UTC
   * ee213ff624d49436cd091bade36df325306cff55 updated square splash to have target background color
 ## v1.106.0+107 released on 19 Mar 2025 UTC
