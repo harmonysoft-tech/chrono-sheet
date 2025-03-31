@@ -15,6 +15,7 @@ import '../../../category/model/category.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../ui/dimension.dart';
 import '../../../ui/path.dart';
+import '../../../util/snackbar_util.dart';
 
 final _logger = getNamedLogger();
 
@@ -165,6 +166,10 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
   }
 
   Future<void> _saveCategoryIfPossible(BuildContext context, CategoryStateManager stateManager) async {
+    if (_nameController.text.trim().isEmpty) {
+      SnackBarUtil.showL10nMessage(context, _logger, (l10n) => l10n.errorCategoryNameMustBeProvided);
+    }
+
     final l10n = AppLocalizations.of(context);
     final categoryName = _nameController.text.trim();
     if (categoryName.isEmpty) {
@@ -185,6 +190,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     final Category newCategory = Category(
       name: categoryName,
       representation: representation,
+      persistedInGoogle: widget.category?.persistedInGoogle ?? false,
     );
     final originalCategory = widget.category;
     final ManageCategoryResult saveResult;
@@ -204,16 +210,6 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     } else {
       _logger.info("cannot handle category save attempt for category '$categoryName' "
           "($saveResult) - the build context is not mounted");
-    }
-  }
-
-  VoidCallback? _getSaveCallback() {
-    if (_nameController.text.trim().isNotEmpty) {
-      return () {
-        _saveCategoryIfPossible(context, ref.read(categoryStateManagerProvider.notifier));
-      };
-    } else {
-      return null;
     }
   }
 
@@ -275,6 +271,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
                         category: Category(
                           name: _nameController.text,
                           representation: ImageCategoryRepresentation(_iconFile!),
+                          persistedInGoogle: widget.category?.persistedInGoogle ?? false,
                         ),
                         selected: false,
                         pressCallback: () {
@@ -287,7 +284,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _getSaveCallback(),
+        onPressed: () => _saveCategoryIfPossible(context, ref.read(categoryStateManagerProvider.notifier)),
         child: Icon(Icons.save),
       ),
     );

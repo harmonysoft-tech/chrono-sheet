@@ -47,7 +47,7 @@ class NoFileCreationWidget extends ConsumerWidget {
           data: (categoryState) => categoryState.selected?.name,
           orElse: () => null,
         ) ??
-        l10n.textNoValue;
+        l10n.textNoCategory;
     return Column(
       children: [
         Text(activeCategoryName, style: theme.textTheme.displayMedium),

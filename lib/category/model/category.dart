@@ -6,16 +6,22 @@ class _Key {
   static String getName(String keyPrefix) {
     return "$keyPrefix.name";
   }
+
+  static String getPersistedInGoogle(String keyPrefix) {
+    return "$keyPrefix.persistedInGoogle";
+  }
 }
 
 @immutable
 final class Category implements Comparable<Category> {
   final String name;
   final CategoryRepresentation representation;
+  final bool persistedInGoogle;
 
    Category({
     required this.name,
     required this.representation,
+    required this.persistedInGoogle,
   }) {
     if (name.trim().isEmpty)  {
       throw ArgumentError.notNull("category name must be provided, representation: $representation");
@@ -25,15 +31,18 @@ final class Category implements Comparable<Category> {
   Category copyWith({
     String? name,
     CategoryRepresentation? representation,
+    bool? persistedInGoogle,
   }) {
     return Category(
       name: name ?? this.name,
       representation: representation ?? this.representation,
+      persistedInGoogle: persistedInGoogle ?? this.persistedInGoogle,
     );
   }
 
   Future<void> serialize(SharedPreferencesAsync prefs, String keyPrefix) async {
     await prefs.setString(_Key.getName(keyPrefix), name);
+    await prefs.setBool(_Key.getPersistedInGoogle(keyPrefix), persistedInGoogle);
     await representation.serialize(prefs, keyPrefix);
   }
 
@@ -42,11 +51,12 @@ final class Category implements Comparable<Category> {
     if (name == null) {
       return null;
     }
+    final persistedInGoogle = await prefs.getBool(_Key.getPersistedInGoogle(keyPrefix)) ?? false;
     final representation = await CategoryRepresentation.deserialiseIfPossible(prefs, keyPrefix);
     if (representation == null) {
       return null;
     }
-    return Category(name: name, representation: representation);
+    return Category(name: name, representation: representation, persistedInGoogle: persistedInGoogle);
   }
 
   @override
@@ -72,6 +82,6 @@ final class Category implements Comparable<Category> {
 
   @override
   String toString() {
-    return 'Category{name: $name, representation: $representation}';
+    return 'Category{name: $name, persistedInGoogle: $persistedInGoogle, representation: $representation}';
   }
 }

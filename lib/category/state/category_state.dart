@@ -31,11 +31,7 @@ class CategoryState {
   final List<Category> categories;
   final String id;
 
-  CategoryState({
-    this.selected,
-    this.categories = const [],
-    String? id,
-  }) : id = id ?? Uuid().v4();
+  CategoryState({this.selected, this.categories = const [], String? id}) : id = id ?? Uuid().v4();
 
   @override
   String toString() {
@@ -101,10 +97,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     final cached = await _readCachedCategoryState(selectedFile);
     if (cached == null) {
       final result = await _parseAndApplyCategoriesFromSheet(selectedFile);
-      return result.match(
-          (error) => CategoryState(),
-          (newState) => newState
-      );
+      return result.match((error) => CategoryState(), (newState) => newState);
     } else {
       _logger.info("found cached category state: $cached");
       _parseAndApplyCategoriesFromSheet(selectedFile).then((result) {
@@ -120,21 +113,21 @@ class CategoryStateManager extends _$CategoryStateManager {
     _logger.info("loading categories from the remote document");
     final categoryNamesFromFileResult = await _parseCategoryNames(file);
     return categoryNamesFromFileResult.match(
-        (error) {
-          _logger.info("failed to load categories from $file");
-          return Either.left(unit);
-        },
-        (categoryNamesFromFile) async {
-          _logger.info("fetched remote categories: $categoryNamesFromFile");
-          final currentState = state;
-          CategoryState? cached;
-          if (currentState is AsyncData) {
-            cached = currentState.value;
-          }
-          final newCategoryState = await _merge(cached, categoryNamesFromFile);
-          await _cacheCategoryState(newCategoryState, file);
-          return Either.right(newCategoryState);
+      (error) {
+        _logger.info("failed to load categories from $file");
+        return Either.left(unit);
+      },
+      (categoryNamesFromFile) async {
+        _logger.info("fetched remote categories: $categoryNamesFromFile");
+        final currentState = state;
+        CategoryState? cached;
+        if (currentState is AsyncData) {
+          cached = currentState.value;
         }
+        final newCategoryState = await _merge(cached, categoryNamesFromFile);
+        await _cacheCategoryState(newCategoryState, file);
+        return Either.right(newCategoryState);
+      },
     );
   }
 
@@ -145,13 +138,14 @@ class CategoryStateManager extends _$CategoryStateManager {
     }
     return Category(
       name: name,
+      persistedInGoogle: false,
       representation: TextCategoryRepresentation(_getDefaultRepresentationText(name)),
     );
   }
 
   Future<CategoryState?> _readCachedCategoryState(GoogleFile file) async {
     List<Category> categories = [];
-    for (int i = 0;; i++) {
+    for (int i = 0; ; i++) {
       final categoryName = await _prefs.getString(_Key.getFileCategoryPrefix(file, i));
       if (categoryName == null) {
         break;
@@ -182,8 +176,10 @@ class CategoryStateManager extends _$CategoryStateManager {
     final result = CategoryState(id: id, selected: selectedCategory, categories: normalisedCategories);
 
     if (shouldSaveAfterNormalisation) {
-      _logger.info("detected that normalised categories differ from originally read categories, caching "
-          "the normalised categories state");
+      _logger.info(
+        "detected that normalised categories differ from originally read categories, caching "
+        "the normalised categories state",
+      );
       await _cacheCategoryState(result, file);
     }
     return result;
@@ -243,60 +239,55 @@ class CategoryStateManager extends _$CategoryStateManager {
     }
   }
 
-  Map<String, String> _resolveTextRepresentationClash(
-    String s1,
-    String s2,
-    Map<String, int> usedRepresentations,
-  ) {
+  Map<String, String> _resolveTextRepresentationClash(String s1, String s2, Map<String, int> usedRepresentations) {
     final partsFirstLetters1 = s1.split(AppRegexp.whitespaces).map((s) => s[0]).join();
     final partsFirstLetters2 = s2.split(AppRegexp.whitespaces).map((s) => s[0]).join();
-    final fromFirstLetters =
-        _doResolveTextRepresentationClash(partsFirstLetters1, partsFirstLetters2, usedRepresentations);
+    final fromFirstLetters = _doResolveTextRepresentationClash(
+      partsFirstLetters1,
+      partsFirstLetters2,
+      usedRepresentations,
+    );
     if (fromFirstLetters[partsFirstLetters1] != fromFirstLetters[partsFirstLetters2]) {
       return fromFirstLetters;
     }
     return _doResolveTextRepresentationClash(s1, s2, usedRepresentations);
   }
 
-  Map<String, String> _doResolveTextRepresentationClash(
-    String s1,
-    String s2,
-    Map<String, int> usedRepresentations,
-  ) {
+  Map<String, String> _doResolveTextRepresentationClash(String s1, String s2, Map<String, int> usedRepresentations) {
     for (int i = 1, limit = min(s1.length, s2.length); i < limit; i++) {
       if (s1[i] != s2[i]) {
-        return {
-          s1: s1.substring(0, 1) + s1[i],
-          s2: s2.substring(0, 1) + s2[i],
-        };
+        return {s1: s1.substring(0, 1) + s1[i], s2: s2.substring(0, 1) + s2[i]};
       }
     }
-    return {
-      s1: _getDefaultRepresentationText(s1),
-      s2: _getDefaultRepresentationText(s2),
-    };
+    return {s1: _getDefaultRepresentationText(s1), s2: _getDefaultRepresentationText(s2)};
   }
 
   Future<CategoryState> _merge(CategoryState? cached, List<String> currentCategoryNames) async {
     _logger.info("merging cached categories state (\n$cached\n) and current categories ($currentCategoryNames)");
-    if (currentCategoryNames.isEmpty) {
+    if (currentCategoryNames.isEmpty && (cached?.categories.all((c) => c.persistedInGoogle) ?? true)) {
       return CategoryState.empty;
     }
     if (cached == null) {
-      List<Category> categories = await Future.wait(currentCategoryNames.map((name) async {
-        return await _getCategoryByName(name);
-      }));
+      List<Category> categories = await Future.wait(
+        currentCategoryNames.map((name) async {
+          return await _getCategoryByName(name);
+        }),
+      );
       categories = ensureNoDuplicateTextRepresentations(categories);
       final selected = categories.first;
       return CategoryState(selected: selected, categories: categories);
     }
     List<Category> sortedCategories = List.of(cached.categories);
-    sortedCategories.removeWhere((category) => !currentCategoryNames.contains(category.name));
+    sortedCategories.removeWhere(
+      (category) => !currentCategoryNames.contains(category.name) && category.persistedInGoogle,
+    );
     final Set<String> cachedCategoryNames = Set.of(cached.categories.map((c) => c.name));
     final categoryNamesToAdd = currentCategoryNames.where((name) => !cachedCategoryNames.contains(name));
-    final categoriesToAdd = await Future.wait(categoryNamesToAdd.map((name) async {
-      return await _getCategoryByName(name);
-    }));
+    final categoriesToAdd = await Future.wait(
+      categoryNamesToAdd.map((name) async {
+        return await _getCategoryByName(name);
+      }),
+    );
     sortedCategories.addAll(categoriesToAdd);
 
     sortedCategories = ensureNoDuplicateTextRepresentations(sortedCategories);
@@ -345,7 +336,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     return ManageCategoryResult.success;
   }
 
-  Future<Either<Unit,List<String>>> _parseCategoryNames(GoogleFile file) async {
+  Future<Either<Unit, List<String>>> _parseCategoryNames(GoogleFile file) async {
     final online = await isOnline();
     if (!online) {
       return Either.left(unit);
@@ -397,8 +388,10 @@ class CategoryStateManager extends _$CategoryStateManager {
 
     final withConflictingName = _findCategoryWithName(current, to.name, from);
     if (withConflictingName != null) {
-      _logger.info("cannot replace category '$from' by '$to' because the name '${to.name}' is already used "
-          "for category '$withConflictingName'");
+      _logger.info(
+        "cannot replace category '$from' by '$to' because the name '${to.name}' is already used "
+        "for category '$withConflictingName'",
+      );
       return ManageCategoryResult.nameConflict;
     }
 
@@ -424,11 +417,7 @@ class CategoryStateManager extends _$CategoryStateManager {
         return ManageCategoryResult.noFileSelected;
       }
       final updateService = ref.read(updateServiceProvider);
-      final ok = await updateService.renameCategory(
-        from: from.name,
-        to: to.name,
-        file: file,
-      );
+      final ok = await updateService.renameCategory(from: from.name, to: to.name, file: file);
       if (!ok) {
         return ManageCategoryResult.generic;
       }
@@ -464,12 +453,15 @@ class CategoryStateManager extends _$CategoryStateManager {
       _logger.info("skipping onMeasurement() for category '${category.name}' because it's not registered");
       return;
     }
-    if (i == 0) {
-      _logger.info("category ${category.name} is already the first, skipping onMeasurement()");
+    if (i == 0 && category.persistedInGoogle) {
+      _logger.info("category ${category.name} is already the first and is persisted, skipping onMeasurement()");
       return;
     }
     final categoriesToUse = List.of(current.categories);
-    final categoryToUse = categoriesToUse[i];
+    Category categoryToUse = categoriesToUse[i];
+    if (!categoryToUse.persistedInGoogle) {
+      categoryToUse = categoryToUse.copyWith(persistedInGoogle: true);
+    }
     categoriesToUse.removeAt(i);
     categoriesToUse.insert(0, categoryToUse);
     final newState = CategoryState(selected: categoryToUse, categories: categoriesToUse);

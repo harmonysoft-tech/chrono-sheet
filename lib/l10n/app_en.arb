@@ -30,6 +30,7 @@
   "textCopiedToClipboard": "Copied to clipboard",
   "textCanNotSaveMeasurementsWhileOffline": "Cannot save measurements while offline",
   "textNoValue": "<no value>",
+  "textNoCategory": "<no category>",
   "textNoFileIsSelected": "<no file>",
   "textChangeIsSuccessful": "successfully changed",
 
