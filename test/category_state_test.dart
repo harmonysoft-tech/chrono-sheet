@@ -8,16 +8,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'category_state_test.mocks.dart';
 
 Category _text(String name) {
-  return Category(
-    name: name,
-    representation: TextCategoryRepresentation(name),
-  );
+  return _fullText(name, name);
 }
 
 Category _fullText(String name, String representation) {
   return Category(
     name: name,
     representation: TextCategoryRepresentation(representation),
+    persistedInGoogle: false,
   );
 }
 
