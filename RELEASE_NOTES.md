@@ -1,3 +1,5 @@
+## v1.111.0+112 released on 01 Apr 2025 UTC
+  * d04aec2d429c2a3c8409f8509603dc8e5f6de79c fix tests
 ## v1.110.0+111 released on 25 Mar 2025 UTC
   * ac0986ecca501bf30122b6b1cc7e6ed202146c0a don't try to open gsheet file in browser twice
 ## v1.109.0+110 released on 25 Mar 2025 UTC
