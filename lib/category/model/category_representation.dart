@@ -13,6 +13,10 @@ class _Key {
   static String getRepresentationData(String keyPrefix) {
     return "$keyPrefix.ui.data";
   }
+
+  static String getRepresentationTime(String keyPrefix) {
+    return "$keyPrefix.ui.createdAt";
+  }
 }
 
 class _Value {
@@ -27,9 +31,10 @@ sealed class CategoryRepresentation<T extends CategoryRepresentation<T>> impleme
       case TextCategoryRepresentation(text: final data):
         await prefs.setString(_Key.getRepresentationType(keyPrefix), _Value.text);
         await prefs.setString(_Key.getRepresentationData(keyPrefix), data);
-      case ImageCategoryRepresentation(file: final file):
+      case ImageCategoryRepresentation(file: final file, createdAt: final createdAt):
         await prefs.setString(_Key.getRepresentationType(keyPrefix), _Value.image);
         await prefs.setString(_Key.getRepresentationData(keyPrefix), file.path);
+        await prefs.setString(_Key.getRepresentationTime(keyPrefix), createdAt.toIso8601String());
     }
   }
 
@@ -54,7 +59,12 @@ sealed class CategoryRepresentation<T extends CategoryRepresentation<T>> impleme
       case _Value.image:
         final file = File(data);
         if (file.existsSync()) {
-          return ImageCategoryRepresentation(file);
+          final createdAtString = await prefs.getString(_Key.getRepresentationTime(keyPrefix));
+          DateTime? createdAt;
+          if (createdAtString != null) {
+            createdAt = DateTime.parse(createdAtString);
+          }
+          return ImageCategoryRepresentation(file, createdAt);
         } else {
           _logger.info("cannot deserialise image category representation for the prefix '$keyPrefix' - "
               "it points to file ${file.path} but the file doesn't exist");
@@ -108,8 +118,9 @@ class TextCategoryRepresentation extends CategoryRepresentation<TextCategoryRepr
 
 class ImageCategoryRepresentation extends CategoryRepresentation<ImageCategoryRepresentation> {
   final File file;
+  final DateTime createdAt;
 
-  ImageCategoryRepresentation(this.file);
+  ImageCategoryRepresentation(this.file, [DateTime? createdAt]) : createdAt = createdAt ?? DateTime.now();
 
   @override
   int _doCompareTo(ImageCategoryRepresentation other) {

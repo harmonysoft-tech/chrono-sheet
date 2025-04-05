@@ -145,10 +145,15 @@ class CategoryStateManager extends _$CategoryStateManager {
 
   Future<CategoryState?> _readCachedCategoryState(GoogleFile file) async {
     List<Category> categories = [];
+    Set<String> usedCategories = {};
     for (int i = 0; ; i++) {
       final categoryName = await _prefs.getString(_Key.getFileCategoryPrefix(file, i));
       if (categoryName == null) {
         break;
+      }
+      if (!usedCategories.add(categoryName)) {
+        // we encountered a situation when categories were duplicated somehow
+        continue;
       }
       final category = await _getCategoryByName(categoryName);
       categories.add(category);
