@@ -1,5 +1,6 @@
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
+import 'package:chrono_sheet/ui/widget_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +28,7 @@ class FileWidget extends ConsumerWidget {
     final fileStateAsync = ref.watch(fileStateManagerProvider);
     final l10n = AppLocalizations.of(context);
     return GestureDetector(
+      key: AppWidgetKey.selectFile,
       onTap: () => _selectFile(context),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -4,7 +4,7 @@ import 'package:googleapis/sheets/v4.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../file/model/google_file.dart';
-import '../../google/google_helper.dart';
+import '../../google/login/state/google_helper.dart';
 import '../../log/util/log_util.dart';
 import '../../util/collection_util.dart';
 import '../model/sheet_model.dart';

@@ -8,9 +8,9 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis/sheets/v4.dart' as sheets;
 import 'package:http/http.dart' as http;
 
-import '../http/AuthenticatedHttpClient.dart';
-import '../log/util/log_util.dart';
-import '../util/rich_text_util.dart';
+import '../../../http/AuthenticatedHttpClient.dart';
+import '../../../log/util/log_util.dart';
+import '../../../util/rich_text_util.dart';
 
 final _logger = getNamedLogger();
 
@@ -31,7 +31,7 @@ class GoogleData {
   GoogleData(this.identity, this.authenticatedClient);
 }
 
-Future<GoogleData> getGoogleClientData() async {
+Future<GoogleData> getGoogleClientData([background = false]) async {
   final client = _dataOverride;
   if (client != null) {
     return client;

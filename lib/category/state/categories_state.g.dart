@@ -1,19 +1,19 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'category_state.dart';
+part of 'categories_state.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
 String _$categoryStateManagerHash() =>
-    r'06ca0e0e800f02cfac644344b83c80ced3b9a90c';
+    r'2e6d589f648869238648f0aabf8215ae8a35840b';
 
-/// See also [CategoryStateManager].
-@ProviderFor(CategoryStateManager)
+/// See also [CategoriesStateManager].
+@ProviderFor(CategoriesStateManager)
 final categoryStateManagerProvider = AutoDisposeAsyncNotifierProvider<
-    CategoryStateManager, CategoryState>.internal(
-  CategoryStateManager.new,
+    CategoriesStateManager, CategoriesState>.internal(
+  CategoriesStateManager.new,
   name: r'categoryStateManagerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
@@ -22,6 +22,6 @@ final categoryStateManagerProvider = AutoDisposeAsyncNotifierProvider<
   allTransitiveDependencies: null,
 );
 
-typedef _$CategoryStateManager = AutoDisposeAsyncNotifier<CategoryState>;
+typedef _$CategoryStateManager = AutoDisposeAsyncNotifier<CategoriesState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

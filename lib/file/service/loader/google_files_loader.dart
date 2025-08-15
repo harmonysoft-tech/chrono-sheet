@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis/drive/v3.dart';
 
-import '../../../google/google_helper.dart';
+import '../../../google/login/state/google_helper.dart';
 import '../../../log/util/log_util.dart';
 
 final _logger = getNamedLogger();

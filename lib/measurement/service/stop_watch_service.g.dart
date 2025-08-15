@@ -6,7 +6,7 @@ part of 'stop_watch_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$stopWatchServiceHash() => r'4a30025203a85dbb50a4cb0f41dc8c757a06b614';
+String _$stopWatchServiceHash() => r'62ca2d75cdf857b321944288e5a25cc78572f4e9';
 
 /// See also [StopWatchService].
 @ProviderFor(StopWatchService)

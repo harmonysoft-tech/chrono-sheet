@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chrono_sheet/di/di.dart';
 import 'package:chrono_sheet/log/boostrap/log_bootstrap.dart';
+import 'package:chrono_sheet/category/service/category_manager.dart';
 import 'package:chrono_sheet/router/router.dart';
 import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
 import 'package:chrono_sheet/ui/path.dart';
@@ -65,6 +66,7 @@ class MyAppState extends State<MyApp> {
       diContainer = ProviderScope.containerOf(context);
       Timer.periodic(Duration(minutes: 1), (_) {
         diContainer?.read(sheetUpdaterProvider.notifier).storeUnsavedMeasurements();
+        diContainer?.read(categoryManagerProvider).tick();
       });
     });
     return MaterialApp(

@@ -7,11 +7,9 @@
 
 // ignore_for_file: avoid_print
 
-import 'dart:io';
-
 import 'package:chrono_sheet/file/model/google_file.dart';
-import 'package:chrono_sheet/google/google_helper.dart';
-import 'package:chrono_sheet/google/state/google_login_state.dart';
+import 'package:chrono_sheet/google/login/state/google_helper.dart';
+import 'package:chrono_sheet/google/login/state/google_login_state.dart';
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:chrono_sheet/sheet/parser/sheet_parser.dart';
 import 'package:chrono_sheet/sheet/updater/update_service.dart';
@@ -19,10 +17,11 @@ import 'package:chrono_sheet/util/date_util.dart' as date;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:googleapis/drive/v2.dart' as drive;
 import 'package:googleapis/sheets/v4.dart';
-import 'package:googleapis_auth/src/service_account_client.dart';
 import 'package:googleapis_auth/src/service_account_credentials.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+
+import '../test_common/google/service/google_service_test_common.dart';
 
 final List<_TestContext> _contexts = [];
 int _contextCounter = 0;
@@ -38,20 +37,6 @@ DateTime _today = date.fallbackDateFormat.parse("2024-12-29");
 String _todayUs = _Format.us.format(_today);
 DateTime _yesterday = _today.subtract(Duration(days: 1));
 String _yesterdayUs = _Format.us.format(_yesterday);
-
-Future<AutoRefreshingAuthClient> _getClient(int counter) async {
-  final file = File("test/auto-test-service-account$counter.json");
-  if (!await file.exists()) {
-    throw AssertionError("file ${file.path} doesn't exist");
-  }
-  final json = await file.readAsString();
-  final credentials = ServiceAccountCredentials.fromJson(json);
-  final scopes = [
-    SheetsApi.spreadsheetsScope,
-    SheetsApi.driveFileScope,
-  ];
-  return await clientViaServiceAccount(credentials, scopes);
-}
 
 Future<void> _clearDocument(_TestContext context) async {
   await context.api.spreadsheets.values.clear(ClearValuesRequest(), context.file.id, _sheetTitle);
@@ -166,7 +151,7 @@ class _TestContext {
 
 Future<void> prepareContexts() async {
   for (int i = 1; i <= 2; i++) {
-    final client = await _getClient(i);
+    final client = await getTestGoogleClient(i, "test_common");
     final format = DateFormat("yyyy-MM-dd-HH:mm:ss'");
     final documentTitle = "${format.format(DateTime.now())}-${Uuid().v4()}";
     final fileMetaData = drive.File()

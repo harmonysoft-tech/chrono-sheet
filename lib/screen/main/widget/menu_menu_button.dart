@@ -1,10 +1,11 @@
+import 'package:chrono_sheet/category/service/category_manager.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
+import 'package:chrono_sheet/google/login/state/google_login_state.dart';
 import 'package:chrono_sheet/network/network.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../google/state/google_login_state.dart';
 import '../../../router/router.dart';
 
 class MainMenuButton extends ConsumerStatefulWidget {
@@ -23,6 +24,10 @@ class MainMenuButtonState extends ConsumerState<MainMenuButton> {
     isOnline().then((online) => _online = online);
   }
 
+  Future<void> _triggerTick() async {
+    await ref.read(categoryManagerProvider).tick(true);
+  }
+
   @override
   Widget build(BuildContext context) {
     final loginStateAsync = ref.watch(loginStateManagerProvider);
@@ -30,6 +35,14 @@ class MainMenuButtonState extends ConsumerState<MainMenuButton> {
     return PopupMenuButton(
       icon: Icon(Icons.more_vert),
       itemBuilder: (context) => [
+        // TODO remove
+        PopupMenuItem(
+          child: ListTile(
+            leading: Icon(Icons.ac_unit),
+            title: Text("tick"),
+            onTap: _triggerTick,
+          ),
+        ),
         PopupMenuItem(
           child: ListTile(
             leading: Icon(Icons.access_time),

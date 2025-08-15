@@ -6,7 +6,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../category/model/category.dart';
-import '../../category/state/category_state.dart';
+import '../../category/state/categories_state.dart';
 import '../../file/model/google_file.dart';
 import '../../file/state/file_state.dart';
 import '../../log/util/log_util.dart';

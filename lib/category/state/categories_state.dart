@@ -5,6 +5,7 @@ import 'package:chrono_sheet/category/model/category_representation.dart';
 import 'package:chrono_sheet/file/state/file_state.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/log/util/log_util.dart';
+import 'package:chrono_sheet/category/service/category_manager.dart';
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:chrono_sheet/sheet/parser/sheet_parser.dart';
 import 'package:chrono_sheet/util/regexp_util.dart';
@@ -19,19 +20,19 @@ import '../../network/network.dart';
 import '../../sheet/updater/sheet_updater.dart';
 import '../../sheet/updater/update_service.dart';
 
-part 'category_state.g.dart';
+part 'categories_state.g.dart';
 
 final _categoryNamesToHideInUi = {Column.date, Column.total};
 final _logger = getNamedLogger();
 
-class CategoryState {
-  static CategoryState empty = CategoryState();
+class CategoriesState {
+  static CategoriesState empty = CategoriesState();
 
   final Category? selected;
   final List<Category> categories;
   final String id;
 
-  CategoryState({this.selected, this.categories = const [], String? id}) : id = id ?? Uuid().v4();
+  CategoriesState({this.selected, this.categories = const [], String? id}) : id = id ?? Uuid().v4();
 
   @override
   String toString() {
@@ -50,10 +51,6 @@ class _Key {
 
   static String getFileCategoryPrefix(GoogleFile file, int i) {
     return "category.${file.id}.$i";
-  }
-
-  static String getCommonCategoryPrefix(String categoryName) {
-    return "category.common.$categoryName";
   }
 }
 
@@ -81,23 +78,23 @@ enum ManageCategoryResult {
 }
 
 @riverpod
-class CategoryStateManager extends _$CategoryStateManager {
+class CategoriesStateManager extends _$CategoryStateManager {
   final SharedPreferencesAsync _prefs;
 
-  CategoryStateManager({SharedPreferencesAsync? prefs}) : _prefs = prefs ?? SharedPreferencesAsync();
+  CategoriesStateManager({SharedPreferencesAsync? prefs}) : _prefs = prefs ?? SharedPreferencesAsync();
 
   @override
-  Future<CategoryState> build() async {
+  Future<CategoriesState> build() async {
     final fileState = await ref.watch(fileStateManagerProvider.future);
     _logger.info("start building categories state");
     final selectedFile = fileState.selected;
     if (selectedFile == null) {
-      return CategoryState.empty;
+      return CategoriesState.empty;
     }
     final cached = await _readCachedCategoryState(selectedFile);
     if (cached == null) {
       final result = await _parseAndApplyCategoriesFromSheet(selectedFile);
-      return result.match((error) => CategoryState(), (newState) => newState);
+      return result.match((error) => CategoriesState(), (newState) => newState);
     } else {
       _logger.info("found cached category state: $cached");
       _parseAndApplyCategoriesFromSheet(selectedFile).then((result) {
@@ -109,7 +106,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     }
   }
 
-  Future<Either<Unit, CategoryState>> _parseAndApplyCategoriesFromSheet(GoogleFile file) async {
+  Future<Either<Unit, CategoriesState>> _parseAndApplyCategoriesFromSheet(GoogleFile file) async {
     _logger.info("loading categories from the remote document");
     final categoryNamesFromFileResult = await _parseCategoryNames(file);
     return categoryNamesFromFileResult.match(
@@ -120,7 +117,7 @@ class CategoryStateManager extends _$CategoryStateManager {
       (categoryNamesFromFile) async {
         _logger.info("fetched remote categories: $categoryNamesFromFile");
         final currentState = state;
-        CategoryState? cached;
+        CategoriesState? cached;
         if (currentState is AsyncData) {
           cached = currentState.value;
         }
@@ -132,7 +129,7 @@ class CategoryStateManager extends _$CategoryStateManager {
   }
 
   Future<Category> _getCategoryByName(String name) async {
-    final category = await Category.deserialiseIfPossible(_prefs, _Key.getCommonCategoryPrefix(name));
+    final category = await ref.read(categoryManagerProvider).getCategory(name);
     if (category != null) {
       return category;
     }
@@ -143,7 +140,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     );
   }
 
-  Future<CategoryState?> _readCachedCategoryState(GoogleFile file) async {
+  Future<CategoriesState?> _readCachedCategoryState(GoogleFile file) async {
     List<Category> categories = [];
     Set<String> usedCategories = {};
     for (int i = 0; ; i++) {
@@ -178,7 +175,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     selectedCategory ??= normalisedCategories.first;
 
     final id = await _prefs.getString(_Key.getStateId(file));
-    final result = CategoryState(id: id, selected: selectedCategory, categories: normalisedCategories);
+    final result = CategoriesState(id: id, selected: selectedCategory, categories: normalisedCategories);
 
     if (shouldSaveAfterNormalisation) {
       _logger.info(
@@ -267,10 +264,10 @@ class CategoryStateManager extends _$CategoryStateManager {
     return {s1: _getDefaultRepresentationText(s1), s2: _getDefaultRepresentationText(s2)};
   }
 
-  Future<CategoryState> _merge(CategoryState? cached, List<String> currentCategoryNames) async {
+  Future<CategoriesState> _merge(CategoriesState? cached, List<String> currentCategoryNames) async {
     _logger.info("merging cached categories state (\n$cached\n) and current categories ($currentCategoryNames)");
     if (currentCategoryNames.isEmpty && (cached?.categories.all((c) => c.persistedInGoogle) ?? true)) {
-      return CategoryState.empty;
+      return CategoriesState.empty;
     }
     if (cached == null) {
       List<Category> categories = await Future.wait(
@@ -280,7 +277,7 @@ class CategoryStateManager extends _$CategoryStateManager {
       );
       categories = ensureNoDuplicateTextRepresentations(categories);
       final selected = categories.first;
-      return CategoryState(selected: selected, categories: categories);
+      return CategoriesState(selected: selected, categories: categories);
     }
     List<Category> sortedCategories = List.of(cached.categories);
     sortedCategories.removeWhere(
@@ -301,12 +298,12 @@ class CategoryStateManager extends _$CategoryStateManager {
     if (selected == null || !currentCategoryNames.contains(selected.name)) {
       selected = sortedCategories.first;
     }
-    final result = CategoryState(selected: selected, categories: sortedCategories);
+    final result = CategoriesState(selected: selected, categories: sortedCategories);
     _logger.info("categories after merge: $result");
     return result;
   }
 
-  Future<ManageCategoryResult> _cacheCategoryState(CategoryState state, [GoogleFile? file]) async {
+  Future<ManageCategoryResult> _cacheCategoryState(CategoriesState state, [GoogleFile? file]) async {
     final GoogleFile fileToUse;
     if (file == null) {
       final fileState = await ref.read(fileStateManagerProvider.future);
@@ -350,7 +347,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     return Either.right(info.columns.keys.where((c) => !_categoryNamesToHideInUi.contains(c)).toList());
   }
 
-  Category? _findCategoryWithName(CategoryState state, String name, [Category? toSkip]) {
+  Category? _findCategoryWithName(CategoriesState state, String name, [Category? toSkip]) {
     if (state.selected?.name == name && state.selected != toSkip) {
       return state.selected;
     }
@@ -364,7 +361,6 @@ class CategoryStateManager extends _$CategoryStateManager {
 
   Future<ManageCategoryResult> addNewCategory(Category category) async {
     final currentState = await future;
-    final selected = currentState.selected;
     final withConflictingName = _findCategoryWithName(currentState, category.name);
     if (withConflictingName != null) {
       _logger.info("given new category ($category) conflicts by name with the selected one - '$withConflictingName'");
@@ -372,17 +368,16 @@ class CategoryStateManager extends _$CategoryStateManager {
     }
 
     List<Category> categoriesToUse = List.of(currentState.categories);
-    if (selected != null) {
-      categoriesToUse.insert(0, selected);
-    }
     categoriesToUse.insert(0, category);
     final normalisedCategoriesToUse = ensureNoDuplicateTextRepresentations(categoriesToUse);
-    final newState = CategoryState(selected: category, categories: normalisedCategoriesToUse);
+    final newState = CategoriesState(selected: category, categories: normalisedCategoriesToUse);
     state = AsyncValue.data(newState);
     final result = await _cacheCategoryState(newState);
     if (result == ManageCategoryResult.success) {
       _logger.info("categories state after adding new category '$category': $newState");
     }
+
+    ref.read(categoryManagerProvider).onNewCategory(category);
 
     return result;
   }
@@ -406,11 +401,12 @@ class CategoryStateManager extends _$CategoryStateManager {
       return ManageCategoryResult.wrongOriginalCategory;
     }
 
-    await to.serialize(_prefs, _Key.getCommonCategoryPrefix(to.name));
+    await ref.read(categoryManagerProvider).onReplaceCategory(from, to);
+
     final newCategories = List.of(current.categories);
     newCategories[i] = to;
     final newSelected = current.selected == from ? to : current.selected;
-    final newState = CategoryState(selected: newSelected, categories: newCategories);
+    final newState = CategoriesState(selected: newSelected, categories: newCategories);
     state = AsyncValue.data(newState);
     final result = await _cacheCategoryState(newState);
     if (result == ManageCategoryResult.success) {
@@ -430,7 +426,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     return result;
   }
 
-  Future<CategoryState> select(Category category) async {
+  Future<CategoriesState> select(Category category) async {
     _logger.info("got a request to select category '$category'");
     final current = await future;
     if (current.selected == category) {
@@ -442,7 +438,7 @@ class CategoryStateManager extends _$CategoryStateManager {
       return current;
     }
 
-    CategoryState newState = CategoryState(selected: category, categories: current.categories);
+    CategoriesState newState = CategoriesState(selected: category, categories: current.categories);
     final saveResult = await _cacheCategoryState(newState);
     if (saveResult == ManageCategoryResult.success) {
       _logger.info("categories state after '$category' is selected: $newState");
@@ -469,7 +465,7 @@ class CategoryStateManager extends _$CategoryStateManager {
     }
     categoriesToUse.removeAt(i);
     categoriesToUse.insert(0, categoryToUse);
-    final newState = CategoryState(selected: categoryToUse, categories: categoriesToUse);
+    final newState = CategoriesState(selected: categoryToUse, categories: categoriesToUse);
     await _cacheCategoryState(newState);
     state = AsyncValue.data(newState);
   }

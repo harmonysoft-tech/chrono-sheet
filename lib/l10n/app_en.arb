@@ -47,7 +47,7 @@
   "labelFile": "file to store the measurement",
 
   "errorCanNotParseCategories": "can not parse categories",
-  "errorNoFileIsSelected": "no file is selected",
+  "errorNoFileIsSelected": "no google file is selected",
   "errorNoCategoryIsSelected": "no category is selected",
   "errorPermissionsNotGranted": "The following mandatory permissions are not granted:\n",
   "errorCanNotOpenFile": "Can not open the measurements file, try to open if from the browser or Google Sheets application",

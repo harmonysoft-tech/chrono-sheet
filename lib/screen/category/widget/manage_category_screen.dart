@@ -1,20 +1,17 @@
 import 'dart:io';
 
 import 'package:chrono_sheet/category/model/category_representation.dart';
-import 'package:chrono_sheet/category/state/category_state.dart';
+import 'package:chrono_sheet/category/service/category_icon_selector.dart';
+import 'package:chrono_sheet/category/state/categories_state.dart';
 import 'package:chrono_sheet/category/widget/category_widget.dart';
 import 'package:chrono_sheet/log/util/log_util.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:chrono_sheet/ui/widget_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../category/model/category.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../ui/dimension.dart';
-import '../../../ui/path.dart';
 import '../../../util/snackbar_util.dart';
 
 final _logger = getNamedLogger();
@@ -59,113 +56,24 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     super.dispose();
   }
 
-  Future<void> _selectIcon(BuildContext context, double edgeSize) async {
-    final l10n = AppLocalizations.of(context);
-    final haveNecessaryPermissions = await _ensureFileSelectionPermissions(context);
-    if (!haveNecessaryPermissions) {
+  Future<void> _selectIcon(BuildContext context) async {
+    final category = _nameController.text.trim();
+    final fileToStore = await selectCategoryIcon(context, category);
+    if (fileToStore == null) {
+      _logger.info("skipped icon selection for category '$category' - no file is selected");
       return;
     }
 
-    final originalImageFilePath = await _selectFile(l10n);
-    if (originalImageFilePath == null) {
-      return;
-    }
-
-    final croppedFile = await _cropImage(originalImageFilePath, l10n);
-    if (croppedFile == null) {
-      _logger.info("cannot get cropped file");
-      return;
-    }
-
-    final fileToStore = File("${AppPaths.categoryIconDir}/${Uuid().v4()}.jpg");
-    fileToStore.createSync(recursive: true);
-    await File(croppedFile.path).copy(fileToStore.path);
     if (context.mounted) {
       setState(() {
         _iconFile = fileToStore;
       });
     } else {
-      _logger.info("skipped icon selection for category '${_nameController.text}' - the build context is not mounted");
+      _logger.info("skipped icon selection for category '$category' - the build context is not mounted");
     }
   }
 
-  Future<bool> _ensureFileSelectionPermissions(BuildContext context) async {
-    final l10n = AppLocalizations.of(context);
-    if (Platform.isAndroid) {
-      if (await Permission.storage.request().isGranted) {
-        // for android < 13
-        _logger.info("detected that permission ${Permission.storage} is granted");
-        return true;
-      } else if (await Permission.mediaLibrary.request().isGranted) {
-        // for android >= 13
-        _logger.info("detected that permission ${Permission.mediaLibrary} is granted");
-        return true;
-      } else {
-        _logger.info("do not have necessary permissions for icon selection");
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(l10n.errorNeedPermissionForCategoryIcon),
-          ));
-        } else {
-          _logger.info("skipped icon selection for category '${_nameController.text}' - permission is not granted "
-              "and the build context is not mounted");
-        }
-        return false;
-      }
-    } else {
-      return true;
-    }
-  }
-
-  Future<String?> _selectFile(AppLocalizations l10n) async {
-    try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
-        dialogTitle: l10n.titleChooseCategoryImage,
-        type: FileType.image,
-      );
-      if (result == null) {
-        _logger.info("no icon file is selected");
-        return null;
-      }
-      final path = result.files.single.path;
-      if (path == null) {
-        _logger.info("no path is available after image selection, selection result: $result");
-        return null;
-      } else {
-        return path;
-      }
-    } catch (e, stack) {
-      _logger.info("unexpected exception on attempt to select a file", e, stack);
-      return null;
-    }
-  }
-
-  Future<CroppedFile?> _cropImage(String originalImageFilePath, AppLocalizations l10n) async {
-    return await ImageCropper().cropImage(
-      sourcePath: originalImageFilePath,
-      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: l10n.titleCropImage,
-          lockAspectRatio: true,
-          initAspectRatio: CropAspectRatioPreset.square,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.square,
-          ],
-        ),
-        IOSUiSettings(
-          title: l10n.titleCropImage,
-          aspectRatioLockEnabled: true,
-          aspectRatioPickerButtonHidden: true,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.square,
-          ],
-        ),
-      ],
-    );
-  }
-
-  Future<void> _saveCategoryIfPossible(BuildContext context, CategoryStateManager stateManager) async {
+  Future<void> _saveCategoryIfPossible(BuildContext context, CategoriesStateManager stateManager) async {
     if (_nameController.text.trim().isEmpty) {
       SnackBarUtil.showL10nMessage(context, _logger, (l10n) => l10n.errorCategoryNameMustBeProvided);
     }
@@ -234,6 +142,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
                 ),
                 Expanded(
                   child: TextField(
+                    key: AppWidgetKey.manageCategoryName,
                     focusNode: _nameFocusNode,
                     controller: _nameController,
                   ),
@@ -251,8 +160,9 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
                 ),
                 _iconFile == null
                     ? IconButton(
+                        key: AppWidgetKey.manageCategoryIcon,
                         onPressed: () {
-                          _selectIcon(context, AppDimension.getCategoryWidgetEdgeLength(context));
+                          _selectIcon(context);
                         },
                         icon: Container(
                           width: AppDimension.getCategoryWidgetEdgeLength(context),
@@ -275,7 +185,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
                         ),
                         selected: false,
                         pressCallback: () {
-                          _selectIcon(context, AppDimension.getCategoryWidgetEdgeLength(context));
+                          _selectIcon(context);
                         },
                       ),
               ],
@@ -284,6 +194,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        key: AppWidgetKey.saveCategoryState,
         onPressed: () => _saveCategoryIfPossible(context, ref.read(categoryStateManagerProvider.notifier)),
         child: Icon(Icons.save),
       ),

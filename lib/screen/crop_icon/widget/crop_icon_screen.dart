@@ -56,7 +56,7 @@ class CropIconScreeState extends State<CropIconScreen> {
     // Convert back to bytes and save
     Uint8List croppedBytes = Uint8List.fromList(img.encodeJpg(croppedImage));
 
-    final croppedFile = File("${AppPaths.categoryIconDir}/${Uuid().v4()}.jpg");
+    final croppedFile = File("${AppPaths.categoryIconRootDir}/${Uuid().v4()}.jpg");
     await croppedFile.writeAsBytes(croppedBytes);
     if (context.mounted) {
       context.pop(croppedFile);

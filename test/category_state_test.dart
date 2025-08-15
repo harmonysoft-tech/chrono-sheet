@@ -1,6 +1,6 @@
 import 'package:chrono_sheet/category/model/category.dart';
 import 'package:chrono_sheet/category/model/category_representation.dart';
-import 'package:chrono_sheet/category/state/category_state.dart';
+import 'package:chrono_sheet/category/state/categories_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +21,7 @@ Category _fullText(String name, String representation) {
 
 @GenerateMocks([SharedPreferencesAsync])
 void main() {
-  final manager = CategoryStateManager(prefs: MockSharedPreferencesAsync());
+  final manager = CategoriesStateManager(prefs: MockSharedPreferencesAsync());
 
   test("when category has multiple words then default representation is as expected", () {
     final actual = manager.ensureNoDuplicateTextRepresentations([_text("category one"), _text("cat two")]);

@@ -1,7 +1,7 @@
 import 'package:chrono_sheet/file/widget/file_widget.dart';
 import 'package:chrono_sheet/file/widget/view_selected_file_widget.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
-import 'package:chrono_sheet/google/state/google_login_state.dart';
+import 'package:chrono_sheet/google/login/state/google_login_state.dart';
 import 'package:chrono_sheet/hint/widget/hint_widget.dart';
 import 'package:chrono_sheet/measurement/widget/stop_watch_buttons_widget.dart';
 import 'package:chrono_sheet/screen/main/state/main_hint_positions.dart';

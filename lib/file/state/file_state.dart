@@ -1,8 +1,8 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
-import 'package:chrono_sheet/google/state/google_login_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../google/login/state/google_login_state.dart';
 import '../../log/util/log_util.dart';
 
 part 'file_state.g.dart';

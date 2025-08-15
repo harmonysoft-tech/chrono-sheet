@@ -7,7 +7,7 @@ part of 'stop_watch_controls_ui_state.dart';
 // **************************************************************************
 
 String _$stopWatchControlUiStateManagerHash() =>
-    r'9b09e0f856c71778a62f274066c11885777428a6';
+    r'8ca62689fa9031a9f8cf5a3419c7dad98d145410';
 
 /// See also [StopWatchControlUiStateManager].
 @ProviderFor(StopWatchControlUiStateManager)

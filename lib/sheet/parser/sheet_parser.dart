@@ -1,5 +1,5 @@
 import 'package:chrono_sheet/file/model/google_file.dart';
-import 'package:chrono_sheet/google/google_helper.dart';
+import 'package:chrono_sheet/google/login/state/google_helper.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:intl/intl.dart';
 

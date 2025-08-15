@@ -4,7 +4,7 @@ import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../category/state/category_state.dart';
+import '../../category/state/categories_state.dart';
 import '../../sheet/updater/sheet_updater.dart';
 import '../../util/date_util.dart';
 import '../model/measurement.dart';
