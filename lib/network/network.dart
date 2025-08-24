@@ -7,6 +7,7 @@ Future<bool> isOnline() async {
   try {
     final result = await Connectivity().checkConnectivity();
     _logger.info("detected connectivity status '$result'");
+    // TODO handle a situation when we're connected but can't reach internet (the avion case)
     return result.any((status) => status != ConnectivityResult.none);
   } catch (e) {
     _logger.info("detected that the application is currently offline");

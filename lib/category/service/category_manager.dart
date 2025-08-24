@@ -40,10 +40,23 @@ class _Key {
   }
 }
 
-class _Category {
-  static const rootDirPath = ".chrono-sheet/picture/category";
-  static const mappingDirPath = "$rootDirPath/mapping";
-  static const picturesDirPath = "$rootDirPath/data";
+String _rootDirPath = ".chrono-sheet/picture/category";
+String? _rootDirPathOverride = null;
+
+setCategoryGoogleRootDirPathOverride(String rootPathToUse) {
+  _rootDirPathOverride = rootPathToUse;
+}
+
+resetCategoryRootDirPathOverride() {
+  _rootDirPathOverride = null;
+}
+
+class CategoryGooglePaths {
+  static String get rootDirPathToUse => _rootDirPathOverride ?? _rootDirPath;
+
+  static String get mappingDirPath => "$rootDirPathToUse/mapping";
+
+  static String get picturesDirPath => "$rootDirPathToUse/pictures";
 }
 
 class CategoryManager {
@@ -94,27 +107,25 @@ class CategoryManager {
 
   Future<_CategoriesToInfo> _getRemoteInfo() async {
     _logger.info("start downloading remote pictures infos");
-    final directoryId = await _getGoogleDirectoryId(_Category.mappingDirPath);
+    final directoryId = await _getGoogleDirectoryId(CategoryGooglePaths.mappingDirPath);
     final driveFiles = await driveService.listFiles(directoryId);
     final result = <String, IconInfo>{};
     for (final file in driveFiles) {
       final raw = await driveService.getFileContent(file.id);
       final text = utf8.decode(raw).trim();
-      final i = text.indexOf(",");
-      if (i <= 0 || i >= text.length) {
-        _logger.info("detected that google category icon mapping file $file has incorrect content format:\n$text");
-        await driveService.deleteFile(file.id);
-        continue;
-      }
-      final fileName = text.substring(0, i);
-      final time = DateTime.tryParse(text.substring(i + 1));
-      if (time == null) {
-        _logger.info("detected that google category icon mapping file $file doesn't have time:\n$text");
-        await driveService.deleteFile(file.id);
-      } else {
-        final categoryName = p.basenameWithoutExtension(file.name);
-        result[categoryName] = IconInfo(fileName: fileName, activationTime: time);
-      }
+      final parseResult = IconInfo.parse(text);
+      parseResult.fold(
+        (error) async {
+          _logger.info(
+            "detected that google category icon mapping file $file has incorrect content format, deleting it - $error",
+          );
+          await driveService.delete(file.id);
+        },
+        (info) {
+          final categoryName = p.basenameWithoutExtension(file.name);
+          result[categoryName] = info;
+        },
+      );
     }
     return result;
   }
@@ -203,8 +214,8 @@ class CategoryManager {
       }
     });
     _logger.info("found ${toUpload.length} icon files to upload: $toUpload");
-    final picturesDirectoryId = await _getGoogleDirectoryId(_Category.picturesDirPath);
-    final mappingDirectoryId = await _getGoogleDirectoryId(_Category.mappingDirPath);
+    final picturesDirectoryId = await _getGoogleDirectoryId(CategoryGooglePaths.picturesDirPath);
+    final mappingDirectoryId = await _getGoogleDirectoryId(CategoryGooglePaths.mappingDirPath);
     toUpload.forEach((categoryName, iconFilePath) async {
       await driveService.uploadImageFile(picturesDirectoryId, File(iconFilePath));
       final fileName = p.basename(iconFilePath);
@@ -224,15 +235,15 @@ class CategoryManager {
       }
     });
     _logger.info("found ${toDownload.length} remote category icons to download: ${toDownload.keys.join(", ")}");
-    final picturesDirectoryId = await _getGoogleDirectoryId(_Category.picturesDirPath);
+    final picturesDirectoryId = await _getGoogleDirectoryId(CategoryGooglePaths.picturesDirPath);
     final remoteFiles = await driveService.listFiles(picturesDirectoryId);
-    final remoteFilesByName = { for (final file in remoteFiles) file.name : file};
+    final remoteFilesByName = {for (final file in remoteFiles) file.name: file};
     final localDataDir = _getLocalDataDir();
     final futures = toDownload.entries.map((entry) async {
       final file = remoteFilesByName[entry.key];
       if (file == null) {
         _logger.severe(
-            "cannot download data for category '${entry.key}' - no file with such name is found in google drive"
+          "cannot download data for category '${entry.key}' - no file with such name is found in google drive",
         );
       } else {
         final dataFile = File("${localDataDir.path}/${entry.value}");

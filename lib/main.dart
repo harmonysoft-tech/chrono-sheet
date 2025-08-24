@@ -8,6 +8,7 @@ import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
 import 'package:chrono_sheet/ui/path.dart';
 import 'package:chrono_sheet/ui/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,6 +23,8 @@ void main() async {
   final logger = getNamedLogger();
 
   runZonedGuarded(() async {
+    final defaultErrorReporter = FlutterError.onError;
+
     FlutterError.onError = (FlutterErrorDetails details) {
       var error = "flutter error - ${details.exception}";
       if (details.stack != null) {
@@ -29,6 +32,10 @@ void main() async {
         error += details.stack.toString();
       }
       logger.severe(error);
+
+      if (kDebugMode || kProfileMode) {
+        defaultErrorReporter?.call(details);
+      }
     };
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(

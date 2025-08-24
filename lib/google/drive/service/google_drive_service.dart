@@ -1,21 +1,64 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chrono_sheet/file/model/google_file.dart';
+import 'package:chrono_sheet/google/login/state/google_helper.dart';
 import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:path/path.dart' as p;
-import 'package:chrono_sheet/file/model/google_file.dart';
-import 'package:chrono_sheet/google/login/state/google_helper.dart';
 
 final _logger = getNamedLogger();
 
 class GoogleDriveService {
+
+  Future<List<GoogleFile>> list() async {
+    final api = await _getApi();
+    final searchResult = await api.files.list();
+    return searchResult.files?.map((f) => GoogleFile(f.id!, f.name!)).toList() ?? [];
+  }
+
+  Future<String?> getDirectoryId(String path) async {
+    final api = await _getApi();
+    final pathEntries = path.split("/");
+    String currentPath = "";
+    String result = "root";
+    for (final entry in pathEntries) {
+      final searchResult = await api.files.list(
+        q:
+        "name = '$entry' "
+            "and '$result' in parents "
+            "and mimeType = 'application/vnd.google-apps.folder' "
+            "and trashed = false",
+        spaces: "drive",
+        $fields: "files(id, name)",
+      );
+      final id = searchResult.files?.firstOrNull?.id;
+      if (id == null) {
+        _logger.info("failed to find directory '$currentPath' on google drive");
+        return null;
+      } else {
+        _logger.fine("found existing google directory at path '$currentPath', id: '$id'");
+        result = id;
+        if (currentPath.isNotEmpty) {
+          currentPath += "/";
+        }
+        currentPath += entry;
+      }
+    }
+    return result;
+  }
+
   Future<String> getOrCreateDirectory(String path) async {
     final api = await _getApi();
     final pathEntries = path.split("/");
     String result = "root";
+    String currentPath = "";
     for (final entry in pathEntries) {
+      if (currentPath.isNotEmpty) {
+        currentPath += "/";
+      }
+      currentPath += entry;
       final searchResult = await api.files.list(
         q:
         "name = '$entry' "
@@ -33,7 +76,9 @@ class GoogleDriveService {
           ..parents = [result];
         final directory = await api.files.create(metaData);
         result = directory.id!;
+        _logger.info("created google directory at path '$currentPath', id: '$id'");
       } else {
+        _logger.info("found existing google directory at path '$currentPath', id: '$id'");
         result = id;
       }
     }
@@ -50,6 +95,33 @@ class GoogleDriveService {
     return searchResult.files?.map((f) => GoogleFile(f.id!, f.name!)).toList() ?? [];
   }
 
+  Future<String?> getFileId(String path) async {
+    final i = path.indexOf("/");
+    List<GoogleFile> files;
+    String fileName;
+    if (i > 0) {
+      final directoryPath = path.substring(0, i);
+      final directoryId = await getDirectoryId(directoryPath);
+      if (directoryId == null) {
+        return null;
+      }
+
+      fileName = path.substring(i + 1);
+      files = await listFiles(directoryId);
+    } else {
+      fileName = path;
+      files = await list();
+    }
+
+    for (final file in files) {
+      if (file.name == fileName) {
+        return file.id;
+      }
+    }
+    _logger.info("can not get id of the  google file at path '$path', the file does not exist");
+    return null;
+  }
+
   Future<String> getOrCreateTextFile(String directoryId, String fileName) async {
     return await getOrCreateFile(directoryId, fileName, "text/plain", true);
   }
@@ -58,27 +130,22 @@ class GoogleDriveService {
       bool retryOnCreationFailure,) async {
     final api = await _getApi();
     final searchResult = await api.files.list(
-      q: "name = '$fileName' and '$directoryId' in parents and mimeType = $mimeType",
+      q: "name = '$fileName' and '$directoryId' in parents and mimeType = '$mimeType'",
       spaces: "drive",
       $fields: "files(id, name)",
     );
-    final existing = searchResult.files?.first.id;
+    final existing = searchResult.files?.firstOrNull?.id;
     if (existing != null) {
       return existing;
     }
 
     final metaData = drive.File()
       ..name = fileName
+      ..mimeType = mimeType
       ..parents = [directoryId];
 
-    final media = drive.Media(
-      Stream.empty(),
-      0,
-      contentType: mimeType,
-    );
-
     try {
-      final createdFile = await api.files.create(metaData, uploadMedia: media);
+      final createdFile = await api.files.create(metaData);
       return createdFile.id!;
     } catch (e) {
       // if there is a race condition, and the file is created in parallel, we want to retry the search
@@ -121,7 +188,7 @@ class GoogleDriveService {
         final existingFiles = await listFiles(directoryId);
         final conflicting = existingFiles.where((file) => file.name == fileName);
         if (conflicting.isNotEmpty) {
-          await deleteFile(conflicting.first.id);
+          await delete(conflicting.first.id);
           _uploadImageFile(directoryId, file, false);
         } else {
           _logger.info("cannot upload file $fileName to google drive and no file with such name is there", e, stack);
@@ -157,10 +224,10 @@ class GoogleDriveService {
     }
   }
 
-  Future<void> deleteFile(String fileId) async {
-    _logger.info("deleting google file $fileId");
+  Future<void> delete(String entryId) async {
+    _logger.info("deleting google drive entry $entryId");
     final api = await _getApi();
-    api.files.delete(fileId);
+    api.files.delete(entryId);
   }
 
   Future<void> downloadFile(String fileId, File outputFile) async {

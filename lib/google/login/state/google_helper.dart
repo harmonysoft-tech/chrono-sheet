@@ -24,6 +24,10 @@ void setDataOverride(GoogleIdentity identity, http.Client client) {
   _dataOverride = GoogleData(identity, client);
 }
 
+void resetOverride() {
+  _dataOverride = null;
+}
+
 class GoogleData {
   final GoogleIdentity identity;
   final http.Client authenticatedClient;
