@@ -220,7 +220,7 @@ class CategoryManager {
       await driveService.uploadImageFile(picturesDirectoryId, File(iconFilePath));
       final fileName = p.basename(iconFilePath);
       final content = "$fileName,${clockProvider.now().toIso8601String()}";
-      await driveService.createOrUpdateTextFile(mappingDirectoryId, "$categoryName.txt", content);
+      await driveService.createOrUpdateTextFile(mappingDirectoryId, "$categoryName.csv", content);
     });
   }
 

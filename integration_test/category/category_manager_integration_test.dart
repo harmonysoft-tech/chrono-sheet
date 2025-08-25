@@ -6,6 +6,7 @@ import 'package:chrono_sheet/google/drive/service/google_drive_service.dart';
 import 'package:chrono_sheet/google/login/state/google_helper.dart';
 import 'package:chrono_sheet/google/login/state/google_login_state.dart';
 import 'package:chrono_sheet/main.dart' as app;
+import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:googleapis_auth/auth.dart';
@@ -13,7 +14,7 @@ import 'package:integration_test/integration_test.dart';
 
 import '../../test_common/google/service/google_service_test_common.dart';
 import '../framework/driver/category/manage/category_manage_screen_driver.dart';
-import '../framework/driver/google/google_driver.dart';
+import '../framework/driver/choose_sheet/choose_sheet_driver.dart';
 import '../framework/driver/main/main_screen_driver.dart';
 import '../framework/path/test_path.dart';
 import 'integration_test_common.dart';
@@ -32,21 +33,34 @@ void main() {
   });
 
   tearDown(() async {
-    // TODO uncomment
-    // await GoogleDriver.cleanup();
+    final service = GoogleDriveService();
+
+    final remoteDirId = await service.getDirectoryId(TestContext.current.rootGoogleDataDirPath);
+    if (remoteDirId != null) {
+      await service.delete(remoteDirId);
+    }
   });
+
+  Future<void> createDataFileIfNecessary(GoogleDriveService gService) async {
+    final testContext = TestContext.current;
+    final remoteDirId = await gService.getOrCreateDirectory(testContext.rootGoogleDataDirPath);
+    await gService.getOrCreateFile(remoteDirId, testContext.testId, sheetMimeType, true);
+  }
 
   // TODO name accordingly
   testWidgets("integration-test", (WidgetTester tester) async {
     final main = MainScreenDriver(tester);
-    final google = GoogleDriver(tester);
+    final chooseSheet = ChooseSheetScreenDriver(tester);
     final manageCategory = ManageCategoryScreenDriver(tester);
     final gService = GoogleDriveService();
+
+    await createDataFileIfNecessary(gService);
 
     app.main();
     await tester.pumpAndSettle();
 
-    await google.selectFile();
+    await main.clickSelectFile();
+    await chooseSheet.selectTestSheet();
 
     await main.clickAddCategory();
 

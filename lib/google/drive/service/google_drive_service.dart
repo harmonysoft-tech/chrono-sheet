@@ -61,10 +61,10 @@ class GoogleDriveService {
       currentPath += entry;
       final searchResult = await api.files.list(
         q:
-        "name = '$entry' "
-            "and '$result' in parents "
-            "and mimeType = 'application/vnd.google-apps.folder' "
-            "and trashed = false",
+        "name = '$entry'"
+            " and '$result' in parents"
+            " and mimeType = 'application/vnd.google-apps.folder'"
+            " and trashed = false",
         spaces: "drive",
         $fields: "files(id, name)",
       );
@@ -76,9 +76,9 @@ class GoogleDriveService {
           ..parents = [result];
         final directory = await api.files.create(metaData);
         result = directory.id!;
-        _logger.info("created google directory at path '$currentPath', id: '$id'");
+        _logger.info("created google directory at path '$currentPath', id: '$result'");
       } else {
-        _logger.info("found existing google directory at path '$currentPath', id: '$id'");
+        _logger.info("found existing google directory at path '$currentPath', id: '$result'");
         result = id;
       }
     }
@@ -96,7 +96,7 @@ class GoogleDriveService {
   }
 
   Future<String?> getFileId(String path) async {
-    final i = path.indexOf("/");
+    final i = path.lastIndexOf("/");
     List<GoogleFile> files;
     String fileName;
     if (i > 0) {
