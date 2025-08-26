@@ -27,7 +27,11 @@ void setupLogging() {
     final messageToPrint = "${record.time} [${record.level}] ${record.loggerName}: $message";
     // ignore: avoid_print
     print(messageToPrint);
-    diContainer?.read(logStateManagerProvider.notifier).onLogRecord(messageToPrint);
+    try {
+      diContainer?.read(logStateManagerProvider.notifier).onLogRecord(messageToPrint);
+    } catch (ignore) {
+      // we encountered a situation when the container was disposed but the process was still alive in tests
+    }
 
     if (!kDebugMode) {
       if (record.level.compareTo(Level.INFO) > 0) {
