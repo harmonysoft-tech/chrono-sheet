@@ -69,7 +69,7 @@ jobs:
       - name: simulator
         uses: futureware-tech/simulator-action@v4
         with:
-          model: 'iPhone 14'
+          model: 'iPhone 16 Pro Max'
 
       - name: test
         run: |
