@@ -1,3 +1,5 @@
+## v1.113.0+114 released on 15 Sep 2025 UTC
+  * c991f0f362521fdaff85900fbd2a110a76df8281 setting up integration tests on CI
 ## v1.112.0+113 released on 05 Apr 2025 UTC
   * 01a91f99803db309ff3212feb610cb2650fcb715 prevent duplicated categories
 ## v1.111.0+112 released on 01 Apr 2025 UTC
