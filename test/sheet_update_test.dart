@@ -31,7 +31,7 @@ class _Category {
 }
 
 void main() async {
-  group("all tests", () {
+  group("[all tests]", () {
     setUp(() async {
       TestContext("test");
       date.overrideNow(_today);
@@ -62,8 +62,8 @@ void _runTests() {
 }
 
 void _emptySheet() {
-  group("empty sheet", () {
-    test("empty sheet", () async {
+  group("[empty sheet]", () {
+    test("[empty sheet]", () async {
       final duration = 2;
       await _sheetService.saveMeasurement(duration, _Category.one, file);
       await GoogleTestUtil.verifySheetState(file.id, """
@@ -75,8 +75,8 @@ void _emptySheet() {
 }
 
 void _updateToday() {
-  group("existing 'today' row", () {
-    test("new category", () async {
+  group("[existing 'today' row]", () {
+    test("[new category]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         ${Column.date} | ${Column.total} | ${_Category.one}
         $_todayUs      | 1               | 1
@@ -88,7 +88,7 @@ void _updateToday() {
       """);
     });
 
-    test("existing category", () async {
+    test("[existing category]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         ${Column.date} | ${Column.total} | ${_Category.one}
         $_todayUs      | 1               | 1
@@ -100,7 +100,7 @@ void _updateToday() {
       """);
     });
 
-    test("non-standard  table location", () async {
+    test("[non-standard  table location]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         |   |  |                |                 |
         |   |  | ${Column.date} | ${Column.total} | ${_Category.one}
@@ -114,7 +114,7 @@ void _updateToday() {
       """);
     });
 
-    test("historical records", () async {
+    test("[historical records]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         ${Column.date} | ${Column.total} | ${_Category.one} | ${_Category.two}
         $_todayUs      | 3               | 1                | 2          
@@ -131,8 +131,8 @@ void _updateToday() {
 }
 
 void _existingTableNoTodayRow() {
-  group("existing table, no 'today' row", () {
-    test("new category", () async {
+  group("[existing table, no 'today' row]", () {
+    test("[new category]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         ${Column.date} | ${Column.total} | ${_Category.one}
         $_yesterdayUs  | 5               | 5                 
@@ -145,7 +145,7 @@ void _existingTableNoTodayRow() {
       """);
     });
 
-    test("existing category", () async {
+    test("[existing category]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         ${Column.date} | ${Column.total} | ${_Category.one}
         $_yesterdayUs  | 5               | 5                 
@@ -161,8 +161,8 @@ void _existingTableNoTodayRow() {
 }
 
 void _existingTableNoTotalColumn() {
-  group("existing table, no 'total time' column", () {
-    test("existing table, no 'total time' column", () async {
+  group("[existing table, no 'total time' column]", () {
+    test("[existing table, no 'total time' column]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         ${Column.date} | ${_Category.one} | ${_Category.two}
         $_yesterdayUs  | 5                | 3
@@ -178,8 +178,8 @@ void _existingTableNoTotalColumn() {
 }
 
 void _noTableNonEmptySheet() {
-  group("no table, non-empty sheet", () {
-    test("data in the first row and first column", () async {
+  group("[no table, non-empty sheet]", () {
+    test("[data in the first row and first column]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         abc                 
       """);
@@ -192,7 +192,7 @@ void _noTableNonEmptySheet() {
       """);
     });
 
-    test("data in the first row second column", () async {
+    test("[data in the first row second column]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         | abc                 
       """);
@@ -205,7 +205,7 @@ void _noTableNonEmptySheet() {
       """);
     });
 
-    test("data in the first row and fourth column", () async {
+    test("[data in the first row and fourth column]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         |   |  | abc                 
       """);
@@ -218,7 +218,7 @@ void _noTableNonEmptySheet() {
       """);
     });
 
-    test("data in the first row and fifth column", () async {
+    test("[data in the first row and fifth column]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         |   |   |   |  abc                 
       """);
@@ -231,7 +231,7 @@ void _noTableNonEmptySheet() {
       """);
     });
 
-    test("data in the second row second column", () async {
+    test("[data in the second row second column]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         |
         | abc                 
@@ -245,7 +245,7 @@ void _noTableNonEmptySheet() {
       """);
     });
 
-    test("data in the third row third column", () async {
+    test("[data in the third row third column]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         |   |
         |   |
@@ -263,8 +263,8 @@ void _noTableNonEmptySheet() {
 }
 
 void _customFormat() {
-  group("custom format", () {
-    test("custom format is preserved", () async {
+  group("[custom format]", () {
+    test("[custom format is preserved]", () async {
       final yesterday = date.fallbackDateFormat.format(_yesterday);
       final today = date.fallbackDateFormat.format(_today);
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
@@ -282,8 +282,8 @@ void _customFormat() {
 }
 
 void _renameCategory() {
-  group("rename category", () {
-    test("existing category", () async {
+  group("[rename category]", () {
+    test("[existing category]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         ${Column.date} | ${_Category.one} | ${_Category.two}
         $_todayUs      | 5                | 3
@@ -302,7 +302,7 @@ void _renameCategory() {
       expect(result, equals(true));
     });
 
-    test("non existing category", () async {
+    test("[non existing category]", () async {
       await GoogleTestUtil.setSheetState(file.id, file.name, _sheetTitle, """
         ${Column.date} | ${_Category.one} | ${_Category.two}
         $_todayUs      | 5                | 3

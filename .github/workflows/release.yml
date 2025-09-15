@@ -68,18 +68,15 @@ jobs:
 
       - name: test
         run: |
-          echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT1_JSON }}" | base64 -d >> ./test_common/auto-test-service-account1.json
-          echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT2_JSON }}" | base64 -d >> ./test_common/auto-test-service-account2.json
+          echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT1_JSON }}" | base64 -d >> ./test_common/resources/auto-test-service-account1.json
+          echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT2_JSON }}" | base64 -d >> ./test_common/resources/auto-test-service-account2.json
           flutter test test
 
-      - name: start simulator
-        uses: futureware-tech/simulator-action@v4
-        with:
-          model: 'iPhone 16 Pro Max'
-
       - name: integration test
-        run: |
-          flutter test integration_test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          script: flutter test integration_test
 
       - name: prepare gradle cache key
         # we explicitly use the same cache key for restoring and saving the cache because

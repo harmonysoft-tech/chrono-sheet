@@ -16,7 +16,7 @@ main() async {
 }
 
 Future<drive.DriveApi> init() async {
-  final file = File("/Users/denis/project/my/chrono-sheet/test_common/auto-test-service-account1.json");
+  final file = File("/Users/denis/project/my/chrono-sheet/test_common/resources/auto-test-service-account1.json");
   final json = await file.readAsString();
   final credentials = ServiceAccountCredentials.fromJson(json);
   final scopes = [

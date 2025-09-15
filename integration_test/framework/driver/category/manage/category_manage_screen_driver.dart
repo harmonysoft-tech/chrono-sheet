@@ -5,7 +5,7 @@ import 'package:chrono_sheet/ui/widget_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../path/test_path.dart';
+import '../../../../../test_common/context/test_context.dart';
 
 class ManageCategoryScreenDriver {
 
@@ -22,7 +22,7 @@ class ManageCategoryScreenDriver {
   }
 
   Future<void> selectIcon(String icon) async {
-    final iconFile = File("${TestAppPaths.rootDir}/$icon");
+    final iconFile = File("${TestContext.current.rootLocalDirPath}/$icon");
     if (!iconFile.existsSync()) {
       throw AssertionError("icon file with name '$icon' does not exist at path: ${iconFile.path}");
     }
