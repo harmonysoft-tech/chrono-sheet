@@ -3,47 +3,36 @@ import 'dart:convert';
 import 'package:chrono_sheet/category/model/icon_info.dart';
 import 'package:chrono_sheet/category/service/category_manager.dart';
 import 'package:chrono_sheet/google/drive/service/google_drive_service.dart';
-import 'package:chrono_sheet/google/login/state/google_helper.dart';
-import 'package:chrono_sheet/google/login/state/google_login_state.dart';
 import 'package:chrono_sheet/main.dart' as app;
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:googleapis_auth/auth.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../../test_common/context/test_context.dart';
 import '../../test_common/google/service/google_service_test_common.dart';
 import '../framework/driver/category/manage/category_manage_screen_driver.dart';
 import '../framework/driver/choose_sheet/choose_sheet_driver.dart';
 import '../framework/driver/main/main_screen_driver.dart';
-import '../framework/path/test_path.dart';
 import 'integration_test_common.dart';
-
-int _contextCounter = 0;
-late AutoRefreshingAuthClient _googleClient;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
-    TestContext();
-    _googleClient = await getTestGoogleClient(++_contextCounter, TestAppPaths.rootDir);
-    setCategoryGoogleRootDirPathOverride(TestContext.current.rootGoogleDataDirPath);
-    setDataOverride(CachedGoogleIdentity(id: "dummy-id", email: "dummy-email"), _googleClient);
+    TestContext(TestPath.rootRemoteDirPath);
+    await GoogleTestUtil.setUp();
+    setCategoryGoogleRootDirPathOverride(TestContext.current.rootRemoteDataDirPath);
   });
 
   tearDown(() async {
-    final service = GoogleDriveService();
-
-    final remoteDirId = await service.getDirectoryId(TestContext.current.rootGoogleDataDirPath);
-    if (remoteDirId != null) {
-      await service.delete(remoteDirId);
-    }
+    resetCategoryRootDirPathOverride();
+    await GoogleTestUtil.tearDown();
   });
 
   Future<void> createDataFileIfNecessary(GoogleDriveService gService) async {
     final testContext = TestContext.current;
-    final remoteDirId = await gService.getOrCreateDirectory(testContext.rootGoogleDataDirPath);
+    final remoteDirId = await gService.getOrCreateDirectory(testContext.rootRemoteDataDirPath);
     await gService.getOrCreateFile(remoteDirId, testContext.testId, sheetMimeType, true);
   }
 
@@ -68,7 +57,7 @@ void main() {
     await manageCategory.selectIcon(TestIcon.icon1);
     await manageCategory.saveChanges();
 
-    String categoryIconMetaFileRemoteId = await getGoogleFileId(
+    String categoryIconMetaFileRemoteId = await GoogleTestUtil.getGoogleFileId(
       "${CategoryGooglePaths.mappingDirPath}/${TestCategory.category1}.csv",
     );
     List<int> rawCategoryIconMetaFileContent = await gService.getFileContent(categoryIconMetaFileRemoteId);

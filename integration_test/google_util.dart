@@ -70,8 +70,8 @@ list() async {
   }
   for (drive.File file in fileList.files ?? []) {
     print('${getPath(name2id, id2parentId, file.id!, file.name!)}: ${file.id} ${file.mimeType}');
-    await driveApi.files.delete(file.id!);
-    print("deleted entry '${file.name}'");
+    // await driveApi.files.delete(file.id!);
+    // print("deleted entry '${file.name}'");
   }
 }
 
@@ -83,7 +83,6 @@ createSheet() async {
         ..mimeType = sheetMimeType
         ..parents = [dirId];
 
-  final media = drive.Media(Stream.empty(), 0, contentType: sheetMimeType);
   final createdFile = await driveApi.files.create(metaData);
   print('created file with id $createdFile');
 }

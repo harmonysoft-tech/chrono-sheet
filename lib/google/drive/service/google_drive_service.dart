@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:chrono_sheet/file/model/google_file.dart';
 import 'package:chrono_sheet/google/login/state/google_helper.dart';
 import 'package:chrono_sheet/log/util/log_util.dart';
+import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:path/path.dart' as p;
@@ -163,6 +164,10 @@ class GoogleDriveService {
     }
     _logger.info("can not get id of the  google file at path '$path', the file does not exist");
     return null;
+  }
+
+  Future<String> getOrCreateSheetFile(String directoryId, String fileName) async {
+    return await getOrCreateFile(directoryId, fileName, sheetMimeType, true);
   }
 
   Future<String> getOrCreateTextFile(String directoryId, String fileName) async {

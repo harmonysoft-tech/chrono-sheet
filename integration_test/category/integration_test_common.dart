@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:uuid/uuid.dart';
 
 class TestPath {
-  static final rootTestDir = "integration-test";
+  static final rootRemoteDirPath = "integration-test";
 }
 
 class TestIcon {
@@ -11,18 +10,6 @@ class TestIcon {
 
 class TestCategory {
   static final category1 = "category1";
-}
-
-class TestContext {
-  final String testId;
-
-  TestContext([String? testId]) : testId = testId ?? Uuid().v4() {
-    current = this;
-  }
-
-  static late TestContext current;
-
-  String get rootGoogleDataDirPath => "${TestPath.rootTestDir}/$testId";
 }
 
 class UiVerificationUtil {
