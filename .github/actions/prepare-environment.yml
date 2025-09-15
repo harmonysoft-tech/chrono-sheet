@@ -1,0 +1,36 @@
+name: prepare environment
+description: common steps for setting up the environment
+runs:
+  using: "composite"
+  steps:
+    - name: checkout source
+      uses: actions/checkout@v4
+
+    - name: set up flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version-file: pubspec.yaml
+        cache: true
+
+    - name: print flutter version
+      run: flutter --version
+
+    - name: get dependencies
+      run: flutter pub get
+
+    - name: generate l10n
+      run: flutter gen-l10n
+
+    - name: prepare common sensitive data
+      run: |
+        echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
+
+    - name: test
+      run: |
+        echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT1_JSON }}" | base64 -d >> ./test_common/resources/auto-test-service-account1.json
+        echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT2_JSON }}" | base64 -d >> ./test_common/resources/auto-test-service-account2.json
+        flutter test test
+
+    - name: prepare splash
+      run: dart run flutter_native_splash:create
