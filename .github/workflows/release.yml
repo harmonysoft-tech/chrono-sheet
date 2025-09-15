@@ -34,10 +34,16 @@ jobs:
           echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT2_JSON }}" | base64 -d >> ./test_common/resources/auto-test-service-account2.json
           flutter test test
 
+      - name: enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: integration test
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: 29
           target: google_apis
           arch: x86_64
           script: flutter test integration_test
