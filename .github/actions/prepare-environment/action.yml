@@ -30,7 +30,3 @@ runs:
       shell: bash
       run: |
         echo "${{ inputs.firebase-options-base64 }}" | base64 -d >> ./lib/firebase_options.dart
-
-    - name: prepare splash
-      shell: bash
-      run: dart run flutter_native_splash:create

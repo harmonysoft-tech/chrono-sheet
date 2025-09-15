@@ -42,6 +42,10 @@ jobs:
           arch: x86_64
           script: flutter test integration_test
 
+      - name: prepare splash
+        shell: bash
+        run: dart run flutter_native_splash:create
+
       - name: prepare gradle cache key
         # we explicitly use the same cache key for restoring and saving the cache because
         # it seems that the flutter build modifies gradle files and if we generate the key
@@ -141,6 +145,10 @@ jobs:
         with:
           name: flutter-build
           path: .
+
+      - name: prepare splash
+        shell: bash
+        run: dart run flutter_native_splash:create
 
       - name: build ipa
         run: flutter build ipa --release --export-options-plist ios/GithubActionsExportOptions.plist
