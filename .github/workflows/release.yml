@@ -46,7 +46,7 @@ jobs:
           api-level: 29
           target: google_apis
           arch: x86_64
-          script: flutter test integration_test
+          script: run-integration-tests.sh
 
       - name: prepare splash
         shell: bash
@@ -110,6 +110,7 @@ jobs:
   build-iphone:
     name: build iphone
     runs-on: macos-latest
+    needs: build-android
     steps:
       - name: checkout source
         uses: actions/checkout@v4
