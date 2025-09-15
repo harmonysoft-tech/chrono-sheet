@@ -16,6 +16,8 @@ jobs:
 
       - name: prepare environment for android build
         uses: ./.github/actions/prepare-environment
+        with:
+          firebase-options-base64: ${{ secrets.FIREBASE_OPTIONS_DART }}
 
       - name: prepare sensitive android data
         run: |
@@ -104,6 +106,8 @@ jobs:
 
       - name: prepare environment for iphone build
         uses: ./.github/actions/prepare-environment
+        with:
+          firebase-options-base64: ${{ secrets.FIREBASE_OPTIONS_DART }}
 
       - name: prepare sensitive iphone data
         run: |

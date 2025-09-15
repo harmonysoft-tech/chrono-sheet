@@ -1,5 +1,9 @@
 name: prepare environment
 description: common steps for setting up the environment
+inputs:
+  firebase-options-base64:
+    description: firebase_options.dart contents encoded in base64
+    required: true
 runs:
   using: "composite"
   steps:
@@ -11,23 +15,22 @@ runs:
         cache: true
 
     - name: print flutter version
+      shell: bash
       run: flutter --version
 
     - name: get dependencies
+      shell: bash
       run: flutter pub get
 
     - name: generate l10n
+      shell: bash
       run: flutter gen-l10n
 
     - name: prepare common sensitive data
+      shell: bash
       run: |
-        echo "${{ secrets.FIREBASE_OPTIONS_DART }}" | base64 -d >> ./lib/firebase_options.dart
-
-    - name: test
-      run: |
-        echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT1_JSON }}" | base64 -d >> ./test_common/resources/auto-test-service-account1.json
-        echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT2_JSON }}" | base64 -d >> ./test_common/resources/auto-test-service-account2.json
-        flutter test test
+        echo "${{ inputs.firebase-options-base64 }}" | base64 -d >> ./lib/firebase_options.dart
 
     - name: prepare splash
+      shell: bash
       run: dart run flutter_native_splash:create
