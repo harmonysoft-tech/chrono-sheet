@@ -66,10 +66,15 @@ jobs:
       - name: generate l10n
         run: flutter gen-l10n
 
+      - name: simulator
+        uses: futureware-tech/simulator-action@v4
+        with:
+          model: 'iPhone 14'
+
       - name: test
         run: |
-          echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT1_JSON }}" | base64 -d >> ./test/auto-test-service-account1.json
-          echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT2_JSON }}" | base64 -d >> ./test/auto-test-service-account2.json
+          echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT1_JSON }}" | base64 -d >> ./test_common/auto-test-service-account1.json
+          echo "${{ secrets.GOOGLE_TEST_SERVICE_ACCOUNT2_JSON }}" | base64 -d >> ./test_common/auto-test-service-account2.json
           flutter test
 
       - name: prepare gradle cache key
