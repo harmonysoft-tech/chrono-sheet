@@ -35,7 +35,7 @@ void main() async {
     setUp(() async {
       TestContext("test");
       date.overrideNow(_today);
-      await GoogleTestUtil.setUp("test_common");
+      await GoogleTestUtil.setUp("test_common/resources");
       final fileName = "data";
       final remoteDirId = await gService.getOrCreateDirectory(TestContext.current.rootRemoteDataDirPath);
       final remoteFileId = await gService.getOrCreateSheetFile(remoteDirId, fileName);
