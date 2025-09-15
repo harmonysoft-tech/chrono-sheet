@@ -11,6 +11,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: checkout source
+        uses: actions/checkout@v4
+
       - name: prepare environment for android build
         uses: ./.github/actions/prepare-environment
 
@@ -96,6 +99,9 @@ jobs:
     name: build iphone
     runs-on: macos-latest
     steps:
+      - name: checkout source
+        uses: actions/checkout@v4
+
       - name: prepare environment for iphone build
         uses: ./.github/actions/prepare-environment
 
