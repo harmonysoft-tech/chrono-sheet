@@ -126,6 +126,12 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
+      - name: download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: flutter-build
+          path: .
+
       - name: build ipa
         run: flutter build ipa --release --export-options-plist ios/GithubActionsExportOptions.plist
 
