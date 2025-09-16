@@ -40,6 +40,10 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      - name: remove-me
+        run: |
+          ls -al ./integration_test
+
       - name: integration test
         uses: reactivecircus/android-emulator-runner@v2
         with:
