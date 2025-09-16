@@ -1,6 +1,9 @@
 import 'package:chrono_sheet/category/model/category_representation.dart';
+import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+final _logger = getNamedLogger();
 
 class _Key {
   static String getName(String keyPrefix) {
@@ -44,6 +47,7 @@ final class Category implements Comparable<Category> {
     await prefs.setString(_Key.getName(keyPrefix), name);
     await prefs.setBool(_Key.getPersistedInGoogle(keyPrefix), persistedInGoogle);
     await representation.serialize(prefs, keyPrefix);
+    _logger.fine("stored category $this into a local storage under key prefix '$keyPrefix'");
   }
 
   static Future<Category?> deserialiseIfPossible(SharedPreferencesAsync prefs, String keyPrefix) async {

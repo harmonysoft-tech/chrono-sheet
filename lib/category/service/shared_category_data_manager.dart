@@ -22,8 +22,8 @@ final _logger = getNamedLogger();
 typedef _CategoriesToInfo = Map<String, IconInfo>;
 
 @Riverpod(keepAlive: true)
-CategoryManager categoryManager(Ref ref) {
-  return CategoryManager();
+SharedCategoryDataManager categoryManager(Ref ref) {
+  return SharedCategoryDataManager();
 }
 
 class _Key {
@@ -59,7 +59,7 @@ class CategoryGooglePaths {
   static String get picturesDirPath => "$rootDirPathToUse/pictures";
 }
 
-class CategoryManager {
+class SharedCategoryDataManager {
   final _prefs = SharedPreferencesAsync();
   final driveService = GoogleDriveService();
   DateTime? _startTime;
@@ -75,7 +75,7 @@ class CategoryManager {
       final diff = now.difference(start);
       if (diff.inMinutes < 10) {
         _logger.info(
-          "skipped picture manager tick because only ${diff.inMinutes} minutes elapsed since the last check",
+          "skipped category manager tick because only ${diff.inMinutes} minutes elapsed since the last check",
         );
         return;
       }
@@ -84,8 +84,10 @@ class CategoryManager {
     var online = await isOnline();
     if (!online) {
       _logger.info("skipped picture manager tick because the application is offline");
+      return;
     }
 
+    _logger.info("checking if we need to sync local and remote categories info");
     _startTime = now;
     try {
       await _handlePendingCategoryRenames();
@@ -106,7 +108,7 @@ class CategoryManager {
   }
 
   Future<_CategoriesToInfo> _getRemoteInfo() async {
-    _logger.info("start downloading remote pictures infos");
+    _logger.info("start fetching remote categories infos");
     final directoryId = await _getGoogleDirectoryId(CategoryGooglePaths.mappingDirPath);
     final driveFiles = await driveService.listFiles(directoryId);
     final result = <String, IconInfo>{};
@@ -149,7 +151,7 @@ class CategoryManager {
 
     final files = rootDir.listSync();
     final Map<String, IconInfo> result = {};
-    _logger.fine("found ${files.length} category mapping files in directory ${rootDir.path}");
+    _logger.fine("found ${files.length} category mapping file(s) in directory ${rootDir.path}");
     for (final file in files) {
       if (file is File) {
         final categoryName = p.basename(file.path);
@@ -257,10 +259,11 @@ class CategoryManager {
   }
 
   Future<void> onNewCategory(Category category) async {
+    _logger.fine("got information about new category '$category'");
     await category.serialize(_prefs, _Key.getCategory(category.name));
     final representation = category.representation;
     if (representation is! ImageCategoryRepresentation) {
-      _logger.fine("skip category change as it doesn't have image representations: $category");
+      _logger.fine("skip new category processing as it doesn't have image representations: $category");
       return;
     }
     final iconFile = representation.file;
@@ -268,13 +271,16 @@ class CategoryManager {
     final parentDir = mappingFile.parent;
     if (mappingFile.existsSync()) {
       mappingFile.deleteSync();
+      _logger.fine("deleted previous local category mapping file for category '${category.name}': ${mappingFile.path}");
     } else if (!parentDir.existsSync()) {
       await parentDir.create(recursive: true);
-      _logger.info("created a directory for storing categories meta info: ${parentDir.path}");
+      _logger.info("created a local directory for storing categories meta info: ${parentDir.path}");
     }
     final content = "${iconFile.path},${clockProvider.now().toIso8601String()}";
     mappingFile.writeAsStringSync(content);
-    _logger.info("written '$content' into category meta info file ${mappingFile.path} for category ${category.name}");
+    _logger.info(
+      "wrote category meta info for category '${category.name}' into local file ${mappingFile.path}: $content",
+    );
     await tick(true);
   }
 

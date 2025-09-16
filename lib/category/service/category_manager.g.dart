@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'category_manager.dart';
+part of 'shared_category_data_manager.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -10,7 +10,7 @@ String _$categoryManagerHash() => r'691a1144ff7a82693634d7734c53553584b3e8a8';
 
 /// See also [categoryManager].
 @ProviderFor(categoryManager)
-final categoryManagerProvider = Provider<CategoryManager>.internal(
+final categoryManagerProvider = Provider<SharedCategoryDataManager>.internal(
   categoryManager,
   name: r'categoryManagerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -22,6 +22,6 @@ final categoryManagerProvider = Provider<CategoryManager>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef CategoryManagerRef = ProviderRef<CategoryManager>;
+typedef CategoryManagerRef = ProviderRef<SharedCategoryDataManager>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

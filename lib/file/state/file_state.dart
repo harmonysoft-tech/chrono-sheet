@@ -83,7 +83,7 @@ class FileStateManager extends _$FileStateManager {
   }
 
   Future<void> select(GoogleFile file) async {
-    _logger.info("file '${file.name}' is now active");
+    _logger.info("google file '${file.name}' is now active");
     final previousState = await future;
     List<GoogleFile> recent = List.from(previousState.recent);
     final previousSelected = previousState.selected;

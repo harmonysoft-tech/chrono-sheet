@@ -21,19 +21,21 @@ class LoginStateManager extends _$LoginStateManager {
     if (cached == null) {
       final online = await isOnline();
       if (!online) {
-        _logger.info("no cached login state is found and we're offline, considering to be offline");
+        _logger.info("no cached google identity is found and we're offline, considering to be offline");
         return null;
       }
-      _logger.fine("no cached record is found checking if we are logged in now silently");
+      _logger.fine("no cached google identity record is found, checking if we are logged in now silently");
       final account = await signIn.signInSilently();
-      _logger.fine("observing the following google account: $account");
-      if (account != null) {
+      if (account == null) {
+        _logger.info("can not login into google silently");
+      } else {
+        _logger.info("successfully logged into google silently");
         await _cache(account);
       }
       return account;
     }
 
-    _logger.fine("cached record is found but checking in background if we are logged in");
+    _logger.fine("cached google identity is found but checking in background if we are logged in");
     signIn.signInSilently().then((account) async {
 
       if (account == null) {
@@ -45,7 +47,7 @@ class LoginStateManager extends _$LoginStateManager {
         _resetCached();
         state = AsyncValue.data(null);
       } else if (account.id == cached.id && account.email == cached.email) {
-        _logger.fine("detected that cached google login record ($cached) is still active");
+        _logger.fine("detected that cached google identity record ($cached) is still active");
       } else {
         final newState = await _cache(account);
         state = AsyncValue.data(newState);

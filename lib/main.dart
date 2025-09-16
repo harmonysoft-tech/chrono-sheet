@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:chrono_sheet/di/di.dart';
 import 'package:chrono_sheet/log/boostrap/log_bootstrap.dart';
-import 'package:chrono_sheet/category/service/category_manager.dart';
+import 'package:chrono_sheet/category/service/shared_category_data_manager.dart';
 import 'package:chrono_sheet/router/router.dart';
 import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
 import 'package:chrono_sheet/ui/path.dart';

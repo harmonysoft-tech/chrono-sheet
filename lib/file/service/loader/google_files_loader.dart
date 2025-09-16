@@ -62,7 +62,7 @@ class PaginatedFilesNotifier extends StateNotifier<PaginatedFilesState> {
     _logger.info("fetching gsheet documents, next page token: ${state.nextPageToken}");
     try {
       final fileList = await fetchSheets(initialLoad ? null : state.nextPageToken);
-      _logger.info("got google response for ${fileList.files?.length ?? 0} gsheet files");
+      _logger.info("got google response for ${fileList.files?.length ?? 0} gsheet file(s)");
 
       fileList.files?.forEach((file) {
         final id = file.id;

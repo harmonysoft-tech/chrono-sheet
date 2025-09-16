@@ -21,9 +21,13 @@ class GoogleDriveService {
   Future<String?> getDirectoryId(String path) async {
     final api = await _getApi();
     final pathEntries = path.split("/");
-    String currentPath = "";
+    String currentPath = "/";
     String result = "root";
     for (final entry in pathEntries) {
+      if (!currentPath.endsWith("/")) {
+        currentPath += "/";
+      }
+      currentPath += entry;
       final searchResult = await api.files.list(
         q:
             "name = '$entry' "
@@ -40,10 +44,6 @@ class GoogleDriveService {
       } else {
         _logger.fine("found existing google directory at path '$currentPath', id: '$id'");
         result = id;
-        if (currentPath.isNotEmpty) {
-          currentPath += "/";
-        }
-        currentPath += entry;
       }
     }
     return result;
@@ -89,7 +89,7 @@ class GoogleDriveService {
     // directory, so, we ended up with that situation. That's why we double check the contents and keep
     // only a directory which is created first
     final searchResult = await api.files.list(q: query, spaces: "drive", $fields: "files(id, createdTime)");
-    drive.File? result = null;
+    drive.File? result;
     final remoteFiles = searchResult.files;
     if (remoteFiles != null) {
       for (final file in remoteFiles) {
@@ -104,7 +104,9 @@ class GoogleDriveService {
           try {
             await api.files.delete(file.id!);
             _logger.info("deleted google drive entry with id '${file.id}'");
-          } catch (ignore) {}
+          } catch (ignore) {
+            // ignore
+          }
         } else {
           _logger.info(
               "detected a race condition for google drive objects matching the query below, detected that the one "
@@ -199,6 +201,7 @@ class GoogleDriveService {
 
     try {
       final createdFile = await api.files.create(metaData);
+      _logger.info("created google file '$fileName' with mime type $mimeType in directory $directoryId");
       return createdFile.id!;
     } catch (e) {
       // if there is a race condition, and the file is created in parallel, we want to retry the search

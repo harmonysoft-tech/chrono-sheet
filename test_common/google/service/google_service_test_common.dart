@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chrono_sheet/google/drive/service/google_drive_service.dart';
 import 'package:chrono_sheet/google/login/state/google_helper.dart';
 import 'package:chrono_sheet/google/login/state/google_login_state.dart';
+import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:chrono_sheet/sheet/parser/sheet_parser.dart';
 import 'package:chrono_sheet/sheet/updater/update_service.dart';
@@ -12,6 +13,8 @@ import 'package:googleapis_auth/auth_io.dart';
 
 import '../../context/test_context.dart';
 import '../../verification/verification_util.dart';
+
+final _logger = getNamedLogger();
 
 class GoogleTestUtil {
   static int _contextCounter = 0;
@@ -36,7 +39,8 @@ class GoogleTestUtil {
   }
 
   static Future<AutoRefreshingAuthClient> getTestGoogleClient(int counter, String rootLocalPath) async {
-    final file = File("$rootLocalPath/auto-test-service-account$counter.json");
+    final filePath = "$rootLocalPath/auto-test-service-account$counter.json";
+    final file = File(filePath);
     if (!await file.exists()) {
       if (counter > 1) {
         return await getTestGoogleClient(1, rootLocalPath);
@@ -44,6 +48,7 @@ class GoogleTestUtil {
         throw AssertionError("file ${file.path} doesn't exist");
       }
     }
+    _logger.info("using test google credentials from file '$filePath'");
     final json = await file.readAsString();
     final credentials = ServiceAccountCredentials.fromJson(json);
     final scopes = [SheetsApi.spreadsheetsScope, SheetsApi.driveFileScope];

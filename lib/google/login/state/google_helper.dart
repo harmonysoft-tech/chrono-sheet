@@ -38,6 +38,7 @@ class GoogleData {
 Future<GoogleData> getGoogleClientData([background = false]) async {
   final client = _dataOverride;
   if (client != null) {
+    _logger.fine("using an overridden google client ");
     return client;
   }
   _logger.fine("trying to sign in silently");

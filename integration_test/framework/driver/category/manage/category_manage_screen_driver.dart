@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:chrono_sheet/category/service/category_icon_selector.dart';
+import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:chrono_sheet/ui/widget_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../../test_common/context/test_context.dart';
+
+final _logger = getNamedLogger();
 
 class ManageCategoryScreenDriver {
 
@@ -14,6 +17,7 @@ class ManageCategoryScreenDriver {
   ManageCategoryScreenDriver(this.tester);
 
   Future<void> setCategoryName(String name) async {
+    _logger.info("setting active category name as '$name'");
     final nameField = find.byKey(AppWidgetKey.manageCategoryName);
     expect(nameField, findsOneWidget);
 
@@ -22,7 +26,9 @@ class ManageCategoryScreenDriver {
   }
 
   Future<void> selectIcon(String icon) async {
-    final iconFile = File("${TestContext.current.rootLocalDirPath}/$icon");
+    final iconPath = "${TestContext.current.rootLocalDirPath}/$icon";
+    _logger.info("selecting category icon from path $iconPath");
+    final iconFile = File(iconPath);
     if (!iconFile.existsSync()) {
       throw AssertionError("icon file with name '$icon' does not exist at path: ${iconFile.path}");
     }
@@ -38,6 +44,7 @@ class ManageCategoryScreenDriver {
   }
 
   Future<void> saveChanges() async {
+    _logger.info("saving category changes");
     final saveButton = find.byKey(AppWidgetKey.saveCategoryState);
     expect(saveButton, findsOneWidget);
 

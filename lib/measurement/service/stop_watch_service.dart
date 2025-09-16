@@ -18,17 +18,11 @@ class StopWatchState {
   bool running;
   Duration measuredDuration;
 
-  StopWatchState({
-    bool? running,
-    Duration? measuredDuration,
-  })
-      : running = running ?? false,
-        measuredDuration = measuredDuration ?? Duration.zero;
+  StopWatchState({bool? running, Duration? measuredDuration})
+    : running = running ?? false,
+      measuredDuration = measuredDuration ?? Duration.zero;
 
-  StopWatchState copyWith({
-    bool? running,
-    Duration? measuredDuration,
-  }) {
+  StopWatchState copyWith({bool? running, Duration? measuredDuration}) {
     return StopWatchState(
       running: running ?? this.running,
       measuredDuration: measuredDuration ?? this.measuredDuration,
@@ -49,10 +43,13 @@ class StopWatchService extends _$StopWatchService {
   @override
   StopWatchState build() {
     _prefs.getString(_preferencesKey).then((storedValue) {
-      _logger.fine("found the following for preferences key '$_preferencesKey': $storedValue");
       if (storedValue == null || storedValue.isEmpty) {
+        _logger.fine("no cached stop watch state is found for the preferences key '$_preferencesKey'");
         return;
       }
+      _logger.fine(
+        "found the following cached stop watch state for the preferences key '$_preferencesKey': $storedValue",
+      );
       final i = storedValue.indexOf(":");
       if (i <= 0 || i >= storedValue.length) {
         return;
@@ -178,8 +175,8 @@ class StopWatchService extends _$StopWatchService {
 
     return ref.read(sheetUpdaterProvider.notifier).prepareToStore(duration).then((fileAndCategoryResult) {
       return fileAndCategoryResult.match(
-          (error) => error,
-          (fileAndCategory) => _saveMeasurement(duration, fileAndCategory),
+        (error) => error,
+        (fileAndCategory) => _saveMeasurement(duration, fileAndCategory),
       );
     });
   }
@@ -195,13 +192,11 @@ class StopWatchService extends _$StopWatchService {
 
     await ref.read(categoryStateManagerProvider.notifier).onMeasurement(fileAndCategory.category);
 
-    await ref.read(measurementsProvider.notifier).save(
-      Measurement(
-        file: fileAndCategory.file,
-        category: fileAndCategory.category,
-        durationSeconds: durationToStore,
-      ),
-    );
+    await ref
+        .read(measurementsProvider.notifier)
+        .save(
+          Measurement(file: fileAndCategory.file, category: fileAndCategory.category, durationSeconds: durationToStore),
+        );
     return await ref.read(sheetUpdaterProvider.notifier).storeUnsavedMeasurements();
   }
 }

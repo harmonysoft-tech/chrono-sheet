@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:chrono_sheet/category/model/icon_info.dart';
-import 'package:chrono_sheet/category/service/category_manager.dart';
+import 'package:chrono_sheet/category/service/shared_category_data_manager.dart';
 import 'package:chrono_sheet/google/drive/service/google_drive_service.dart';
 import 'package:chrono_sheet/main.dart' as app;
 import 'package:chrono_sheet/sheet/model/sheet_model.dart';
@@ -36,8 +36,7 @@ void main() {
     await gService.getOrCreateFile(remoteDirId, testContext.testId, sheetMimeType, true);
   }
 
-  // TODO name accordingly
-  testWidgets("integration-test", (WidgetTester tester) async {
+  testWidgets("saving category icons in remote storage", (WidgetTester tester) async {
     final main = MainScreenDriver(tester);
     final chooseSheet = ChooseSheetScreenDriver(tester);
     final manageCategory = ManageCategoryScreenDriver(tester);
@@ -48,7 +47,7 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    await main.clickSelectFile();
+    await main.clickSelectGoogleFile();
     await chooseSheet.selectTestSheet();
 
     await main.clickAddCategory();

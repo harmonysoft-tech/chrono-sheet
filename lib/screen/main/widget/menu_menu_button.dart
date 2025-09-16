@@ -1,4 +1,4 @@
-import 'package:chrono_sheet/category/service/category_manager.dart';
+import 'package:chrono_sheet/category/service/shared_category_data_manager.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/google/login/state/google_login_state.dart';
 import 'package:chrono_sheet/network/network.dart';
