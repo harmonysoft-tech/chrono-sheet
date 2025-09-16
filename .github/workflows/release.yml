@@ -46,7 +46,7 @@ jobs:
           api-level: 29
           target: google_apis
           arch: x86_64
-          script: run-integration-tests.sh
+          script: integration_test/run-integration-tests.sh
 
       - name: prepare splash
         shell: bash
