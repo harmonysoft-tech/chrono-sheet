@@ -55,27 +55,27 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-$EMULATOR_API_LEVEL
+          key: avd-${{ env.EMULATOR_API_LEVEL }}
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: $EMULATOR_API_LEVEL
+          api-level: ${{ env.EMULATOR_API_LEVEL }}
           force-avd-creation: false
-          emulator-options: $EMULATOR_OPTIONS
-          target: $EMULATOR_TARGET
-          arch: $EMULATOR_ARCH
+          emulator-options: ${{ env.EMULATOR_OPTIONS }}
+          target: ${{ env.EMULATOR_TARGET }}
+          arch: ${{ env.EMULATOR_ARCH }}
           disable-animations: false
           script: echo "generated AVD snapshot for caching"
 
       - name: integration test
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: $EMULATOR_API_LEVEL
-          emulator-options: -no-snapshot-save $EMULATOR_OPTIONS
-          target: $EMULATOR_TARGET
-          arch: $EMULATOR_ARCH
+          api-level: ${{ env.EMULATOR_API_LEVEL }}
+          emulator-options: -no-snapshot-save ${{ env.EMULATOR_OPTIONS }}
+          target: ${{ env.EMULATOR_TARGET }}
+          arch: ${{ env.EMULATOR_ARCH }}
           disable-animations: true
           script: ./integration_test/run-integration-tests.sh
 
