@@ -1,4 +1,4 @@
-#!/ bin/bash
+#!/bin/bash
 
 echo "copying test resources into the emulator"
 for file in $(ls ./test_common/resources); do
