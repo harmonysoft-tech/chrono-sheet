@@ -161,7 +161,6 @@ jobs:
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           
-          echo "${{ secrets.INFO_PLIST }}" | base64 -d >> ./ios/Runner/Info.plist
           echo "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" | base64 -d >> ./ios/Runner/GoogleService-Info.plist
           echo "${{ secrets.IPHONE_CERTIFICATE_P12 }}" | base64 -d >> $CERTIFICATE_PATH
           echo "${{ secrets.IPHONE_PROVISIONING_PROFILE }}" | base64 -d >> $PP_PATH

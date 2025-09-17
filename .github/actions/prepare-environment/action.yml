@@ -30,3 +30,6 @@ runs:
       shell: bash
       run: |
         echo "${{ inputs.firebase-options-base64 }}" | base64 -d >> ./lib/firebase_options.dart
+        
+        # we need this for the icon generation
+        echo "${{ secrets.INFO_PLIST }}" | base64 -d >> ./ios/Runner/Info.plist
