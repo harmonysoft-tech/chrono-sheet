@@ -1,3 +1,5 @@
+## v1.115.0+116 released on 17 Sep 2025 UTC
+  * ca504c35c479ba4c7764e0de39ce4fb2b85b63bd setting up integration tests on CI
 ## v1.114.0+115 released on 17 Sep 2025 UTC
   * 6a02387d8a5faf21c3ff4dd23f029039f942d13c setting up integration tests on CI
 ## v1.113.0+114 released on 15 Sep 2025 UTC
