@@ -215,7 +215,7 @@ class SharedCategoryDataManager {
         toUpload[categoryName] = filePath;
       }
     });
-    _logger.info("found ${toUpload.length} icon files to upload: $toUpload");
+    _logger.info("found ${toUpload.length} icon file(s) to upload: $toUpload");
     final picturesDirectoryId = await _getGoogleDirectoryId(CategoryGooglePaths.picturesDirPath);
     final mappingDirectoryId = await _getGoogleDirectoryId(CategoryGooglePaths.mappingDirPath);
     toUpload.forEach((categoryName, iconFilePath) async {
@@ -236,7 +236,7 @@ class SharedCategoryDataManager {
         toDownload[categoryName] = remoteIconInfo.fileName;
       }
     });
-    _logger.info("found ${toDownload.length} remote category icons to download: ${toDownload.keys.join(", ")}");
+    _logger.info("found ${toDownload.length} remote category icon(s) to download: ${toDownload.keys.join(", ")}");
     final picturesDirectoryId = await _getGoogleDirectoryId(CategoryGooglePaths.picturesDirPath);
     final remoteFiles = await driveService.listFiles(picturesDirectoryId);
     final remoteFilesByName = {for (final file in remoteFiles) file.name: file};

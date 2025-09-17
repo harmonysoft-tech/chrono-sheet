@@ -19,6 +19,7 @@ class GoogleDriveService {
   }
 
   Future<String?> getDirectoryId(String path) async {
+    _logger.fine("got a request to get google directory id for path '$path'");
     final api = await _getApi();
     final pathEntries = path.split("/");
     String currentPath = "/";
@@ -39,23 +40,29 @@ class GoogleDriveService {
       );
       final id = searchResult.files?.firstOrNull?.id;
       if (id == null) {
-        _logger.info("failed to find directory '$currentPath' on google drive");
+        _logger.fine(
+          "failed to find directory '$currentPath' on google drive during fetching directory id for path '$path'",
+        );
         return null;
       } else {
-        _logger.fine("found existing google directory at path '$currentPath', id: '$id'");
         result = id;
+        _logger.fine(
+          "found existing google directory at path '$currentPath', id: '$id' during fetching directory id "
+          "for path '$path'",
+        );
       }
     }
     return result;
   }
 
   Future<String> getOrCreateDirectory(String path) async {
+    _logger.fine("got a request to get or create google directory '$path'");
     final api = await _getApi();
     final pathEntries = path.split("/");
     String result = "root";
-    String currentPath = "";
+    String currentPath = "/";
     for (final entry in pathEntries) {
-      if (currentPath.isNotEmpty) {
+      if (!currentPath.endsWith("/")) {
         currentPath += "/";
       }
       currentPath += entry;
@@ -76,8 +83,10 @@ class GoogleDriveService {
         _logger.info("created google directory at path '$currentPath', id: '${directory.id}'");
         result = await _ensureUniqueness(api, query);
       } else {
-        _logger.info("found existing google directory at path '$currentPath', id: '$result'");
         result = id;
+        _logger.fine(
+          "found existing google directory at path '$currentPath', id: '$id' during 'get or create' directory '$path'",
+        );
       }
     }
     return result;
@@ -97,9 +106,9 @@ class GoogleDriveService {
           result = file;
         } else if (result.createdTime!.isBefore(file.createdTime!)) {
           _logger.info(
-              "detected a race condition for google drive objects matching the query below, detected that the one "
-                  "with id '${file.id}' is created after the one with id '${result.id}', so, removing the former. "
-                  "Query: $query"
+            "detected a race condition for google drive objects matching the query below, detected that the one "
+            "with id '${file.id}' is created after the one with id '${result.id}', so, removing the former. "
+            "Query: $query",
           );
           try {
             await api.files.delete(file.id!);
@@ -109,9 +118,9 @@ class GoogleDriveService {
           }
         } else {
           _logger.info(
-              "detected a race condition for google drive objects matching the query below, detected that the one "
-                  "with id '${result.id}' is created after the one with id '${file.id}', so, removing the former. "
-                  "Query: $query"
+            "detected a race condition for google drive objects matching the query below, detected that the one "
+            "with id '${result.id}' is created after the one with id '${file.id}', so, removing the former. "
+            "Query: $query",
           );
           try {
             await api.files.delete(result.id!);

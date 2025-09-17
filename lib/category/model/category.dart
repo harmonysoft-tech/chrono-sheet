@@ -47,7 +47,7 @@ final class Category implements Comparable<Category> {
     await prefs.setString(_Key.getName(keyPrefix), name);
     await prefs.setBool(_Key.getPersistedInGoogle(keyPrefix), persistedInGoogle);
     await representation.serialize(prefs, keyPrefix);
-    _logger.fine("stored category $this into a local storage under key prefix '$keyPrefix'");
+    _logger.fine("stored category $this in the local storage using key prefix '$keyPrefix'");
   }
 
   static Future<Category?> deserialiseIfPossible(SharedPreferencesAsync prefs, String keyPrefix) async {
