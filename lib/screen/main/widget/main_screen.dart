@@ -46,7 +46,7 @@ class MainScreen extends ConsumerWidget {
           appBar: AppBar(
             title: Row(
               children: [
-                Text(AppLocalizations.of(context).appName),
+                Expanded(child: Text(AppLocalizations.of(context).appName)),
                 Spacer(),
                 FileWidget(),
                 MainMenuButton(),
@@ -74,34 +74,20 @@ class MainScreen extends ConsumerWidget {
         if (_needToShowHint(hintPositions)) ...[
           GestureDetector(
             onTap: () => ref.read(sheetUpdaterProvider.notifier).reset(),
-            child: Container(
-              color: AppColor.hintBelow,
-            ),
-          )
+            child: Container(color: AppColor.hintBelow),
+          ),
         ],
         if (hintPositions.createFile != null) ...[
-          HintWidget(
-            text: l10n.hintCreateFile,
-            hintBounds: hintPositions.createFile!,
-          ),
+          HintWidget(text: l10n.hintCreateFile, hintBounds: hintPositions.createFile!),
         ],
         if (hintPositions.selectFile != null) ...[
-          HintWidget(
-            text: l10n.hintSelectFile,
-            hintBounds: hintPositions.selectFile!,
-          ),
+          HintWidget(text: l10n.hintSelectFile, hintBounds: hintPositions.selectFile!),
         ],
         if (_needToHintCategoryCreation(hintPositions)) ...[
-          HintWidget(
-            text: l10n.hintCreateCategory,
-            hintBounds: hintPositions.createCategory!,
-          ),
+          HintWidget(text: l10n.hintCreateCategory, hintBounds: hintPositions.createCategory!),
         ],
         if (_needToHintCategorySelection(hintPositions)) ...[
-          HintWidget(
-            text: l10n.hintSelectCategory,
-            hintBounds: hintPositions.selectCategory!,
-          ),
+          HintWidget(text: l10n.hintSelectCategory, hintBounds: hintPositions.selectCategory!),
         ],
       ],
     );
@@ -113,9 +99,6 @@ class LoginWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(
-      onPressed: () => ref.read(loginStateManagerProvider.notifier).login(),
-      icon: Icon(Icons.login),
-    );
+    return IconButton(onPressed: () => ref.read(loginStateManagerProvider.notifier).login(), icon: Icon(Icons.login));
   }
 }
