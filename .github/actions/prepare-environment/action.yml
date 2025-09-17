@@ -4,6 +4,9 @@ inputs:
   firebase-options-base64:
     description: firebase_options.dart contents encoded in base64
     required: true
+  info-plist:
+    description: Info.plist file, necessary for generating a splash image
+    required: true
 runs:
   using: "composite"
   steps:
@@ -32,4 +35,4 @@ runs:
         echo "${{ inputs.firebase-options-base64 }}" | base64 -d >> ./lib/firebase_options.dart
         
         # we need this for the icon generation
-        echo "${{ secrets.INFO_PLIST }}" | base64 -d >> ./ios/Runner/Info.plist
+        echo "${{ inputs.info-plist }}" | base64 -d >> ./ios/Runner/Info.plist

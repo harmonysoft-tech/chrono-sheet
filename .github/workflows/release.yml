@@ -23,6 +23,7 @@ jobs:
         uses: ./.github/actions/prepare-environment
         with:
           firebase-options-base64: ${{ secrets.FIREBASE_OPTIONS_DART }}
+          info-plist: ${{ secrets.INFO_PLIST }}
 
       - name: prepare sensitive android data
         run: |
@@ -153,6 +154,7 @@ jobs:
         uses: ./.github/actions/prepare-environment
         with:
           firebase-options-base64: ${{ secrets.FIREBASE_OPTIONS_DART }}
+          info-plist: ${{ secrets.INFO_PLIST }}
 
       - name: prepare sensitive iphone data
         run: |
