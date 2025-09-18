@@ -38,18 +38,18 @@ sealed class CategoryRepresentation<T extends CategoryRepresentation<T>> impleme
     }
   }
 
-  static Future<CategoryRepresentation?> deserialiseIfPossible(SharedPreferencesAsync prefs, String keyPrefix) async {
+  static Future<CategoryRepresentation?> deserializeIfPossible(SharedPreferencesAsync prefs, String keyPrefix) async {
     var typeKey = _Key.getRepresentationType(keyPrefix);
     final type = await prefs.getString(typeKey);
     if (type == null) {
-      _logger.info("cannot deserialise category representation for the prefix '$keyPrefix' - its type is not stored "
+      _logger.info("cannot deserialize category representation for the prefix '$keyPrefix' - its type is not stored "
           "under key '$typeKey'");
       return null;
     }
     final dataKey = _Key.getRepresentationData(keyPrefix);
     final data = await prefs.getString(dataKey);
     if (data == null) {
-      _logger.info("cannot deserialise category representation for the prefix '$keyPrefix' - its data is not stored "
+      _logger.info("cannot deserialize category representation for the prefix '$keyPrefix' - its data is not stored "
           "under key '$dataKey'");
       return null;
     }

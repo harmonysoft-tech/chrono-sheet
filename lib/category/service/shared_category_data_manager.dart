@@ -54,7 +54,7 @@ resetCategoryRootDirPathOverride() {
 class CategoryGooglePaths {
   static String get rootDirPathToUse => _rootDirPathOverride ?? _rootDirPath;
 
-  static String get mappingDirPath => "$rootDirPathToUse/mapping";
+  static String get metaInfoDirPath => "$rootDirPathToUse/meta-info";
 
   static String get picturesDirPath => "$rootDirPathToUse/pictures";
 }
@@ -65,7 +65,7 @@ class SharedCategoryDataManager {
   DateTime? _startTime;
 
   Future<Category?> getCategory(String categoryName) async {
-    return await Category.deserialiseIfPossible(_prefs, _Key.getCategory(categoryName));
+    return await Category.deserializeIfPossible(_prefs, _Key.getCategory(categoryName));
   }
 
   Future<void> tick([bool force = false]) async {
@@ -73,9 +73,11 @@ class SharedCategoryDataManager {
     final now = clockProvider.now();
     if (!force && start != null) {
       final diff = now.difference(start);
-      if (diff.inMinutes < 10) {
+      final minutesUntilNextCheck = 10 - diff.inMinutes;
+      if (diff.inMinutes > 0) {
         _logger.info(
-          "skipped category manager tick because only ${diff.inMinutes} minutes elapsed since the last check",
+          "skipped category manager tick because only ${diff.inMinutes} minutes elapsed since the last check, "
+              "need to wait at least $minutesUntilNextCheck minutes more",
         );
         return;
       }
@@ -109,7 +111,7 @@ class SharedCategoryDataManager {
 
   Future<_CategoriesToInfo> _getRemoteInfo() async {
     _logger.info("start fetching remote categories infos");
-    final directoryId = await _getGoogleDirectoryId(CategoryGooglePaths.mappingDirPath);
+    final directoryId = await _getGoogleDirectoryId(CategoryGooglePaths.metaInfoDirPath);
     final driveFiles = await driveService.listFiles(directoryId);
     final result = <String, IconInfo>{};
     for (final file in driveFiles) {
@@ -119,7 +121,7 @@ class SharedCategoryDataManager {
       parseResult.fold(
         (error) async {
           _logger.info(
-            "detected that google category icon mapping file $file has incorrect content format, deleting it - $error",
+            "detected that google category icon meta-info file $file has incorrect content format, deleting it - $error",
           );
           await driveService.delete(file.id);
         },
@@ -129,6 +131,7 @@ class SharedCategoryDataManager {
         },
       );
     }
+    _logger.info("fetched the following remote categories info: $result");
     return result;
   }
 
@@ -145,13 +148,13 @@ class SharedCategoryDataManager {
   Future<_CategoriesToInfo> _getLocalInfo() async {
     final rootDir = _getLocalDataDir();
     if (!rootDir.existsSync()) {
-      _logger.fine("local category data directory ${rootDir.path} doesn't exist");
+      _logger.info("local category data directory ${rootDir.path} doesn't exist");
       return {};
     }
 
     final files = rootDir.listSync();
     final Map<String, IconInfo> result = {};
-    _logger.fine("found ${files.length} category mapping file(s) in directory ${rootDir.path}");
+    _logger.info("found ${files.length} category meta-info file(s) in directory ${rootDir.path}");
     for (final file in files) {
       if (file is File) {
         final categoryName = p.basename(file.path);
@@ -165,7 +168,7 @@ class SharedCategoryDataManager {
   }
 
   Directory _getLocalDataDir() {
-    return Directory("${AppPaths.categoryIconRootDir}/mapping");
+    return Directory("${AppPaths.categoryIconRootDir}/meta-info");
   }
 
   IconInfo? _tryParseLocalInfoFile(String categoryName, File file) {
@@ -217,12 +220,12 @@ class SharedCategoryDataManager {
     });
     _logger.info("found ${toUpload.length} icon file(s) to upload: $toUpload");
     final picturesDirectoryId = await _getGoogleDirectoryId(CategoryGooglePaths.picturesDirPath);
-    final mappingDirectoryId = await _getGoogleDirectoryId(CategoryGooglePaths.mappingDirPath);
+    final metaInfoDirectoryId = await _getGoogleDirectoryId(CategoryGooglePaths.metaInfoDirPath);
     toUpload.forEach((categoryName, iconFilePath) async {
       await driveService.uploadImageFile(picturesDirectoryId, File(iconFilePath));
       final fileName = p.basename(iconFilePath);
       final content = "$fileName,${clockProvider.now().toIso8601String()}";
-      await driveService.createOrUpdateTextFile(mappingDirectoryId, "$categoryName.csv", content);
+      await driveService.createOrUpdateTextFile(metaInfoDirectoryId, "$categoryName.csv", content);
     });
   }
 
@@ -258,6 +261,28 @@ class SharedCategoryDataManager {
     await Future.wait(futures);
   }
 
+  File _getCategoryMetaInfoFile(String categoryName) {
+    return File("${_getLocalDataDir().path}/$categoryName");
+  }
+
+  Future<void> _storeCategoryWithIconLocally(Category category, ImageCategoryRepresentation representation) async {
+    final iconFile = representation.file;
+    final metaInfoFile = _getCategoryMetaInfoFile(category.name);
+    final parentDir = metaInfoFile.parent;
+    if (metaInfoFile.existsSync()) {
+      metaInfoFile.deleteSync();
+      _logger.fine("deleted previous local category meta-info file for category '${category.name}': ${metaInfoFile.path}");
+    } else if (!parentDir.existsSync()) {
+      await parentDir.create(recursive: true);
+      _logger.info("created a local directory for storing categories meta info: ${parentDir.path}");
+    }
+    final content = "${iconFile.path},${clockProvider.now().toIso8601String()}";
+    metaInfoFile.writeAsStringSync(content);
+    _logger.info(
+      "wrote category meta info for category '${category.name}' into local file ${metaInfoFile.path}: $content",
+    );
+  }
+
   Future<void> onNewCategory(Category category) async {
     _logger.fine("got information about new category '$category'");
     await category.serialize(_prefs, _Key.getCategory(category.name));
@@ -266,26 +291,16 @@ class SharedCategoryDataManager {
       _logger.fine("skip new category processing as it doesn't have image representations: $category");
       return;
     }
-    final iconFile = representation.file;
-    final mappingFile = File("${_getLocalDataDir().path}/${category.name}");
-    final parentDir = mappingFile.parent;
-    if (mappingFile.existsSync()) {
-      mappingFile.deleteSync();
-      _logger.fine("deleted previous local category mapping file for category '${category.name}': ${mappingFile.path}");
-    } else if (!parentDir.existsSync()) {
-      await parentDir.create(recursive: true);
-      _logger.info("created a local directory for storing categories meta info: ${parentDir.path}");
-    }
-    final content = "${iconFile.path},${clockProvider.now().toIso8601String()}";
-    mappingFile.writeAsStringSync(content);
-    _logger.info(
-      "wrote category meta info for category '${category.name}' into local file ${mappingFile.path}: $content",
-    );
+    await _storeCategoryWithIconLocally(category, representation);
     await tick(true);
   }
 
   Future<void> onReplaceCategory(Category from, Category to) async {
-    // TODO implement
     await to.serialize(_prefs, _Key.getCategory(to.name));
+    final newRepresentation = to.representation;
+    if (newRepresentation is ImageCategoryRepresentation && newRepresentation != from.representation) {
+      await _storeCategoryWithIconLocally(to, newRepresentation);
+    }
+    await tick(true);
   }
 }

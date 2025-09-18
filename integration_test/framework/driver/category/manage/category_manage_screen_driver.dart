@@ -25,12 +25,12 @@ class ManageCategoryScreenDriver {
     await tester.pumpAndSettle();
   }
 
-  Future<void> selectIcon(String icon) async {
-    final iconPath = "${TestContext.current.rootLocalDirPath}/$icon";
+  Future<void> selectIcon(String iconFileName) async {
+    final iconPath = "${TestContext.current.rootLocalDirPath}/$iconFileName";
     _logger.info("selecting category icon from path $iconPath");
     final iconFile = File(iconPath);
     if (!iconFile.existsSync()) {
-      throw AssertionError("icon file with name '$icon' does not exist at path: ${iconFile.path}");
+      throw AssertionError("icon file with name '$iconFileName' does not exist at path: ${iconFile.path}");
     }
     selectCategoryIcon = (BuildContext context, String category) async {
       return iconFile;

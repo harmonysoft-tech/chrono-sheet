@@ -30,44 +30,104 @@ void main() {
     await GoogleTestUtil.tearDown();
   });
 
-  Future<void> createDataFileIfNecessary(GoogleDriveService gService) async {
+  Future<void> createRemoteDataFileIfNecessary(GoogleDriveService gService) async {
     final testContext = TestContext.current;
     final remoteDirId = await gService.getOrCreateDirectory(testContext.rootRemoteDataDirPath);
     await gService.getOrCreateFile(remoteDirId, testContext.testId, sheetMimeType, true);
   }
 
-  testWidgets("saving category icons in remote storage", (WidgetTester tester) async {
-    final main = MainScreenDriver(tester);
-    final chooseSheet = ChooseSheetScreenDriver(tester);
-    final manageCategory = ManageCategoryScreenDriver(tester);
-    final gService = GoogleDriveService();
-
-    await createDataFileIfNecessary(gService);
+  Future<_IntegrationTestContext> prepare(WidgetTester tester) async {
+    final context = _IntegrationTestContext(tester);
+    await createRemoteDataFileIfNecessary(context.gService);
 
     app.main();
     await tester.pumpAndSettle();
 
-    await main.clickSelectGoogleFile();
-    await chooseSheet.selectTestSheet();
+    await context.screen.main.clickSelectGoogleFile();
+    await context.screen.chooseSheet.selectTestSheet();
+    return context;
+  }
 
-    await main.clickAddCategory();
+  Future<void> addCategory({required _IntegrationTestContext context, required String name, String? iconFileName}) async {
+    await context.screen.main.clickAddCategory();
 
-    await manageCategory.setCategoryName(TestCategory.category1);
-    await manageCategory.selectIcon(TestIcon.icon1);
-    await manageCategory.saveChanges();
+    await context.screen.manageCategory.setCategoryName(TestCategory.category1);
+    if (iconFileName != null) {
+      await context.screen.manageCategory.selectIcon(TestIcon.icon1);
+    }
+    await context.screen.manageCategory.saveChanges();
+  }
 
+  Future<void> editCategory({
+    required _IntegrationTestContext context,
+    required String initialCategoryName,
+    String? newCategoryName,
+    String? iconFileName,
+  }) async {
+    if (newCategoryName == null && iconFileName == null) {
+      throw AssertionError("can not edit category '$initialCategoryName', new category name or icon must be provided");
+    }
+
+    await context.screen.main.startCategoryEditing(initialCategoryName);
+
+    if (newCategoryName != null) {
+      await context.screen.manageCategory.setCategoryName(TestCategory.category1);
+    }
+
+    if (iconFileName != null) {
+      await context.screen.manageCategory.selectIcon(TestIcon.icon1);
+    }
+    await context.screen.manageCategory.saveChanges();
+  }
+
+  Future<void> ensureRemoteCategoryIconFileExists(_IntegrationTestContext context, String category) async {
     String categoryIconMetaFileRemoteId = await GoogleTestUtil.getGoogleFileId(
-      "${CategoryGooglePaths.mappingDirPath}/${TestCategory.category1}.csv",
+      "${CategoryGooglePaths.metaInfoDirPath}/$category.csv",
     );
-    List<int> rawCategoryIconMetaFileContent = await gService.getFileContent(categoryIconMetaFileRemoteId);
+    List<int> rawCategoryIconMetaFileContent = await context.gService.getFileContent(categoryIconMetaFileRemoteId);
     String categoryIconMetaFileContent = utf8.decode(rawCategoryIconMetaFileContent).trim();
     Either<String, IconInfo> iconInfoParseResult = IconInfo.parse(categoryIconMetaFileContent);
     IconInfo iconInfo = iconInfoParseResult.getOrElse((l) => fail(l));
 
     String iconFileRemotePath = "${CategoryGooglePaths.picturesDirPath}/${iconInfo.fileName}";
-    String? iconFileRemoteId = await gService.getFileId(iconFileRemotePath);
+    String? iconFileRemoteId = await context.gService.getFileId(iconFileRemotePath);
     if (iconFileRemoteId == null) {
       fail("remote file is not found at path $iconFileRemotePath");
     }
+  }
+
+  testWidgets("new category with icon", (WidgetTester tester) async {
+    final context = await prepare(tester);
+
+    await addCategory(context: context, name: TestCategory.category1, iconFileName: TestIcon.icon1);
+
+    await ensureRemoteCategoryIconFileExists(context, TestCategory.category1);
   });
+
+  testWidgets("set icon to existing category without icon", (WidgetTester tester) async {
+    final context = await prepare(tester);
+
+    await addCategory(context: context, name: TestCategory.category1);
+    await editCategory(context: context, initialCategoryName: TestCategory.category1, iconFileName: TestIcon.icon1);
+
+    await ensureRemoteCategoryIconFileExists(context, TestCategory.category1);
+  });
+}
+
+class _IntegrationTestContext {
+  final _Screens screen;
+  final GoogleDriveService gService;
+
+  _IntegrationTestContext(WidgetTester tester) : screen = _Screens(tester), gService = GoogleDriveService();
+}
+
+class _Screens {
+  final MainScreenDriver main;
+  final ChooseSheetScreenDriver chooseSheet;
+  final ManageCategoryScreenDriver manageCategory;
+
+  _Screens(WidgetTester tester)
+    : main = MainScreenDriver(tester),
+      chooseSheet = ChooseSheetScreenDriver(tester),
+      manageCategory = ManageCategoryScreenDriver(tester);
 }

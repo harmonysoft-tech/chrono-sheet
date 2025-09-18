@@ -77,7 +77,7 @@ class Measurements extends _$Measurements {
     if (id == null) {
       return null;
     }
-    final category = await Category.deserialiseIfPossible(_prefs, _Key.getCategoryPrefix(i));
+    final category = await Category.deserializeIfPossible(_prefs, _Key.getCategoryPrefix(i));
     if (category == null) {
       return null;
     }

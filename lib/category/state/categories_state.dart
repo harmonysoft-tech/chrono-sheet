@@ -388,7 +388,7 @@ class CategoriesStateManager extends _$CategoryStateManager {
     final current = await future;
 
     final withConflictingName = _findCategoryWithName(current, to.name, from);
-    if (withConflictingName != null) {
+    if (withConflictingName != null && from.representation == to.representation) {
       _logger.info(
         "cannot replace category '$from' by '$to' because the name '${to.name}' is already used "
         "for category '$withConflictingName'",
@@ -424,6 +424,9 @@ class CategoriesStateManager extends _$CategoryStateManager {
         return ManageCategoryResult.generic;
       }
     }
+
+    ref.read(categoryManagerProvider).onReplaceCategory(from, to);
+
     return result;
   }
 
