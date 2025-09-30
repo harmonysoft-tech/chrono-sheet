@@ -6,21 +6,58 @@ part of 'main_hint_positions.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(HintPositions)
+const hintPositionsProvider = HintPositionsProvider._();
+
+final class HintPositionsProvider
+    extends $NotifierProvider<HintPositions, HintPositionsState> {
+  const HintPositionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'hintPositionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$hintPositionsHash();
+
+  @$internal
+  @override
+  HintPositions create() => HintPositions();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HintPositionsState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<HintPositionsState>(value),
+    );
+  }
+}
+
 String _$hintPositionsHash() => r'a225ae2ebd3097e1169651dc5e63cf30ea00b0b7';
 
-/// See also [HintPositions].
-@ProviderFor(HintPositions)
-final hintPositionsProvider =
-    AutoDisposeNotifierProvider<HintPositions, HintPositionsState>.internal(
-  HintPositions.new,
-  name: r'hintPositionsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$hintPositionsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$HintPositions = AutoDisposeNotifier<HintPositionsState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$HintPositions extends $Notifier<HintPositionsState> {
+  HintPositionsState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<HintPositionsState, HintPositionsState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<HintPositionsState, HintPositionsState>,
+              HintPositionsState,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

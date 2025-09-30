@@ -6,21 +6,50 @@ part of 'file_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$fileStateManagerHash() => r'a664e6855335471342fc2ce4ae8f127d337bac17';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [FileStateManager].
 @ProviderFor(FileStateManager)
-final fileStateManagerProvider =
-    AutoDisposeAsyncNotifierProvider<FileStateManager, FileState>.internal(
-  FileStateManager.new,
-  name: r'fileStateManagerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$fileStateManagerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const fileStateManagerProvider = FileStateManagerProvider._();
 
-typedef _$FileStateManager = AutoDisposeAsyncNotifier<FileState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class FileStateManagerProvider
+    extends $AsyncNotifierProvider<FileStateManager, FileState> {
+  const FileStateManagerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'fileStateManagerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$fileStateManagerHash();
+
+  @$internal
+  @override
+  FileStateManager create() => FileStateManager();
+}
+
+String _$fileStateManagerHash() => r'3c4c1c013a5aaff1bc5c351b8d5e836daff03f39';
+
+abstract class _$FileStateManager extends $AsyncNotifier<FileState> {
+  FutureOr<FileState> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AsyncValue<FileState>, FileState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<FileState>, FileState>,
+              AsyncValue<FileState>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

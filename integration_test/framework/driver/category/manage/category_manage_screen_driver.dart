@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:chrono_sheet/category/service/category_icon_selector.dart';
 import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:chrono_sheet/ui/widget_key.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../../test_common/context/test_context.dart';
@@ -32,9 +30,6 @@ class ManageCategoryScreenDriver {
     if (!iconFile.existsSync()) {
       throw AssertionError("icon file with name '$iconFileName' does not exist at path: ${iconFile.path}");
     }
-    selectCategoryIcon = (BuildContext context, String category) async {
-      return iconFile;
-    };
 
     final iconButton = find.byKey(AppWidgetKey.manageCategoryIcon);
     expect(iconButton, findsOneWidget);

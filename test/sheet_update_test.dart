@@ -1,9 +1,9 @@
 // ignore_for_file: avoid_print
 
-import 'package:chrono_sheet/file/model/google_file.dart';
+import 'package:chrono_sheet/google/drive/model/google_file.dart';
 import 'package:chrono_sheet/google/drive/service/google_drive_service.dart';
-import 'package:chrono_sheet/sheet/model/sheet_model.dart';
-import 'package:chrono_sheet/sheet/updater/update_service.dart';
+import 'package:chrono_sheet/google/sheet/model/google_sheet_model.dart';
+import 'package:chrono_sheet/google/sheet/service/google_sheet_service.dart';
 import 'package:chrono_sheet/util/date_util.dart' as date;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
@@ -11,15 +11,15 @@ import 'package:intl/intl.dart';
 import '../test_common/context/test_context.dart';
 import '../test_common/google/service/google_service_test_common.dart';
 
-final gService = GoogleDriveService();
 
 final _sheetTitle = "Sheet1";
-final SheetUpdateService _sheetService = SheetUpdateService();
 DateTime _today = date.fallbackDateFormat.parse("2024-12-29");
 String _todayUs = _Format.us.format(_today);
 DateTime _yesterday = _today.subtract(Duration(days: 1));
 String _yesterdayUs = _Format.us.format(_yesterday);
 late GoogleFile file;
+
+GoogleSheetService get _sheetService => TestContext.current.container.read(googleSheetServiceProvider);
 
 class _Format {
   static final us = DateFormat.yMMMd("en_US");
@@ -33,10 +33,11 @@ class _Category {
 void main() async {
   group("[all tests]", () {
     setUp(() async {
-      TestContext("test");
+      final context = TestContext("test");
       date.overrideNow(_today);
       await GoogleTestUtil.setUp("test_common/resources");
       final fileName = "data";
+      final gService = context.container.read(googleDriveServiceProvider);
       final remoteDirId = await gService.getOrCreateDirectory(TestContext.current.rootRemoteDataDirPath);
       final remoteFileId = await gService.getOrCreateSheetFile(remoteDirId, fileName);
       file = GoogleFile(remoteFileId, fileName);
@@ -45,6 +46,7 @@ void main() async {
     tearDown(() async {
       date.reset();
       await GoogleTestUtil.tearDown();
+      TestContext.current.dispose();
     });
 
     _runTests();

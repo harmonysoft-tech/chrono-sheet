@@ -1,30 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chrono_sheet/category/model/category.dart';
 import 'package:chrono_sheet/category/model/category_representation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:chrono_sheet/category/model/icon_info.dart';
+import 'package:chrono_sheet/category/service/category_synchronizer.dart';
+import 'package:chrono_sheet/google/drive/service/google_drive_service.dart';
+import 'package:chrono_sheet/log/util/log_util.dart';
+import 'package:chrono_sheet/network/network.dart';
+import 'package:chrono_sheet/ui/path.dart';
+import 'package:chrono_sheet/util/date_util.dart';
 import 'package:path/path.dart' as p;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../model/category.dart';
-import '../../google/drive/service/google_drive_service.dart';
-import '../../log/util/log_util.dart';
-import '../../network/network.dart';
-import '../../ui/path.dart';
-import '../../util/date_util.dart';
-import '../model/icon_info.dart';
-
-part "category_manager.g.dart";
 
 final _logger = getNamedLogger();
 
 typedef _CategoriesToInfo = Map<String, IconInfo>;
-
-@Riverpod(keepAlive: true)
-SharedCategoryDataManager categoryManager(Ref ref) {
-  return SharedCategoryDataManager();
-}
 
 class _Key {
   static const categoryPrefix = "category.common";
@@ -41,13 +32,13 @@ class _Key {
 }
 
 String _rootDirPath = ".chrono-sheet/picture/category";
-String? _rootDirPathOverride = null;
+String? _rootDirPathOverride;
 
-setCategoryGoogleRootDirPathOverride(String rootPathToUse) {
+void setCategoryGoogleRootDirPathOverride(String rootPathToUse) {
   _rootDirPathOverride = rootPathToUse;
 }
 
-resetCategoryRootDirPathOverride() {
+void resetCategoryRootDirPathOverride() {
   _rootDirPathOverride = null;
 }
 
@@ -59,16 +50,20 @@ class CategoryGooglePaths {
   static String get picturesDirPath => "$rootDirPathToUse/pictures";
 }
 
-class SharedCategoryDataManager {
+class CategorySynchronizerImpl implements CategorySynchronizer {
   final _prefs = SharedPreferencesAsync();
-  final driveService = GoogleDriveService();
+  final GoogleDriveService driveService;
   DateTime? _startTime;
 
+  CategorySynchronizerImpl(this.driveService);
+
+  @override
   Future<Category?> getCategory(String categoryName) async {
     return await Category.deserializeIfPossible(_prefs, _Key.getCategory(categoryName));
   }
 
-  Future<void> tick([bool force = false]) async {
+  @override
+  Future<void> synchronizeIfNecessary([bool force = false]) async {
     final start = _startTime;
     final now = clockProvider.now();
     if (!force && start != null) {
@@ -118,14 +113,14 @@ class SharedCategoryDataManager {
       final raw = await driveService.getFileContent(file.id);
       final text = utf8.decode(raw).trim();
       final parseResult = IconInfo.parse(text);
-      parseResult.fold(
-        (error) async {
+      parseResult.match(
+            (error) async {
           _logger.info(
             "detected that google category icon meta-info file $file has incorrect content format, deleting it - $error",
           );
           await driveService.delete(file.id);
         },
-        (info) {
+            (info) {
           final categoryName = p.basenameWithoutExtension(file.name);
           result[categoryName] = info;
         },
@@ -186,7 +181,7 @@ class SharedCategoryDataManager {
     if (!iconFile.existsSync()) {
       _logger.info(
         "detected that category info for category '$categoryName' points to the file $path "
-        "but it doesn't exist, removing it then",
+            "but it doesn't exist, removing it then",
       );
       file.deleteSync();
       return null;
@@ -195,7 +190,7 @@ class SharedCategoryDataManager {
     if (time == null) {
       _logger.info(
         "detected that category info for category '$categoryName' points to the file $path "
-        "but it doesn't have time info, removing it then",
+            "but it doesn't have time info, removing it then",
       );
       file.deleteSync();
       return null;
@@ -283,6 +278,7 @@ class SharedCategoryDataManager {
     );
   }
 
+  @override
   Future<void> onNewCategory(Category category) async {
     _logger.fine("got information about new category '$category'");
     await category.serialize(_prefs, _Key.getCategory(category.name));
@@ -292,15 +288,16 @@ class SharedCategoryDataManager {
       return;
     }
     await _storeCategoryWithIconLocally(category, representation);
-    await tick(true);
+    await synchronizeIfNecessary(true);
   }
 
+  @override
   Future<void> onReplaceCategory(Category from, Category to) async {
     await to.serialize(_prefs, _Key.getCategory(to.name));
     final newRepresentation = to.representation;
     if (newRepresentation is ImageCategoryRepresentation && newRepresentation != from.representation) {
       await _storeCategoryWithIconLocally(to, newRepresentation);
     }
-    await tick(true);
+    await synchronizeIfNecessary(true);
   }
 }

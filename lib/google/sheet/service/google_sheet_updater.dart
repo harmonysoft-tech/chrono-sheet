@@ -1,17 +1,17 @@
+import 'package:chrono_sheet/google/sheet/service/google_sheet_service.dart';
 import 'package:chrono_sheet/measurement/model/measurement.dart';
 import 'package:chrono_sheet/measurement/model/measurements_state.dart';
 import 'package:chrono_sheet/network/network.dart';
-import 'package:chrono_sheet/sheet/updater/update_service.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../category/model/category.dart';
-import '../../category/state/categories_state.dart';
-import '../../file/model/google_file.dart';
-import '../../file/state/file_state.dart';
-import '../../log/util/log_util.dart';
+import '../../../category/model/category.dart';
+import '../../../category/state/categories_state.dart';
+import '../../../file/state/file_state.dart';
+import '../../drive/model/google_file.dart';
+import '../../../log/util/log_util.dart';
 
-part 'sheet_updater.g.dart';
+part 'google_sheet_updater.g.dart';
 
 final _logger = getNamedLogger();
 
@@ -56,7 +56,7 @@ class SheetUpdater extends _$SheetUpdater {
     if (file == null) {
       return Either.left(AppError(SaveMeasurementsError.noCategoryIsSelected));
     }
-    final categoryInfo = await ref.read(categoryStateManagerProvider.future);
+    final categoryInfo = await ref.read(categoriesStateManagerProvider.future);
     final category = categoryInfo.selected;
     if (category == null) {
       _logger.fine("skipped a request to store measurement $measurement in file "
@@ -99,7 +99,7 @@ class SheetUpdater extends _$SheetUpdater {
       return AppError(SaveMeasurementsError.offline);
     }
 
-    final updateService = ref.read(updateServiceProvider);
+    final updateService = ref.read(googleSheetServiceProvider);
     final measurementsNotifier = ref.read(measurementsProvider.notifier);
     for (final measurement in measurements) {
       if (measurement.saved) {

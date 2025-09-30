@@ -1,4 +1,4 @@
-import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
+import 'package:chrono_sheet/google/sheet/service/google_sheet_updater.dart';
 import 'package:chrono_sheet/ui/widget_key.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

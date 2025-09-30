@@ -1,24 +1,14 @@
-import 'package:chrono_sheet/file/model/google_file.dart';
-import 'package:chrono_sheet/sheet/model/sheet_model.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:chrono_sheet/google/drive/model/google_file.dart';
+import 'package:chrono_sheet/google/account/service/google_http_client_provider.dart';
+import 'package:chrono_sheet/google/sheet/model/google_sheet_model.dart';
+import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis/drive/v3.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../google/login/state/google_helper.dart';
-import '../../../log/util/log_util.dart';
+part 'google_files_loader.g.dart';
 
 final _logger = getNamedLogger();
-
-Future<FileList> fetchSheets(String? pageToken) async {
-  final data = await getGoogleClientData();
-  final driveApi = drive.DriveApi(data.authenticatedClient);
-  return driveApi.files.list(
-    q: "mimeType='$sheetMimeType' and trashed=false",
-    spaces: 'drive',
-    $fields: 'files(id, name)',
-    pageToken: pageToken,
-  );
-}
 
 class PaginatedFilesState {
   final List<GoogleFile> files;
@@ -28,28 +18,24 @@ class PaginatedFilesState {
 
   PaginatedFilesState({required this.files, required this.loading, this.nextPageToken, this.error});
 
-  PaginatedFilesState copyWith({
-    List<GoogleFile>? files,
-    bool? loading,
-    String? nextPageToken,
-    String? error,
-  }) {
+  PaginatedFilesState copyWith({List<GoogleFile>? files, bool? loading, String? nextPageToken, String? error}) {
     return PaginatedFilesState(
-        files: files ?? this.files,
-        loading: loading ?? this.loading,
-        nextPageToken: nextPageToken ?? this.nextPageToken,
-        error: error ?? this.error);
+      files: files ?? this.files,
+      loading: loading ?? this.loading,
+      nextPageToken: nextPageToken ?? this.nextPageToken,
+      error: error ?? this.error,
+    );
   }
 }
 
-final paginatedFilesProvider = StateNotifierProvider<PaginatedFilesNotifier, PaginatedFilesState>((ref) {
-  return PaginatedFilesNotifier();
-});
+@riverpod
+class GoogleFilesLoader extends _$GoogleFilesLoader {
+  @override
+  PaginatedFilesState build() {
+    return PaginatedFilesState(files: [], loading: false);
+  }
 
-class PaginatedFilesNotifier extends StateNotifier<PaginatedFilesState> {
-  PaginatedFilesNotifier() : super(PaginatedFilesState(files: [], loading: false));
-
-  Future<void> loadFiles({initialLoad = false}) async {
+  Future<void> loadFiles({bool initialLoad = false}) async {
     if (state.loading) {
       return;
     }
@@ -61,7 +47,7 @@ class PaginatedFilesNotifier extends StateNotifier<PaginatedFilesState> {
     final files = <GoogleFile>[];
     _logger.info("fetching gsheet documents, next page token: ${state.nextPageToken}");
     try {
-      final fileList = await fetchSheets(initialLoad ? null : state.nextPageToken);
+      final fileList = await _fetchSheets(initialLoad ? null : state.nextPageToken);
       _logger.info("got google response for ${fileList.files?.length ?? 0} gsheet file(s)");
 
       fileList.files?.forEach((file) {
@@ -88,6 +74,25 @@ class PaginatedFilesNotifier extends StateNotifier<PaginatedFilesState> {
 
     _logger.info("got ${files.length} gsheet file(s) and ${errors.length} error(s)");
     state = state.copyWith(
-        files: files, loading: false, nextPageToken: null, error: errors.isEmpty ? null : errors.join(",\n"));
+      files: files,
+      loading: false,
+      nextPageToken: null,
+      error: errors.isEmpty ? null : errors.join(",\n"),
+    );
+  }
+
+  Future<FileList> _fetchSheets(String? pageToken) async {
+    final http = await ref.read(googleHttpClientProvider.future);
+    if (http == null) {
+      return drive.FileList();
+    } else {
+      final driveApi = drive.DriveApi(http);
+      return driveApi.files.list(
+        q: "mimeType='$sheetMimeType' and trashed=false",
+        spaces: 'drive',
+        $fields: 'files(id, name)',
+        pageToken: pageToken,
+      );
+    }
   }
 }

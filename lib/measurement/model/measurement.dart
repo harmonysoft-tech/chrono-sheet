@@ -1,4 +1,4 @@
-import 'package:chrono_sheet/file/model/google_file.dart';
+import 'package:chrono_sheet/google/drive/model/google_file.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../category/model/category.dart';

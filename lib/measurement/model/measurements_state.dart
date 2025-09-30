@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../category/model/category.dart';
-import '../../file/model/google_file.dart';
+import '../../google/drive/model/google_file.dart';
 
 part "measurements_state.g.dart";
 

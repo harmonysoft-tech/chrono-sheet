@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:chrono_sheet/google/account/model/google_account.dart';
+import 'package:chrono_sheet/google/account/service/google_http_client_provider.dart';
+import 'package:chrono_sheet/google/account/service/google_identity_provider.dart';
 import 'package:chrono_sheet/google/drive/service/google_drive_service.dart';
-import 'package:chrono_sheet/google/login/state/google_helper.dart';
-import 'package:chrono_sheet/google/login/state/google_login_state.dart';
+import 'package:chrono_sheet/google/sheet/model/google_sheet_model.dart';
+import 'package:chrono_sheet/google/sheet/service/google_sheet_service.dart';
 import 'package:chrono_sheet/log/util/log_util.dart';
-import 'package:chrono_sheet/sheet/model/sheet_model.dart';
-import 'package:chrono_sheet/sheet/parser/sheet_parser.dart';
-import 'package:chrono_sheet/sheet/updater/update_service.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:googleapis/sheets/v4.dart';
 import 'package:googleapis_auth/auth_io.dart';
@@ -19,31 +19,39 @@ final _logger = getNamedLogger();
 class GoogleTestUtil {
   static int _contextCounter = 0;
 
+  static GoogleSheetService get sheetService => TestContext.current.container.read(googleSheetServiceProvider);
+
   static Future<void> setUp([String? rootLocalDirPath]) async {
     final rootLocalDirPathToUse = rootLocalDirPath ?? TestContext.current.rootLocalDirPath;
-    final googleClient = await getTestGoogleClient(
-      ++_contextCounter,
-      rootLocalDirPathToUse,
+    final googleClient = await getTestGoogleHttpClient(++_contextCounter, rootLocalDirPathToUse);
+    GoogleHttpClient.setDataOverride(googleClient);
+    GoogleIdentity.setDataOverride(
+      AppGoogleIdentity(
+        id: "dummy-id",
+        email: "dummy-email",
+        accessToken: "dummy-token",
+        accessTokenExpirationInSeconds: -1,
+      )
     );
-    setDataOverride(CachedGoogleIdentity(id: "dummy-id", email: "dummy-email"), googleClient);
   }
 
   static Future<void> tearDown() async {
-    final service = GoogleDriveService();
+    final service = TestContext.current.container.read(googleDriveServiceProvider);
 
     final remoteDirId = await service.getDirectoryId(TestContext.current.rootRemoteDataDirPath);
     if (remoteDirId != null) {
       await service.delete(remoteDirId);
     }
-    resetOverride();
+    GoogleIdentity.resetOverride();
+    GoogleHttpClient.resetOverride();
   }
 
-  static Future<AutoRefreshingAuthClient> getTestGoogleClient(int counter, String rootLocalPath) async {
+  static Future<AutoRefreshingAuthClient> getTestGoogleHttpClient(int counter, String rootLocalPath) async {
     final filePath = "$rootLocalPath/auto-test-service-account$counter.json";
     final file = File(filePath);
     if (!await file.exists()) {
       if (counter > 1) {
-        return await getTestGoogleClient(1, rootLocalPath);
+        return await getTestGoogleHttpClient(1, rootLocalPath);
       } else {
         throw AssertionError("file ${file.path} doesn't exist");
       }
@@ -56,7 +64,7 @@ class GoogleTestUtil {
   }
 
   static Future<String> getGoogleFileId(String path) async {
-    final service = GoogleDriveService();
+    final service = TestContext.current.container.read(googleDriveServiceProvider);
     return await VerificationUtil.getDataWithWaiting("get id of google file '$path'", () async {
       final result = await service.getFileId(path);
       if (result == null) {
@@ -67,17 +75,23 @@ class GoogleTestUtil {
     });
   }
 
+  static Future<SheetsApi> _getApi() async {
+    final http = await TestContext.current.container.read(googleHttpClientProvider.future);
+    if (http == null) {
+      throw StateError("google http client is not set");
+    }
+    return SheetsApi(http);
+  }
+
   static Future<void> clearSheet(String remoteFileId, String sheetTitle) async {
-    final gData = await getGoogleClientData();
-    final sheetsApi = SheetsApi(gData.authenticatedClient);
+    final sheetsApi = await _getApi();
     await sheetsApi.spreadsheets.values.clear(ClearValuesRequest(), remoteFileId, sheetTitle);
   }
 
   static Future<void> verifySheetState(String fileId, String expectedSheetContent) async {
     final expectedValues = _parse(expectedSheetContent);
 
-    final gData = await getGoogleClientData();
-    final sheetsApi = SheetsApi(gData.authenticatedClient);
+    final sheetsApi = await _getApi();
     final gSheet = await sheetsApi.spreadsheets.get(fileId);
     final sheetName = gSheet.sheets?.firstOrNull?.properties?.title;
     if (sheetName == null) {
@@ -85,7 +99,7 @@ class GoogleTestUtil {
     }
 
     final valueRange = await sheetsApi.spreadsheets.values.get(fileId, sheetName, majorDimension: "ROWS");
-    final actualValues = parseSheetValues(valueRange.values!);
+    final actualValues = sheetService.parseSheetValues(valueRange.values!);
 
     // google sheet api doesn't return values for empty rows, that's why we need to do custom comparison here
     expectedValues.forEach((address, expected) {
@@ -103,14 +117,11 @@ class GoogleTestUtil {
 
   static Future<void> setSheetState(String remoteFileId, String remoteFileName, String sheetTitle, String raw) async {
     final values = _parse(raw);
-    final gData = await getGoogleClientData();
-    final sheetsApi = SheetsApi(gData.authenticatedClient);
-    await setSheetCellValues(
+    await sheetService.setSheetCellValues(
       values: values,
       sheetTitle: sheetTitle,
       sheetDocumentId: remoteFileId,
       sheetFileName: remoteFileName,
-      api: sheetsApi,
     );
   }
 

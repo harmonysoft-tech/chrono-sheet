@@ -6,22 +6,52 @@ part of 'categories_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$categoryStateManagerHash() =>
-    r'2e6d589f648869238648f0aabf8215ae8a35840b';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [CategoriesStateManager].
 @ProviderFor(CategoriesStateManager)
-final categoryStateManagerProvider = AutoDisposeAsyncNotifierProvider<
-    CategoriesStateManager, CategoriesState>.internal(
-  CategoriesStateManager.new,
-  name: r'categoryStateManagerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$categoryStateManagerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const categoriesStateManagerProvider = CategoriesStateManagerProvider._();
 
-typedef _$CategoryStateManager = AutoDisposeAsyncNotifier<CategoriesState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class CategoriesStateManagerProvider
+    extends $AsyncNotifierProvider<CategoriesStateManager, CategoriesState> {
+  const CategoriesStateManagerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoriesStateManagerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoriesStateManagerHash();
+
+  @$internal
+  @override
+  CategoriesStateManager create() => CategoriesStateManager();
+}
+
+String _$categoriesStateManagerHash() =>
+    r'2af5aa74e391e814d7c6054e4a7f5d8a31c06044';
+
+abstract class _$CategoriesStateManager
+    extends $AsyncNotifier<CategoriesState> {
+  FutureOr<CategoriesState> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<AsyncValue<CategoriesState>, CategoriesState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<CategoriesState>, CategoriesState>,
+              AsyncValue<CategoriesState>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

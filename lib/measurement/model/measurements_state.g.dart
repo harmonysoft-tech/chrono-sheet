@@ -6,20 +6,51 @@ part of 'measurements_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$measurementsHash() => r'4cce8372bc0c02a58bb9aa62507847744f69e31b';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [Measurements].
 @ProviderFor(Measurements)
-final measurementsProvider =
-    AsyncNotifierProvider<Measurements, List<Measurement>>.internal(
-  Measurements.new,
-  name: r'measurementsProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$measurementsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const measurementsProvider = MeasurementsProvider._();
 
-typedef _$Measurements = AsyncNotifier<List<Measurement>>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class MeasurementsProvider
+    extends $AsyncNotifierProvider<Measurements, List<Measurement>> {
+  const MeasurementsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'measurementsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$measurementsHash();
+
+  @$internal
+  @override
+  Measurements create() => Measurements();
+}
+
+String _$measurementsHash() => r'ca1803f1cc231f7b00ffc1cfd0a504b00e25dcaf';
+
+abstract class _$Measurements extends $AsyncNotifier<List<Measurement>> {
+  FutureOr<List<Measurement>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref =
+        this.ref as $Ref<AsyncValue<List<Measurement>>, List<Measurement>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<Measurement>>, List<Measurement>>,
+              AsyncValue<List<Measurement>>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

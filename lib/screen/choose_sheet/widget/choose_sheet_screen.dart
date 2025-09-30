@@ -1,11 +1,10 @@
+import 'package:chrono_sheet/file/service/loader/google_files_loader.dart';
 import 'package:chrono_sheet/file/state/file_state.dart';
+import 'package:chrono_sheet/generated/app_localizations.dart';
+import 'package:chrono_sheet/ui/dimension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../file/service/loader/google_files_loader.dart';
-import '../../../generated/app_localizations.dart';
-import '../../../ui/dimension.dart';
 
 class ChooseSheetScreen extends ConsumerStatefulWidget {
   const ChooseSheetScreen({super.key});
@@ -19,19 +18,17 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(paginatedFilesProvider.notifier).loadFiles(initialLoad: true);
+      ref.read(googleFilesLoaderProvider.notifier).loadFiles(initialLoad: true);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(paginatedFilesProvider);
-    final notifier = ref.read(paginatedFilesProvider.notifier);
+    final state = ref.watch(googleFilesLoaderProvider);
+    final notifier = ref.read(googleFilesLoaderProvider.notifier);
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).titleSelectFile),
-      ),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).titleSelectFile)),
       body: RefreshIndicator(
         onRefresh: () => notifier.loadFiles(initialLoad: true),
         child: NotificationListener<ScrollNotification>(
@@ -56,10 +53,7 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
                       height: AppDimension.iconSize,
                       fit: BoxFit.contain,
                     ),
-                    title: Text(
-                      state.files[index].name,
-                      style: theme.textTheme.headlineSmall,
-                    ),
+                    title: Text(state.files[index].name, style: theme.textTheme.headlineSmall),
                     onTap: () {
                       ref.read(fileStateManagerProvider.notifier).select(state.files[index]);
                       context.pop();
@@ -68,7 +62,7 @@ class ChooseSheetState extends ConsumerState<ChooseSheetScreen> {
                   separatorBuilder: (context, index) => Divider(),
                 ),
               ),
-              if (state.loading) ...[Padding(padding: const EdgeInsets.all(16.0), child: LinearProgressIndicator())]
+              if (state.loading) ...[Padding(padding: const EdgeInsets.all(16.0), child: LinearProgressIndicator())],
             ],
           ),
         ),

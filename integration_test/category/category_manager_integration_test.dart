@@ -1,16 +1,16 @@
 import 'dart:convert';
 
 import 'package:chrono_sheet/category/model/icon_info.dart';
-import 'package:chrono_sheet/category/service/shared_category_data_manager.dart';
+import 'package:chrono_sheet/category/service/category_synchronizer.dart';
 import 'package:chrono_sheet/google/drive/service/google_drive_service.dart';
 import 'package:chrono_sheet/main.dart' as app;
-import 'package:chrono_sheet/sheet/model/sheet_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:integration_test/integration_test.dart';
 
 import '../../test_common/context/test_context.dart';
 import '../../test_common/google/service/google_service_test_common.dart';
+import '../../test_common/verification/verification_util.dart';
 import '../framework/driver/category/manage/category_manage_screen_driver.dart';
 import '../framework/driver/choose_sheet/choose_sheet_driver.dart';
 import '../framework/driver/main/main_screen_driver.dart';
@@ -48,7 +48,11 @@ void main() {
     return context;
   }
 
-  Future<void> addCategory({required _IntegrationTestContext context, required String name, String? iconFileName}) async {
+  Future<void> addCategory({
+    required _IntegrationTestContext context,
+    required String name,
+    String? iconFileName,
+  }) async {
     await context.screen.main.clickAddCategory();
 
     await context.screen.manageCategory.setCategoryName(TestCategory.category1);
@@ -80,20 +84,32 @@ void main() {
     await context.screen.manageCategory.saveChanges();
   }
 
-  Future<void> ensureRemoteCategoryIconFileExists(_IntegrationTestContext context, String category) async {
-    String categoryIconMetaFileRemoteId = await GoogleTestUtil.getGoogleFileId(
-      "${CategoryGooglePaths.metaInfoDirPath}/$category.csv",
-    );
-    List<int> rawCategoryIconMetaFileContent = await context.gService.getFileContent(categoryIconMetaFileRemoteId);
-    String categoryIconMetaFileContent = utf8.decode(rawCategoryIconMetaFileContent).trim();
-    Either<String, IconInfo> iconInfoParseResult = IconInfo.parse(categoryIconMetaFileContent);
-    IconInfo iconInfo = iconInfoParseResult.getOrElse((l) => fail(l));
+  Future<void> ensureRemoteCategoryIcon(_IntegrationTestContext context, String category, String iconFileName) async {
+    await VerificationUtil.verify(
+      "all information about category icon file '$iconFileName' is stored remotely for category '$category'",
+      () async {
+        String categoryIconMetaFileRemoteId = await GoogleTestUtil.getGoogleFileId(
+          "${CategoryGooglePaths.metaInfoDirPath}/$category.csv",
+        );
+        List<int> rawCategoryIconMetaFileContent = await context.gService.getFileContent(categoryIconMetaFileRemoteId);
+        String categoryIconMetaFileContent = utf8.decode(rawCategoryIconMetaFileContent).trim();
+        Either<String, IconInfo> iconInfoParseResult = IconInfo.parse(categoryIconMetaFileContent);
+        IconInfo iconInfo = iconInfoParseResult.getOrElse((l) => fail(l));
+        if (iconInfo.fileName != iconFileName) {
+          return Either.left(
+            "expected to observe file '$iconFileName' for category '$category' but found '${iconInfo.fileName}'",
+          );
+        }
 
-    String iconFileRemotePath = "${CategoryGooglePaths.picturesDirPath}/${iconInfo.fileName}";
-    String? iconFileRemoteId = await context.gService.getFileId(iconFileRemotePath);
-    if (iconFileRemoteId == null) {
-      fail("remote file is not found at path $iconFileRemotePath");
-    }
+        String iconFileRemotePath = "${CategoryGooglePaths.picturesDirPath}/${iconInfo.fileName}";
+        String? iconFileRemoteId = await context.gService.getFileId(iconFileRemotePath);
+        if (iconFileRemoteId == null) {
+          return Either.left("remote file is not found at path $iconFileRemotePath");
+        } else {
+          return Either.right(unit);
+        }
+      },
+    );
   }
 
   testWidgets("new category with icon", (WidgetTester tester) async {
@@ -101,7 +117,7 @@ void main() {
 
     await addCategory(context: context, name: TestCategory.category1, iconFileName: TestIcon.icon1);
 
-    await ensureRemoteCategoryIconFileExists(context, TestCategory.category1);
+    await ensureRemoteCategoryIcon(context, TestCategory.category1, TestIcon.icon1);
   });
 
   testWidgets("set icon to existing category without icon", (WidgetTester tester) async {
@@ -110,7 +126,16 @@ void main() {
     await addCategory(context: context, name: TestCategory.category1);
     await editCategory(context: context, initialCategoryName: TestCategory.category1, iconFileName: TestIcon.icon1);
 
-    await ensureRemoteCategoryIconFileExists(context, TestCategory.category1);
+    await ensureRemoteCategoryIcon(context, TestCategory.category1, TestIcon.icon1);
+  });
+
+  testWidgets("set new icon to existing category with icon", (WidgetTester tester) async {
+    final context = await prepare(tester);
+
+    await addCategory(context: context, name: TestCategory.category1, iconFileName: TestIcon.icon1);
+    await editCategory(context: context, initialCategoryName: TestCategory.category1, iconFileName: TestIcon.icon2);
+
+    await ensureRemoteCategoryIcon(context, TestCategory.category1, TestIcon.icon2);
   });
 }
 

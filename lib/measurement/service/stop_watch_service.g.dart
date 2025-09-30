@@ -6,21 +6,58 @@ part of 'stop_watch_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$stopWatchServiceHash() => r'62ca2d75cdf857b321944288e5a25cc78572f4e9';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [StopWatchService].
 @ProviderFor(StopWatchService)
-final stopWatchServiceProvider =
-    NotifierProvider<StopWatchService, StopWatchState>.internal(
-  StopWatchService.new,
-  name: r'stopWatchServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$stopWatchServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+const stopWatchServiceProvider = StopWatchServiceProvider._();
 
-typedef _$StopWatchService = Notifier<StopWatchState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class StopWatchServiceProvider
+    extends $NotifierProvider<StopWatchService, StopWatchState> {
+  const StopWatchServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'stopWatchServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$stopWatchServiceHash();
+
+  @$internal
+  @override
+  StopWatchService create() => StopWatchService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(StopWatchState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<StopWatchState>(value),
+    );
+  }
+}
+
+String _$stopWatchServiceHash() => r'c6639c8835ddcf9efed9e3434f6b9752a827c38f';
+
+abstract class _$StopWatchService extends $Notifier<StopWatchState> {
+  StopWatchState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<StopWatchState, StopWatchState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<StopWatchState, StopWatchState>,
+              StopWatchState,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}

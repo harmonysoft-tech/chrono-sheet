@@ -1,7 +1,7 @@
 import 'package:chrono_sheet/measurement/service/stop_watch_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../sheet/updater/sheet_updater.dart';
+import '../../google/sheet/service/google_sheet_updater.dart';
 
 part "stop_watch_controls_ui_state.g.dart";
 

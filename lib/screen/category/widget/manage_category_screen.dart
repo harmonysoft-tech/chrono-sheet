@@ -81,9 +81,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     final l10n = AppLocalizations.of(context);
     final categoryName = _nameController.text.trim();
     if (categoryName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(l10n.errorCategoryNameMustBeProvided),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorCategoryNameMustBeProvided)));
       return;
     }
 
@@ -111,13 +109,13 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
       if (saveResult == ManageCategoryResult.success) {
         Navigator.of(context).pop();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(saveResult.getMessage(l10n)),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(saveResult.getMessage(l10n))));
       }
     } else {
-      _logger.info("cannot handle category save attempt for category '$categoryName' "
-          "($saveResult) - the build context is not mounted");
+      _logger.info(
+        "cannot handle category save attempt for category '$categoryName' "
+        "($saveResult) - the build context is not mounted",
+      );
     }
   }
 
@@ -127,9 +125,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
     final theme = Theme.of(context);
     final labelTheme = theme.textTheme.titleLarge;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.category == null ? l10n.titleCreateCategory : l10n.titleEditCategory),
-      ),
+      appBar: AppBar(title: Text(widget.category == null ? l10n.titleCreateCategory : l10n.titleEditCategory)),
       body: Padding(
         padding: const EdgeInsets.all(AppDimension.screenPadding),
         child: Column(
@@ -137,9 +133,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
             Row(
               children: [
                 Text(l10n.labelName, style: labelTheme),
-                SizedBox(
-                  width: AppDimension.elementPadding,
-                ),
+                SizedBox(width: AppDimension.elementPadding),
                 Expanded(
                   child: TextField(
                     key: AppWidgetKey.manageCategoryName,
@@ -149,45 +143,39 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
                 ),
               ],
             ),
-            SizedBox(
-              height: AppDimension.elementPadding,
-            ),
+            SizedBox(height: AppDimension.elementPadding),
             Row(
               children: [
                 Text(l10n.labelIcon, style: labelTheme),
-                SizedBox(
-                  width: AppDimension.elementPadding,
-                ),
+                SizedBox(width: AppDimension.elementPadding),
                 _iconFile == null
                     ? IconButton(
-                        key: AppWidgetKey.manageCategoryIcon,
-                        onPressed: () {
-                          _selectIcon(context);
-                        },
-                        icon: Container(
-                          width: AppDimension.getCategoryWidgetEdgeLength(context),
-                          height: AppDimension.getCategoryWidgetEdgeLength(context),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
-                            border: Border.all(
-                              color: theme.disabledColor,
-                              width: 1,
-                            ),
-                          ),
-                          child: Icon(Icons.add),
+                      key: AppWidgetKey.manageCategoryIcon,
+                      onPressed: () {
+                        _selectIcon(context);
+                      },
+                      icon: Container(
+                        width: AppDimension.getCategoryWidgetEdgeLength(context),
+                        height: AppDimension.getCategoryWidgetEdgeLength(context),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(AppDimension.borderCornerRadius),
+                          border: Border.all(color: theme.disabledColor, width: 1),
                         ),
-                      )
-                    : CategoryWidget(
-                        category: Category(
-                          name: _nameController.text,
-                          representation: ImageCategoryRepresentation(_iconFile!),
-                          persistedInGoogle: widget.category?.persistedInGoogle ?? false,
-                        ),
-                        selected: false,
-                        pressCallback: () {
-                          _selectIcon(context);
-                        },
+                        child: Icon(Icons.add),
                       ),
+                    )
+                    : CategoryWidget(
+                      key: AppWidgetKey.manageCategoryIcon,
+                      category: Category(
+                        name: _nameController.text,
+                        representation: ImageCategoryRepresentation(_iconFile!),
+                        persistedInGoogle: widget.category?.persistedInGoogle ?? false,
+                      ),
+                      selected: false,
+                      pressCallback: () {
+                        _selectIcon(context);
+                      },
+                    ),
               ],
             ),
           ],
@@ -195,7 +183,7 @@ class ManageCategoryScreenState extends ConsumerState<ManageCategoryScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         key: AppWidgetKey.saveCategoryState,
-        onPressed: () => _saveCategoryIfPossible(context, ref.read(categoryStateManagerProvider.notifier)),
+        onPressed: () => _saveCategoryIfPossible(context, ref.read(categoriesStateManagerProvider.notifier)),
         child: Icon(Icons.save),
       ),
     );

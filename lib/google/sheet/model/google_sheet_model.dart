@@ -1,6 +1,5 @@
+import 'package:chrono_sheet/util/date_util.dart';
 import 'package:intl/intl.dart';
-
-import '../../util/date_util.dart';
 
 const sheetMimeType = "application/vnd.google-apps.spreadsheet";
 
@@ -22,7 +21,7 @@ class CellAddress {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is CellAddress && runtimeType == other.runtimeType && row == other.row && column == other.column;
+          other is CellAddress && runtimeType == other.runtimeType && row == other.row && column == other.column;
 
   @override
   int get hashCode => row.hashCode ^ column.hashCode;

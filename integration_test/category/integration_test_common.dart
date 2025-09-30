@@ -6,6 +6,7 @@ class TestPath {
 
 class TestIcon {
   static final icon1 = "icon1.png";
+  static final icon2 = "icon2.png";
 }
 
 class TestCategory {

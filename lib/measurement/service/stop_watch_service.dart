@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../category/state/categories_state.dart';
-import '../../sheet/updater/sheet_updater.dart';
+import '../../google/sheet/service/google_sheet_updater.dart';
 import '../../util/date_util.dart';
 import '../model/measurement.dart';
 import '../model/measurements_state.dart';
@@ -186,11 +186,11 @@ class StopWatchService extends _$StopWatchService {
     if (durationToStore <= 0) {
       _logger.fine("skipped a request to store non-positive rounded measurement $duration");
       state = StopWatchState();
-      ref.read(categoryStateManagerProvider.notifier).onMeasurement(fileAndCategory.category);
+      ref.read(categoriesStateManagerProvider.notifier).onMeasurement(fileAndCategory.category);
       return SaveMeasurementState.success;
     }
 
-    await ref.read(categoryStateManagerProvider.notifier).onMeasurement(fileAndCategory.category);
+    await ref.read(categoriesStateManagerProvider.notifier).onMeasurement(fileAndCategory.category);
 
     await ref
         .read(measurementsProvider.notifier)

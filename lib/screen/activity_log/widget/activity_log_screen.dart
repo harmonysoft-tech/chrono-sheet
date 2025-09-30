@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../network/network.dart';
-import '../../../sheet/updater/sheet_updater.dart';
+import '../../../google/sheet/service/google_sheet_updater.dart';
 
 final _logger = getNamedLogger();
 

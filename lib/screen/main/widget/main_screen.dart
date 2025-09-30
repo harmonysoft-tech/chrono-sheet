@@ -1,19 +1,18 @@
+import 'package:chrono_sheet/category/widget/categories_widget.dart';
 import 'package:chrono_sheet/file/widget/file_widget.dart';
 import 'package:chrono_sheet/file/widget/view_selected_file_widget.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
-import 'package:chrono_sheet/google/login/state/google_login_state.dart';
+import 'package:chrono_sheet/google/account/service/google_identity_provider.dart';
 import 'package:chrono_sheet/hint/widget/hint_widget.dart';
 import 'package:chrono_sheet/measurement/widget/stop_watch_buttons_widget.dart';
 import 'package:chrono_sheet/screen/main/state/main_hint_positions.dart';
 import 'package:chrono_sheet/screen/main/widget/menu_menu_button.dart';
-import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
+import 'package:chrono_sheet/google/sheet/service/google_sheet_updater.dart';
 import 'package:chrono_sheet/ui/color.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
 import 'package:chrono_sheet/ui/widget_key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../category/widget/categories_widget.dart';
 
 class MainScreen extends ConsumerWidget {
   const MainScreen({super.key});
@@ -99,6 +98,9 @@ class LoginWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(onPressed: () => ref.read(loginStateManagerProvider.notifier).login(), icon: Icon(Icons.login));
+    return IconButton(
+      onPressed: () => ref.read(googleIdentityProvider.notifier).login(),
+      icon: Icon(Icons.login),
+    );
   }
 }

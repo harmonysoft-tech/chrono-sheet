@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:chrono_sheet/sheet/model/sheet_model.dart';
+import 'package:chrono_sheet/google/sheet/model/google_sheet_model.dart';
 import 'package:collection/collection.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis/sheets/v4.dart';
@@ -70,8 +70,8 @@ list() async {
   }
   for (drive.File file in fileList.files ?? []) {
     print('${getPath(name2id, id2parentId, file.id!, file.name!)}: ${file.id} ${file.mimeType}');
-    // await driveApi.files.delete(file.id!);
-    // print("deleted entry '${file.name}'");
+    await driveApi.files.delete(file.id!);
+    print("deleted entry '${file.name}'");
   }
 }
 

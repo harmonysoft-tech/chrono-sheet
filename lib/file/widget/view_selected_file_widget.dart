@@ -1,4 +1,4 @@
-import 'package:chrono_sheet/file/model/google_file.dart';
+import 'package:chrono_sheet/google/drive/model/google_file.dart';
 import 'package:chrono_sheet/file/state/file_state.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:flutter/material.dart';

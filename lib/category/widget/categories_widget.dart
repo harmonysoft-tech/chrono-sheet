@@ -40,7 +40,7 @@ class NoFileCreationWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncCategoryState = ref.watch(categoryStateManagerProvider);
+    final asyncCategoryState = ref.watch(categoriesStateManagerProvider);
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final activeCategoryName = asyncCategoryState.maybeWhen(
@@ -84,7 +84,7 @@ class NoFileCreationWidget extends ConsumerWidget {
                         category: category,
                         selected: category == categoryState.selected,
                         pressCallback: () {
-                          ref.read(categoryStateManagerProvider.notifier).select(category);
+                          ref.read(categoriesStateManagerProvider.notifier).select(category);
                         },
                       ),
                     )

@@ -1,4 +1,4 @@
-* run riverpod codegen - flutter pub run build_runner build
+* run riverpod codegen - dart run build_runner build -d
 * generate l10n - flutter gen-l10n
 * apple developer - https://developer.apple.com/
 * appstore connect - https://appstoreconnect.apple.com/

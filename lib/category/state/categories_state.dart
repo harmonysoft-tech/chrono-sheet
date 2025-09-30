@@ -4,21 +4,19 @@ import 'package:chrono_sheet/category/model/category.dart';
 import 'package:chrono_sheet/category/model/category_representation.dart';
 import 'package:chrono_sheet/file/state/file_state.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
+import 'package:chrono_sheet/google/drive/model/google_file.dart';
+import 'package:chrono_sheet/google/sheet/model/google_sheet_model.dart';
+import 'package:chrono_sheet/google/sheet/service/google_sheet_service.dart';
+import 'package:chrono_sheet/google/sheet/service/google_sheet_updater.dart';
 import 'package:chrono_sheet/log/util/log_util.dart';
-import 'package:chrono_sheet/category/service/shared_category_data_manager.dart';
-import 'package:chrono_sheet/sheet/model/sheet_model.dart';
-import 'package:chrono_sheet/sheet/parser/sheet_parser.dart';
+import 'package:chrono_sheet/category/service/category_synchronizer.dart';
+import 'package:chrono_sheet/network/network.dart';
 import 'package:chrono_sheet/util/regexp_util.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../file/model/google_file.dart';
-import '../../network/network.dart';
-import '../../sheet/updater/sheet_updater.dart';
-import '../../sheet/updater/update_service.dart';
 
 part 'categories_state.g.dart';
 
@@ -78,7 +76,7 @@ enum ManageCategoryResult {
 }
 
 @riverpod
-class CategoriesStateManager extends _$CategoryStateManager {
+class CategoriesStateManager extends _$CategoriesStateManager {
   final SharedPreferencesAsync _prefs;
 
   CategoriesStateManager({SharedPreferencesAsync? prefs}) : _prefs = prefs ?? SharedPreferencesAsync();
@@ -343,7 +341,7 @@ class CategoriesStateManager extends _$CategoryStateManager {
     if (!online) {
       return Either.left(unit);
     }
-    final info = await parseSheetDocument(file);
+    final info = await ref.read(googleSheetServiceProvider).parseSheetDocument(file);
     return Either.right(info.columns.keys.where((c) => !_categoryNamesToHideInUi.contains(c)).toList());
   }
 
@@ -418,8 +416,8 @@ class CategoriesStateManager extends _$CategoryStateManager {
       if (file == null) {
         return ManageCategoryResult.noFileSelected;
       }
-      final updateService = ref.read(updateServiceProvider);
-      final ok = await updateService.renameCategory(from: from.name, to: to.name, file: file);
+      final sheetService = ref.read(googleSheetServiceProvider);
+      final ok = await sheetService.renameCategory(from: from.name, to: to.name, file: file);
       if (!ok) {
         return ManageCategoryResult.generic;
       }

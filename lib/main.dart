@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:chrono_sheet/di/di.dart';
 import 'package:chrono_sheet/log/boostrap/log_bootstrap.dart';
-import 'package:chrono_sheet/category/service/shared_category_data_manager.dart';
+import 'package:chrono_sheet/category/service/category_synchronizer.dart';
 import 'package:chrono_sheet/router/router.dart';
-import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
+import 'package:chrono_sheet/google/sheet/service/google_sheet_updater.dart';
 import 'package:chrono_sheet/ui/path.dart';
 import 'package:chrono_sheet/ui/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -73,7 +73,7 @@ class MyAppState extends State<MyApp> {
       diContainer = ProviderScope.containerOf(context);
       Timer.periodic(Duration(minutes: 1), (_) {
         diContainer?.read(sheetUpdaterProvider.notifier).storeUnsavedMeasurements();
-        diContainer?.read(categoryManagerProvider).tick();
+        diContainer?.read(categoryManagerProvider).synchronizeIfNecessary();
       });
     });
     return MaterialApp(

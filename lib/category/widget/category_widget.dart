@@ -2,7 +2,6 @@ import 'package:chrono_sheet/category/model/category_representation.dart';
 import 'package:chrono_sheet/generated/app_localizations.dart';
 import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:chrono_sheet/ui/dimension.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

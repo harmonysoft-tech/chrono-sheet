@@ -1,7 +1,7 @@
 import 'package:chrono_sheet/log/util/log_util.dart';
 import 'package:chrono_sheet/measurement/state/stop_watch_controls_ui_state.dart';
 import 'package:chrono_sheet/measurement/widget/stop_watch_timer_widget.dart';
-import 'package:chrono_sheet/sheet/updater/sheet_updater.dart';
+import 'package:chrono_sheet/google/sheet/service/google_sheet_updater.dart';
 import 'package:chrono_sheet/util/snackbar_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

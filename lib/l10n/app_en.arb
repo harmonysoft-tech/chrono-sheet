@@ -56,6 +56,7 @@
   "errorCanNotDecodeImage": "cannot decode image",
   "errorNeedPermissionForCategoryIcon": "target permission is required for configuring category icon",
   "errorChangeIsStale": "cannot apply the change, the state is changed after it",
+  "errorNotLoggedInGoogle": "not logged into the google account",
   "errorGeneric": "something went wrong",
 
   "permissionDrive": "Google Drive",
